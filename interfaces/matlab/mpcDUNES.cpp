@@ -704,10 +704,10 @@ void solveMatlab( int nlhs, mxArray* plhs[], int nrhs, const mxArray* const prhs
 	/* CONSISTENCY CHECKS */
 	/* 1)   Check for proper number of output arguments. */
 	if (mpcProblemGlobal->qpData.options.logLevel == QPDUNES_LOG_ALL_DATA ) {
-		if ( nlhs > 5 )	mexErrMsgTxt( "ERROR (qpDUNES): At most five output arguments are allowed: \n       [uOpt, xOpt, status, objVal, log]!" );
+		if ( nlhs > 6 )	mexErrMsgTxt( "ERROR (qpDUNES): At most six output arguments are allowed: \n       [uOpt, xOpt, status, objVal, time, log]!" );
 	}
 	else {
-		if ( nlhs > 4 )	mexErrMsgTxt( "ERROR (qpDUNES): At most four output arguments are allowed: \n       [uOpt, xOpt, status, objVal]!" );
+		if ( nlhs > 5 )	mexErrMsgTxt( "ERROR (qpDUNES): At most five output arguments are allowed: \n       [uOpt, xOpt, status, objVal, time]!" );
 	}
 	if ( nlhs < 1 )	mexErrMsgTxt( "ERROR (qpDUNES): At least one output argument is required: [uOpt,...]!" );
 
@@ -721,9 +721,22 @@ void solveMatlab( int nlhs, mxArray* plhs[], int nrhs, const mxArray* const prhs
 	allocateOutputsMPC( plhs,nlhs, mpcProblemGlobal->qpData.nI,mpcProblemGlobal->qpData.nX,mpcProblemGlobal->qpData.nU );
 
 
+	#ifndef __WINDOWS__
+	real_t tic = 0.0;
+	real_t toc = 0.0;
+	struct timeval theclock;
+	gettimeofday( &theclock,0 );
+	tic = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
+	#endif
 	/* SOLVE QPDUNES PROBLEM: */
 	return_t statusFlag = mpcDUNES_solve( mpcProblemGlobal, x0 );
-	if ( statusFlag != QPDUNES_SUCC_OPTIMAL_SOLUTION_FOUND ) {
+	#ifndef __WINDOWS__
+	gettimeofday( &theclock,0 );
+	toc = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec - tic;
+	#endif
+	if ( ( statusFlag != QPDUNES_SUCC_OPTIMAL_SOLUTION_FOUND ) &&
+		 ( statusFlag != QPDUNES_SUCC_SUBOPTIMAL_TERMINATION ) )
+	{
 		mexPrintf( "qpDUNES returned flag %d\n", statusFlag );
 		if (mpcProblemGlobal->qpData.options.logLevel == QPDUNES_LOG_ALL_DATA ) {
 			if ( nlhs == 5 ) {
@@ -738,13 +751,13 @@ void solveMatlab( int nlhs, mxArray* plhs[], int nrhs, const mxArray* const prhs
 
 
 	/* V) PASS SOLUTION ON TO MATLAB: */
-	obtainOutputsMPC( mpcProblemGlobal, plhs, nlhs );
+	obtainOutputsMPC( mpcProblemGlobal, plhs, nlhs, toc );
 
 
 	/* VI) PASS DETAILED LOG INFORMATION ON TO MATLAB: */
 	if (mpcProblemGlobal->qpData.options.logLevel == QPDUNES_LOG_ALL_DATA ) {
-		if ( nlhs == 5 ) {
-			fullLogging( &(mpcProblemGlobal->qpData), &(plhs[4]) );
+		if ( nlhs == 6 ) {
+			fullLogging( &(mpcProblemGlobal->qpData), &(plhs[5]) );
 		}
 	}
 

@@ -42,6 +42,10 @@ extern "C" {
 #include "matrix.h"
 #include "string.h"
 
+#ifndef __WINDOWS__
+#include <sys/time.h>
+#endif
+
 
 /* global pointer to qpDUNES object */
 static qpData_t* qpDataGlobal = 0;
@@ -824,10 +828,10 @@ void solveMatlab( int nlhs, mxArray* plhs[], int nrhs, const mxArray* const prhs
 	/* CONSISTENCY CHECKS */
 	/* 1)   Check for proper number of output arguments. */
 	if (qpDataGlobal->options.logLevel == QPDUNES_LOG_ALL_DATA ) {
-		if ( nlhs > 6 )	mexErrMsgTxt( "[qpDUNES] Error: At most six output arguments are allowed: \n                 [zOpt, status, lambda, mu, objVal, log]!" );
+		if ( nlhs > 7 )	mexErrMsgTxt( "[qpDUNES] Error: At most seven output arguments are allowed: \n                 [zOpt, status, lambda, mu, objVal, time, log]!" );
 	}
 	else {
-		if ( nlhs > 5 )	mexErrMsgTxt( "[qpDUNES] Error: At most five output arguments are allowed: \n                 [zOpt, status, lambda, mu, objVal]!" );
+		if ( nlhs > 6 )	mexErrMsgTxt( "[qpDUNES] Error: At most six output arguments are allowed: \n                 [zOpt, status, lambda, mu, objVal, time]!" );
 	}
 	if ( nlhs < 1 )	mexErrMsgTxt( "[qpDUNES] Error: At least one output argument is required: [zOpt,...]!" );
 
@@ -840,9 +844,23 @@ void solveMatlab( int nlhs, mxArray* plhs[], int nrhs, const mxArray* const prhs
 //	qpDUNES_printMatrixData( qpDataGlobal->intervals[0]->zUpp.data, 1, qpDataGlobal->intervals[0]->nV, "i[%3d]: 2zUpp_startSolve:", qpDataGlobal->intervals[0]->id);
 //	qpDUNES_printMatrixData( qpDataGlobal->intervals[0]->z.data, 1, qpDataGlobal->intervals[0]->nV, "i[%3d]: z@StartSolve:", qpDataGlobal->intervals[0]->id);
 
-	/* SOLVE QP42 PROBLEM: */
+	/* PREPARE TIMING MEASUREMENTS */
+	#ifndef __WINDOWS__
+	real_t tic = 0.0;
+	real_t toc = 0.0;
+	struct timeval theclock;
+	gettimeofday( &theclock,0 );
+	tic = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
+	#endif
+	/* SOLVE QPDUNES PROBLEM: */
 	return_t statusFlag = qpDUNES_solve( qpDataGlobal );
-	if ( statusFlag != QPDUNES_SUCC_OPTIMAL_SOLUTION_FOUND ) {
+	#ifndef __WINDOWS__
+	gettimeofday( &theclock,0 );
+	toc = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec - tic;
+	#endif
+	if ( ( statusFlag != QPDUNES_SUCC_OPTIMAL_SOLUTION_FOUND )  &&
+		 ( statusFlag != QPDUNES_SUCC_SUBOPTIMAL_TERMINATION ) )
+	{
 		mexPrintf( "qpDUNES returned flag %d\n", statusFlag );
 		if (qpDataGlobal->options.logLevel == QPDUNES_LOG_ALL_DATA ) {
 			if ( nlhs == 5 ) {
@@ -856,13 +874,13 @@ void solveMatlab( int nlhs, mxArray* plhs[], int nrhs, const mxArray* const prhs
 //	qpDUNES_printMatrixData( qpDataGlobal->intervals[0]->zUpp.data, 1, qpDataGlobal->intervals[0]->nV, "i[%3d]: zUpp_EndSolve:", qpDataGlobal->intervals[0]->id);
 
 	/* V) PASS SOLUTION ON TO MATLAB: */
-	obtainOutputsQP( qpDataGlobal, plhs, nlhs, statusFlag );
+	obtainOutputsQP( qpDataGlobal, plhs, nlhs, statusFlag, toc );
 
 
 	/* VI) PASS DETAILED LOG INFORMATION ON TO MATLAB: */
 	if (qpDataGlobal->options.logLevel == QPDUNES_LOG_ALL_DATA ) {
-		if ( nlhs == 5 ) {
-			fullLogging( qpDataGlobal, &(plhs[4]) );
+		if ( nlhs == 6 ) {
+			fullLogging( qpDataGlobal, &(plhs[5]) );
 		}
 	}
 

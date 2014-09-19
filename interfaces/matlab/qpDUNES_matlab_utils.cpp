@@ -69,6 +69,11 @@ void allocateOutputsMPC (	mxArray* plhs[],
 			if ( nlhs >= 4 )
 			{
 				plhs[3] = mxCreateDoubleMatrix( 1, 1, mxREAL );	/* objVal */
+
+				if ( nlhs >= 5 )
+				{
+					plhs[4] = mxCreateDoubleMatrix( 1, 1, mxREAL );	/* timing */
+				}
 			}
 		}
 	}
@@ -80,7 +85,8 @@ void allocateOutputsMPC (	mxArray* plhs[],
  */
 void obtainOutputsMPC ( 	const mpcProblem_t* const mpcProblem,
 							mxArray* const plhs[],
-							int nlhs
+							int nlhs,
+							real_t dTime
 							)
 {
 	const qpData_t* qpData = &(mpcProblem->qpData);
@@ -111,6 +117,13 @@ void obtainOutputsMPC ( 	const mpcProblem_t* const mpcProblem,
 				/* objVal */
 				double* objVal = mxGetPr( plhs[3] );
 				*objVal = mpcProblem->optObjVal;
+
+				if ( nlhs >= 4 )
+				{
+					/* timings */
+					double* timingPtr = mxGetPr( plhs[3] );
+					*timingPtr = dTime;
+				}
 			}
 		}
 	}
@@ -145,6 +158,11 @@ void allocateOutputsQP(	mxArray* plhs[],
 				if ( nlhs >= 5 )
 				{
 					plhs[4] = mxCreateDoubleMatrix( 1, 1, mxREAL );	/* objVal */
+
+					if ( nlhs >= 6 )
+					{
+						plhs[5] = mxCreateDoubleMatrix( 1, 1, mxREAL );	/* timing */
+					}
 				}
 			}
 		}
@@ -158,7 +176,8 @@ void allocateOutputsQP(	mxArray* plhs[],
 void obtainOutputsQP( 	qpData_t* const qpData,
 						mxArray* const plhs[],
 						int nlhs,
-						return_t solverStatus
+						return_t solverStatus,
+						real_t dTime
 						)
 {
 	int kk;
@@ -196,6 +215,13 @@ void obtainOutputsQP( 	qpData_t* const qpData,
 					/* objVal */
 					double* objVal = mxGetPr( plhs[4] );
 					*objVal = qpDUNES_computeObjectiveValue( qpData );
+
+					if ( nlhs >= 6 )
+					{
+						/* timings */
+						double* timingPtr = mxGetPr( plhs[5] );
+						*timingPtr = dTime;
+					}
 				}
 			}
 		}
@@ -287,6 +313,8 @@ return_t qpDUNES_setupOptionsMatlab( qpOptions_t* options, const mxArray* const 
 	/* other options */
 	if ( getOptionValue( optionsPtr, "checkForInfeasibility", &optionValue ) == QPDUNES_TRUE )
 		options->checkForInfeasibility = (boolean_t)*optionValue;
+	if ( getOptionValue( optionsPtr, "allowSuboptimalTermination", &optionValue ) == QPDUNES_TRUE )
+		options->allowSuboptimalTermination = (boolean_t)*optionValue;
 
 
 	/* regularization options */
@@ -424,6 +452,80 @@ return_t makeCholNewtonHessianDense( const qpData_t* const qpData,
 
  	return QPDUNES_OK;
  }
+
+
+/*
+ *	M E A S U R E    T I M I N G S
+ */
+//#if (defined __WINDOWS__)
+//
+//void tic(timer* t)
+//{
+//	QueryPerformanceFrequency(&t->freq);
+//	QueryPerformanceCounter(&t->tic);
+//}
+//
+//real_t toc(timer* t)
+//{
+//	QueryPerformanceCounter(&t->toc);
+//	return ((t->toc.QuadPart - t->tic.QuadPart) / (real_t)t->freq.QuadPart);
+//}
+//
+
+//#elif (defined __APPLE__)
+//
+//void tic(timer* t)
+//{
+//    /* read current clock cycles */
+//    t->tic = mach_absolute_time();
+//}
+//
+//real_t toc(timer* t)
+//{
+//
+//    uint64_t duration; /* elapsed time in clock cycles*/
+//
+//    t->toc = mach_absolute_time();
+//    duration = t->toc - t->tic;
+//
+//    /*conversion from clock cycles to nanoseconds*/
+//    mach_timebase_info(&(t->tinfo));
+//    duration *= t->tinfo.numer;
+//    duration /= t->tinfo.denom;
+//
+//    return (real_t)duration / 1e9;
+//}
+
+//#else
+//
+//
+///* read current time */
+//void tic(timer* t)
+//{
+//	gettimeofday(&t->tic, 0);
+//}
+//
+///* return time passed since last call to tic on this timer */
+//real_t toc(timer* t)
+//{
+//	struct timeval temp;
+//
+//	gettimeofday(&t->toc, 0);
+//
+//	if ((t->toc.tv_usec - t->tic.tv_usec) < 0)
+//	{
+//		temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec - 1;
+//		temp.tv_usec = 1000000 + t->toc.tv_usec - t->tic.tv_usec;
+//	}
+//	else
+//	{
+//		temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec;
+//		temp.tv_usec = t->toc.tv_usec - t->tic.tv_usec;
+//	}
+//
+//	return (real_t)temp.tv_sec + (real_t)temp.tv_usec / 1e6;
+//}
+//#endif
 
 
 
