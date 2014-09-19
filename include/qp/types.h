@@ -233,6 +233,7 @@ typedef enum
 	QPDUNES_OK = 0,							/**< ... */
 
 	QPDUNES_SUCC_OPTIMAL_SOLUTION_FOUND,
+	QPDUNES_SUCC_SUBOPTIMAL_TERMINATION,
 	QPDUNES_ERR_STAGE_QP_INFEASIBLE,
 	QPDUNES_ERR_STAGE_COUPLING_INFEASIBLE,
 
@@ -594,10 +595,11 @@ typedef struct
 	real_t ascentCurvatureTolerance;	/**< Tolerance when a step is called a zero curvature step */
 	
 	/* additional options */
-	int_t nbrInitialGradientSteps;		/**< after the first Newton step a number of cheaper gradient
-											 steps with line search can be used to drive the method
-											 faster to the solution */
-	boolean_t checkForInfeasibility;	/**< perform checks for infeasibility of the problem */
+	int_t nbrInitialGradientSteps;			/**< after the first Newton step a number of cheaper gradient
+											 	 steps with line search can be used to drive the method
+											 	 faster to the solution */
+	boolean_t checkForInfeasibility;		/**< perform checks for infeasibility of the problem */
+	boolean_t allowSuboptimalTermination;	/**< permits regular termination after reaching iteration limit (when dual still suboptimal) */
 
 	/* regularization options */
 	nwtnHssnRegType_t regType;

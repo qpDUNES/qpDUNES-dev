@@ -200,7 +200,8 @@ int main( )
 	
 	/** set qpDUNES options */
 	qpOptions.maxIter    = 80;
-//	qpOptions.maxIter   	 = 12;
+//	qpOptions.maxIter   	 			 = 4;
+	qpOptions.allowSuboptimalTermination = QPDUNES_FALSE;
 	qpOptions.printLevel = 3;
 	qpOptions.logLevel = QPDUNES_LOG_ALL_DATA;
 //	qpOptions.logLevel = QPDUNES_LOG_ITERATIONS;

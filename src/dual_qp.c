@@ -330,15 +330,43 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 			qpDUNES_printf("End:  %.3f ms\n", 1e3 * (tItEnd - tLineSearchEnd) / 1);
 		}
 		#endif
-	}
+	}	/* end of main qpDUNES loop */
 
 
 	/* get number of performed iterations right (itCntr is going one up before realizing it's too big) */
 	qpData->log.numIter = qpData->options.maxIter;
 
-
-	qpDUNES_printError(qpData, __FILE__, __LINE__, "Exceeded iteration limit. QP could not be solved." );
-	return QPDUNES_ERR_ITERATION_LIMIT_REACHED;
+	if ( qpData->options.allowSuboptimalTermination == QPDUNES_TRUE )	{
+		qpDUNES_computeNewtonGradient(qpData, &(qpData->gradient), &(qpData->xVecTmp) );
+		qpDUNES_printSuccess(qpData, "Early termination due to iteration limit.\n          Dual suboptimal with remaining ascent slope %.1e",	vectorNorm(&(qpData->gradient), _NI_ * _NX_));
+		/* save the final active set (the one where the solution lies).
+		 *   Even if the hessian is not yet updated according to the last
+		 *   active set changes, the corresponding blocks are already flagged
+		 *   and will be updated in the first iteration of the next call.
+		 *   Then ieqStatus needs to be consistent */
+		/* swap multipliers, such current multipliers are available as old multipliers in next QP solution */
+		for (kk = 0; kk < _NI_ + 1; ++kk) {
+			y_swap = qpData->intervals[kk]->yPrev.data;
+			qpData->intervals[kk]->yPrev.data = qpData->intervals[kk]->y.data;
+			qpData->intervals[kk]->y.data = y_swap;
+			#ifdef __DEBUG__
+//						if ( (kk >= _NI_-3) || (kk == 0) )	qpDUNES_printMatrixData( qpData->intervals[kk]->z.data, 1, qpData->intervals[kk]->nV, "z@end[%3d]:", kk);
+			if (qpData->options.printLevel >= 4)	{
+				for (ii = 0; ii < 2* qpData->intervals[kk]->nV; ++ii)	{
+					if (qpData->intervals[kk]->yPrev.data[ii] > 0)	{
+						qpDUNES_printf("[%d, %d] active", kk, ii);
+					}
+				}
+			}
+			#endif
+		}
+		/* ...and leave */
+		return QPDUNES_SUCC_SUBOPTIMAL_TERMINATION;
+	}
+	else	{
+		qpDUNES_printError(qpData, __FILE__, __LINE__, "Exceeded iteration limit. QP could not be solved." );
+		return QPDUNES_ERR_ITERATION_LIMIT_REACHED;
+	}
 }
 /*<<< END OF qpDUNES_solve */
 
@@ -753,8 +781,11 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
  * ...
  *
  * >>>>>>                                           */
-return_t qpDUNES_computeNewtonGradient(qpData_t* const qpData, xn_vector_t* gradient,
-		x_vector_t* gradPiece) {
+return_t qpDUNES_computeNewtonGradient(	qpData_t* const qpData,
+										xn_vector_t* gradient,
+										x_vector_t* gradPiece
+										)
+{
 	int_t kk, ii;
 
 	interval_t** intervals = qpData->intervals;
@@ -2586,7 +2617,7 @@ return_t qpDUNES_getActSetChanges(	const qpData_t* const qpData,
 			case QPDUNES_STAGE_QP_SOLVER_QPOASES:
 //				qpDUNES_printf("intervalID: %d", interval->id);
 //				qpDUNES_printf("nActConst was %d, is %d", *nActConstr, qpOASES_getNbrActConstr( &(interval->qpSolverQpoases) ) );
-				*nActConstr += qpOASES_getNbrActConstr( &(interval->qpSolverQpoases) );
+				*nActConstr += qpOASES_getNbrActConstr( interval->qpSolverQpoases.qpoasesObject );
 				nChgdConstr_kk = interval->parametricObjFctn_nBasePoints - 2;
 //				qpDUNES_printf("nbr changed on %d is %d", kk, nChgdConstr_kk );
 				if ( nChgdConstr_kk > 0 )	{

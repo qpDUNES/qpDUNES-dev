@@ -213,7 +213,7 @@ return_t directQpSolver_doStep( qpData_t* const qpData,
 
 	return QPDUNES_OK;
 }
-/*<<< END OF qp42_directQpSolver_doStep */
+/*<<< END OF directQpSolver_doStep */
 
 
 /* ----------------------------------------------
@@ -287,7 +287,7 @@ return_t directQpSolver_saturateVector(	qpData_t* const qpData,
 
 	return QPDUNES_OK;
 }
-/*<<< END OF qp42_directQpSolver_saturateVector */
+/*<<< END OF directQpSolver_saturateVector */
 
 
 /* ----------------------------------------------

@@ -183,6 +183,7 @@ SET( QPOASES_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/externals/qpOASES-3.0beta/src/Constraints.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/externals/qpOASES-3.0beta/src/Flipper.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/externals/qpOASES-3.0beta/src/Indexlist.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/externals/qpOASES-3.0beta/src/LoggedSQProblem.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/externals/qpOASES-3.0beta/src/Matrices.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/externals/qpOASES-3.0beta/src/MessageHandling.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/externals/qpOASES-3.0beta/src/Options.cpp

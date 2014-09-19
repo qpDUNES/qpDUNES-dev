@@ -55,18 +55,18 @@ int main(int argc, char * const argv[ ])
 #warning "Compiling for benchmarks!"
 	if (argc != 2)
 	{
-		cout << "Number of horizon intervals is needed!" << endl;
+		std::cout << "Number of horizon intervals is needed!" << std::endl;
 		
 		return 1;
 	}
 	
 	const int N = atoi( static_cast< char* >(argv[ 1 ]) );
 	
-	cout << "Used a horizon length of " << N << endl;
+	std::cout << "Used a horizon length of " << N << std::endl;
 #else
 	// Set the horizon length here
 	const int N = 20;
-	cout << "Horizon length is set to: " << N << endl;
+	std::cout << "Horizon length is set to: " << N << std::endl;
 #endif /* RUN_BENCHMARKS */
 
     // Define a Right-Hand-Side:
@@ -127,8 +127,10 @@ int main(int argc, char * const argv[ ])
 	// ----------------------------------------------------------
     // ----------------------------------------------------------
     
-    Matrix S = eye(6 + 2);
-	Matrix SN = eye( 6 );
+//     Matrix S = eye(6 + 2);
+// 	Matrix SN = eye( 6 );
+	DMatrix S = eye<double>(6 + 2);
+	DMatrix SN = eye<double>(6);
 	
 	S(0, 0) = 1.0e-1;
 	S(1, 1) = 1.0e-1;

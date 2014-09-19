@@ -46,7 +46,7 @@
 int main( )
 {
 	int iter;
-	int i, k;
+	int i, jj, k;
 	
 	return_t statusFlag;
 
@@ -158,7 +158,9 @@ int main( )
 	qpOptions_t qpOptions = qpDUNES_setupDefaultOptions();
 	
 	/** set qpDUNES options */
-	qpOptions.maxIter    = 30;
+//	qpOptions.maxIter    = 30;
+	qpOptions.maxIter   	 			 = 4;
+	qpOptions.allowSuboptimalTermination = QPDUNES_TRUE;
 	qpOptions.printLevel = 3;
 	qpOptions.stationarityTolerance = 1.e-6;
 	qpOptions.regParam            = 1.e-6;
@@ -227,7 +229,14 @@ int main( )
 		for (i=0; i<nX; ++i) {
 //			x0[i] = mpcProblem.xOpt[1*nX+i] + maxNoise[i] * 2.*( (double)rand()/RAND_MAX -1 );
 //			x0[i] = mpcProblem.xOpt[1*nX+i] + maxNoise[i] * (double)rand()/RAND_MAX;
-			x0[i] = mpcProblem.xOpt[1*nX+i] + maxNoise[i] * .5;
+//			x0[i] = mpcProblem.xOpt[1*nX+i] + maxNoise[i] * .5;
+			x0[i] = c[i]  + maxNoise[i] * .5;
+			for (jj=0; jj<nX; ++jj) {
+				x0[i] += C[i*nZ+jj] * mpcProblem.xOpt[jj];
+			}
+			for (jj=0; jj<nU; ++jj) {
+				x0[i] += C[i*nZ+nX+jj] * mpcProblem.uOpt[jj];
+			}
 			printf( "x0: %+.5e  --  with noise: %+.5e\n", mpcProblem.xOpt[1*nX+i], x0[i] );
  		}
 		printf("--- we are completely done with problem %d ---\n", iter);

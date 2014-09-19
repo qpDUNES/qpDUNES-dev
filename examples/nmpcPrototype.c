@@ -290,6 +290,8 @@ int main( )
 		/** (3) obtain primal and dual optimal solution */
 		qpDUNES_getPrimalSol( &qpData, zOpt );
 		qpDUNES_getDualSol( &qpData, lambdaOpt, muOpt );
+		qpDUNES_printMatrixData( lambdaOpt, 1, nI*nX, "dual lambda" );
+		qpDUNES_printMatrixData( muOpt, 1, 2*nI*nZ + 2*nX, "dual mu" );
 		/// ...
 		
 

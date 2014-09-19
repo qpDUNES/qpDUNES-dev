@@ -1567,6 +1567,7 @@ qpOptions_t qpDUNES_setupDefaultOptions( )
 	/* additional options */
 	options.nbrInitialGradientSteps		= 0;
 	options.checkForInfeasibility		= QPDUNES_FALSE;
+	options.allowSuboptimalTermination	= QPDUNES_FALSE;
 
 	/* regularization option */
 	options.regType 					= QPDUNES_REG_LEVENBERG_MARQUARDT;
