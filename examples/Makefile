@@ -57,6 +57,7 @@ QPDUNES_EXES = \
 	singleIntegrator_sc${EXE} \
 	singleIntegrator_d${EXE} \
 	doubleIntegrator${EXE} \
+	doubleIntegrator_qp${EXE} \
 	doubleIntegrator_mpc${EXE} \
 	mhePrototype${EXE}	\
 	nmpcPrototype${EXE}	\
@@ -100,6 +101,9 @@ singleIntegrator_d${EXE}: singleIntegrator_d.${OBJEXT} ../interfaces/mpc/libmpcd
 	${CPP} ${DEF_TARGET} ${CPPFLAGS} $< ${MPCDUNES_LIB} ${QPDUNES_LIB} ${QPOASES_LIB} ${LIBS}
 
 doubleIntegrator${EXE}: doubleIntegrator.${OBJEXT} ../interfaces/mpc/libmpcdunes.a ../src/libqpdunes.a
+	${CPP} ${DEF_TARGET} ${CPPFLAGS} $< ${MPCDUNES_LIB} ${QPDUNES_LIB} ${QPOASES_LIB} ${LIBS}
+	
+doubleIntegrator_qp${EXE}: doubleIntegrator_qp.${OBJEXT} ../interfaces/mpc/libmpcdunes.a ../src/libqpdunes.a
 	${CPP} ${DEF_TARGET} ${CPPFLAGS} $< ${MPCDUNES_LIB} ${QPDUNES_LIB} ${QPOASES_LIB} ${LIBS}
 
 doubleIntegrator_mpc${EXE}: doubleIntegrator_mpc.${OBJEXT} ../interfaces/mpc/libmpcdunes.a ../src/libqpdunes.a
