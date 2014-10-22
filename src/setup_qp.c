@@ -489,8 +489,8 @@ return_t qpDUNES_init(	qpData_t* const qpData,
 	/** determine local QP solvers and set up auxiliary data */
 	qpDUNES_setupAllLocalQPs( qpData, isLTI );
 
-
-
+	/** compute Cholesky factorization of default newton hessian */
+	qpDUNES_setupCholDefaultHessian(qpData);
 
 	return QPDUNES_OK;
 }

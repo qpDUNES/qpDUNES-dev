@@ -743,6 +743,8 @@ typedef struct
 	xn2x_matrix_t cholHessian;
 	xn_vector_t gradient;
 	
+	xn2x_matrix_t cholDefaultHessian;
+
 //	int_t* ieqStatus;
 //	int_t* prevIeqStatus;
 	

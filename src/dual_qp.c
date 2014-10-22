@@ -104,7 +104,34 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 			statusFlag = QPDUNES_OK;
 			tNwtnSolveEnd = getTime();
 		}
-		else {
+		else if (0){
+			/** preconditioned gradient step with default newton hessian */
+			tNwtnSetupStart = getTime();
+			qpDUNES_computeNewtonGradient(qpData, &(qpData->gradient), &(qpData->xVecTmp));
+			tNwtnSetupEnd = getTime();
+
+			tNwtnSolveStart = getTime();
+			switch (qpData->options.nwtnHssnFacAlg) {
+			case QPDUNES_NH_FAC_BAND_FORWARD:
+				statusFlag = qpDUNES_solveNewtonEquation(qpData, &(qpData->deltaLambda), &(qpData->cholDefaultHessian), &(qpData->gradient));
+				break;
+
+			case QPDUNES_NH_FAC_BAND_REVERSE:
+				statusFlag = qpDUNES_solveNewtonEquationBottomUp(qpData, &(qpData->deltaLambda), &(qpData->cholDefaultHessian), &(qpData->gradient));
+				break;
+
+			default:
+				qpDUNES_printError(qpData, __FILE__, __LINE__, "Unknown Newton Hessian factorization algorithm. Cannot do backsolve.");
+				return QPDUNES_ERR_INVALID_ARGUMENT;
+			}
+			tNwtnSolveEnd = getTime();
+			if (statusFlag != QPDUNES_OK) {
+				qpDUNES_printError(qpData, __FILE__, __LINE__,	"Could not compute Newton step direction.");
+				if (qpData->options.logLevel >= QPDUNES_LOG_ITERATIONS)	 qpDUNES_logIteration(qpData, itLogPtr, objValIncumbent, hessRefactorIdx);
+				return statusFlag;
+			}
+		}
+		else{
 			/** (1Ba) set up Newton system */
 			tNwtnSetupStart = getTime();
 			statusFlag = qpDUNES_setupNewtonSystem( qpData, &hessRefactorIdx );
@@ -116,7 +143,7 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 					if (qpData->options.logLevel >= QPDUNES_LOG_ITERATIONS)  qpDUNES_logIteration(qpData, itLogPtr, objValIncumbent, hessRefactorIdx);
 					/* save the final active set (the one where the solution lies).
 					 *   Even if the hessian is not yet updated according to the last
-					 *   active set changes, the corresponding blocks are already flagged
+					 *   active set changesX, the corresponding blocks are already flagged
 					 *   and will be updated in the first iteration of the next call.
 					 *   Then ieqStatus needs to be consistent */
 					/* swap multipliers, such current multipliers are available as old multipliers in next QP solution */
@@ -146,7 +173,7 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 
 			/** (1Bb) factorize Newton system */
 			tNwtnFactorStart = getTime();
-			statusFlag = qpDUNES_factorNewtonSystem(qpData, &(itLogPtr->isHessianRegularized), hessRefactorIdx);		// TODO! can we get a problem with on-the-fly regularization in partial refactorization? might only be partially reg.
+			statusFlag = qpDUNES_factorNewtonSystem(qpData, &(qpData->cholHessian), &(qpData->hessian), &(itLogPtr->isHessianRegularized), hessRefactorIdx);		// TODO! can we get a problem with on-the-fly regularization in partial refactorization? might only be partially reg.
 			switch (statusFlag) {
 				case QPDUNES_OK:
 					break;
@@ -776,6 +803,68 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
 }
 /*<<< END OF qpDUNES_setupNewtonSystem */
 
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>>                                           */
+return_t qpDUNES_setupCholDefaultHessian(	qpData_t* const qpData	)
+{
+	int_t ii, jj, kk;
+	boolean_t isHessianRegularized;
+
+	xx_matrix_t* xxMatTmp = &(qpData->xxMatTmp);
+	xx_matrix_t* xxMatTmp2 = &(qpData->xxMatTmp2);
+	ux_matrix_t* uxMatTmp = &(qpData->uxMatTmp);
+	zx_matrix_t* zxMatTmp = &(qpData->zxMatTmp);
+
+	interval_t** intervals = qpData->intervals;
+
+	xn2x_matrix_t* hessian = &(qpData->cholDefaultHessian);
+
+
+	/* 1) diagonal blocks */
+	/*    E_{k+1} H_{k+1}^-1 E_{k+1}' + C_{k} P_{k} C_{k}'  for projected Hessian  P = Z (Z'HZ)^-1 Z'  */
+	for (kk = 0; kk < _NI_; ++kk) {
+
+		getInvQ(qpData, xxMatTmp, &(intervals[kk + 1]->cholH), intervals[kk + 1]->nV); /* getInvQ not supported with matrices other than diagonal... is this even possible? */
+
+//		if (kk == 1) qpDUNES_printMatrixData( xxMatTmp->data, _NX_, _NX_, "clipping: EPE part[%d]", kk );
+
+		/* add CPC part */
+		/* call addCInvHCT with zero pointer instead of interval->y */
+		addCInvHCT(qpData, xxMatTmp, &(intervals[kk]->cholH), &(intervals[kk]->C), 0, xxMatTmp2, uxMatTmp, zxMatTmp);
+//		if (kk == 1) qpDUNES_printMatrixData( xxMatTmp->data, _NX_, _NX_, "clipping: CPC+ EPE part[%d]", kk );
+
+		/* write Hessian part */
+		for (ii = 0; ii < _NX_; ++ii) {
+			for (jj = 0; jj < _NX_; ++jj) {
+				accHessian( kk, 0, ii, jj ) = xxMatTmp->data[ii * _NX_ + jj];
+				/* clean xxMatTmp */
+				xxMatTmp->data[ii * _NX_ + jj] = 0.; /* TODO: this cleaning part is probably not needed, but we need to be very careful if we decide to leave it out! */
+			}
+		}
+	}	/* END OF diagonal block for loop */
+
+	/* 2) sub-diagonal blocks */
+	for (kk = 1; kk < _NI_; ++kk) {
+		multiplyAInvQ( qpData, &(qpData->xxMatTmp), &(intervals[kk]->C), &(intervals[kk]->cholH) );
+
+		/* write Hessian part */
+		for (ii=0; ii<_NX_; ++ii) {
+			for (jj=0; jj<_NX_; ++jj) {
+				accHessian( kk, -1, ii, jj ) = - xxMatTmp->data[ii * _NX_ + jj];
+			}
+		}
+	}	/* END OF sub-diagonal block for loop */
+
+//	qpDUNES_printMatrixData( qpData->hessian.data, _NI_*_NX_, 2*_NX_, "H = ");
+
+
+	return qpDUNES_factorNewtonSystem(qpData, &(qpData->cholDefaultHessian), &(qpData->cholDefaultHessian), &isHessianRegularized, -1);
+}
+/*<<< END OF qpDUNES_setupNewtonSystem */
+
+
 
 /* ----------------------------------------------
  * ...
@@ -813,6 +902,8 @@ return_t qpDUNES_computeNewtonGradient(	qpData_t* const qpData,
 
 
 return_t qpDUNES_factorNewtonSystem( qpData_t* const qpData,
+									 xn2x_matrix_t* cholHessian,
+									 xn2x_matrix_t* hessian,
 								  	 boolean_t* const isHessianRegularized,
 								  	 int_t lastActSetChangeIdx
 								  	 )
@@ -822,9 +913,6 @@ return_t qpDUNES_factorNewtonSystem( qpData_t* const qpData,
 	return_t statusFlag;
 
 	real_t minDiagElem = qpData->options.QPDUNES_INFTY;
-
-	xn2x_matrix_t* hessian = &(qpData->hessian);
-	xn2x_matrix_t* cholHessian = &(qpData->cholHessian);
 
 	/* Try to factorize Newton Hessian, to check if positive definite */
 	switch (qpData->options.nwtnHssnFacAlg) {

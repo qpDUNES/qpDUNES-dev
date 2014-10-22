@@ -91,7 +91,11 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
 									int_t* const lastHessianDataChangeIdx
 									);
 
+return_t qpDUNES_setupCholDefaultHessian(	qpData_t* const qpData	);
+
 return_t qpDUNES_factorNewtonSystem(	qpData_t* const qpData,
+										xn2x_matrix_t* const cholHessian,
+										xn2x_matrix_t* const hessian,
 										boolean_t* const isHessianRegularized,
 										int_t lastHessianDataChangeIdx
 										);
