@@ -31,4 +31,20 @@ SOLVE A QP:
 
     ./example1
 
+INSTALLATION WITH CMAKE:
+-------------
+
+```
+mkdir build
+cd build
+cmake -DQPDUNES_SIMPLE_BOUNDS_ONLY:BOOL=OFF
+make
+make install
+```
+
+after this you can run test, optinally:
+```
+make test
+```
+
 +=================================================================+
