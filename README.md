@@ -42,7 +42,7 @@ make
 make install
 ```
 
-after this you can run test, optinally:
+after this you can run test, optionally:
 ```
 make test
 ```
