@@ -510,7 +510,7 @@ return_t qpOASES_getDualSol( 	qpData_t* qpData,
 	int_t ii;
 
 	/* (1) get qpOASES multipliers
-	 * 	   qpOASES internal: nV entries for bounds, then nC for constraints (positve: lower, negative: upper) */
+	 * 	   qpOASES internal: first nV entries for bounds, then nC for constraints (positve: lower, negative: upper) */
 	static_cast<qpOASES::LoggedSQProblem*>(qpoasesObject->qpoases)->getDualSolution( static_cast<qpOASES::real_t*>(mu->data) );
 
 	//qpDUNES_printMatrixData( mu->data, 2*interval->nV+2*interval->nD, 1, "qpoases multipliers[%d]", interval->id );
