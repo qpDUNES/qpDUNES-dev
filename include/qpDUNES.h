@@ -43,6 +43,11 @@ extern "C"
 #endif /* __cplusplus */
 
 #include <qp/types.h>
+#if !defined(__STATIC_MEMORY__)
+	#include <qp/qpData.h>
+#else
+	#include <qp/qpDataStatic.h>
+#endif
 #include <qp/matrix_vector.h>
 #include <qp/stage_qp_solver_clipping.h>
 

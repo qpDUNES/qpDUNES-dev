@@ -35,6 +35,11 @@
 
 
 #include <qp/types.h>
+#if !defined(__STATIC_MEMORY__)
+	#include <qp/qpData.h>
+#else
+	#include <qp/qpDataStatic.h>
+#endif
 #include <qp/qpdunes_utils.h>
 #include <math.h>
 

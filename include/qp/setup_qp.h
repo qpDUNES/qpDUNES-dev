@@ -38,6 +38,11 @@
 #include <stdio.h>
 #include <assert.h>
 #include <qp/types.h>
+#if !defined(__STATIC_MEMORY__)
+	#include <qp/qpData.h>
+#else
+	#include <qp/qpDataStatic.h>
+#endif
 #include <qp/matrix_vector.h>
 #include <qp/qpdunes_utils.h>
 

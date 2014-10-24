@@ -38,6 +38,12 @@
 #include <stdarg.h>
 #include <sys/time.h>
 #include <qp/types.h>
+#if !defined(__STATIC_MEMORY__)
+	#include <qp/qpData.h>
+#else
+	#include <qp/qpDataStatic.h>
+#endif
+
 
 #ifdef __QPDUNES_PARALLEL__
 	#include <omp.h>

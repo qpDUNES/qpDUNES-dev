@@ -38,9 +38,14 @@
 //	#include <mcheck.h>
 //#endif
 #include <assert.h>
+#include <qp/types.h>
+#if !defined(__STATIC_MEMORY__)
+	#include <qp/qpData.h>
+#else
+	#include <qp/qpDataStatic.h>
+#endif
 #include <qp/stage_qp_solver_clipping.h>
 #include <qp/stage_qp_solver_qpoases.hpp>
-#include <qp/types.h>
 #include <qp/matrix_vector.h>
 #include <qp/setup_qp.h>
 #include <qp/qpdunes_utils.h>
