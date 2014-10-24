@@ -109,13 +109,13 @@
 	#define _NX_ (qpData->nX)
 	#define _NU_ (qpData->nU)
 	#define _NZ_ (qpData->nZ)
-	#define _NV( I ) (qpData->intervals[ I ]->nV)
-	#define _NV_ (interval->nV)
 	#define _NI_ (qpData->nI)
-	#define _ND( I ) (qpData->intervals[ I ]->nD)
-	#define _ND_ (interval->nD)
 	#define _NDTTL_ (qpData->nDttl)
 #endif
+#define _NV( I ) (qpData->intervals[ I ]->nV)
+#define _ND( I ) (qpData->intervals[ I ]->nD)
+#define _NV_ (interval->nV)
+#define _ND_ (interval->nD)
 
 
 

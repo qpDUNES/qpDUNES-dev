@@ -35,36 +35,183 @@
 #ifndef QPDUNES_QPDATASTATIC_H
 #define QPDUNES_QPDATASTATIC_H
 
+#include <qpDimensions.h>
+
+
 
 /**
- *	\brief generic matrix data type
+ *	\brief Matrix of size _NX_ by _NX_
  *
  *	...
  *
- *	\author Janick Frasch, Hans Joachim Ferreau
+ *	\author Janick Frasch
  *	\version 1.0beta
- *	\date 2012
+ *	\date 2014
  */
 typedef struct
 {
-	/** matrix property flags */
+	/** matrix sparsity specification */
 	sparsityType_t sparsityType;
-/* 	boolean_t isDefined;
- 	boolean_t hasChanged;*/
 
 	/** matrix data array */
-	real_t* data;
-} matrix_t;
+	real_t data[_NX_*_NX_];
+} xx_matrix_t;
 
-typedef matrix_t xx_matrix_t;
-typedef matrix_t xu_matrix_t;
-typedef matrix_t xz_matrix_t;
-typedef matrix_t ux_matrix_t;
-typedef matrix_t uu_matrix_t;
-typedef matrix_t zx_matrix_t;
-typedef matrix_t zz_matrix_t;
-typedef matrix_t vv_matrix_t;
-typedef matrix_t dz_matrix_t;
+
+/**
+ *	\brief Matrix of size _NX_ by _NU_
+ *
+ *	...
+ *
+ *	\author Janick Frasch
+ *	\version 1.0beta
+ *	\date 2014
+ */
+typedef struct
+{
+	/** matrix sparsity specification */
+	sparsityType_t sparsityType;
+
+	/** matrix data array */
+	real_t data[_NX_*_NU_];
+} xu_matrix_t;
+
+
+/**
+ *	\brief Matrix of size _NX_ by _NZ_
+ *
+ *	...
+ *
+ *	\author Janick Frasch
+ *	\version 1.0beta
+ *	\date 2014
+ */
+typedef struct
+{
+	/** matrix sparsity specification */
+	sparsityType_t sparsityType;
+
+	/** matrix data array */
+	real_t data[_NX_*_NZ_];
+} xz_matrix_t;
+
+
+/**
+ *	\brief Matrix of size _NU_ by _NX_
+ *
+ *	...
+ *
+ *	\author Janick Frasch
+ *	\version 1.0beta
+ *	\date 2014
+ */
+typedef struct
+{
+	/** matrix sparsity specification */
+	sparsityType_t sparsityType;
+
+	/** matrix data array */
+	real_t data[_NU_*_NX_];
+} ux_matrix_t;
+
+
+/**
+ *	\brief Matrix of size _NU_ by _NU_
+ *
+ *	...
+ *
+ *	\author Janick Frasch
+ *	\version 1.0beta
+ *	\date 2014
+ */
+typedef struct
+{
+	/** matrix sparsity specification */
+	sparsityType_t sparsityType;
+
+	/** matrix data array */
+	real_t data[_NU_*_NU_];
+} uu_matrix_t;
+
+
+/**
+ *	\brief Matrix of size _NZ_ by _NX_
+ *
+ *	...
+ *
+ *	\author Janick Frasch
+ *	\version 1.0beta
+ *	\date 2014
+ */
+typedef struct
+{
+	/** matrix sparsity specification */
+	sparsityType_t sparsityType;
+
+	/** matrix data array */
+	real_t data[_NZ_*_NX_];
+} zx_matrix_t;
+
+
+/**
+ *	\brief Matrix of size _NZ_ by _NZ_
+ *
+ *	...
+ *
+ *	\author Janick Frasch
+ *	\version 1.0beta
+ *	\date 2014
+ */
+typedef struct
+{
+	/** matrix sparsity specification */
+	sparsityType_t sparsityType;
+
+	/** matrix data array */
+	real_t data[_NZ_*_NZ_];
+} zz_matrix_t;
+
+
+/**
+ *	\brief Matrix of size _NZ_ by _NZ_
+ *
+ *	...
+ *
+ *	\author Janick Frasch
+ *	\version 1.0beta
+ *	\date 2014
+ */
+typedef struct
+{
+	/** matrix sparsity specification */
+	sparsityType_t sparsityType;
+
+	/** matrix data array */
+	real_t data[_NZ_*_NZ_];
+todo! check where v is used!
+} vv_matrix_t;
+
+
+/**
+ *	\brief Matrix of size _NDMAX_ by _NZ_
+ *
+ *	...
+ *
+ *	\author Janick Frasch
+ *	\version 1.0beta
+ *	\date 2014
+ */
+typedef struct
+{
+	/** matrix sparsity specification */
+	sparsityType_t sparsityType;
+
+	/** matrix data array */
+	real_t data[_NDMAX_*_NZ_];
+} dz_matrix_t;
+
+
+
 
 /**
  * Special Newton hessian storage format:
@@ -84,30 +231,14 @@ typedef matrix_t dz_matrix_t;
  * 		[ L D ]
  *
  */
-typedef matrix_t xn2x_matrix_t;
+typedef struct
+{
+	/** matrix data array */
+	real_t data[_NI_*2*_NX_];
+} xn2x_matrix_t;
 
-typedef matrix_t xnxn_matrix_t;
+//typedef matrix_t xnxn_matrix_t;
 
-
-/**
- *	\brief generic matrix data type
- *
- *	...
- *
- *	\author Janick Frasch, Hans Joachim Ferreau
- *	\version 1.0beta
- *	\date 2012
- */
-//typedef struct
-//{
-//	/** matrix property flags */
-//	hessianType_t hessianType;
-//
-//	/** Hessian (sub-)matrices */
-//	zz_matrix_t HH;
-//	xx_matrix_t HQ;
-//	uu_matrix_t HR;
-//} hessian_t;
 
 
 /**
