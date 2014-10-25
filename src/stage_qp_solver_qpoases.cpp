@@ -323,10 +323,8 @@ return_t qpOASES_updateDualGuess(	qpData_t* const qpData,
 									const z_vector_t* const lambdaK1
 									)
 {
-//#ifndef __MATLAB__
 	uint_t ii;
 
-//	if (lambdaK1->isDefined == QPDUNES_TRUE) {
 	if ( interval->id < _NI_ ) {	/* lambdaK1 does not exist on last stage */
 		/* qFullStep = q + C.T*lambdaK1 */
 		multiplyCTy( qpData, &(interval->qpSolverQpoases.qFullStep), &(interval->C), lambdaK1 );
@@ -340,7 +338,6 @@ return_t qpOASES_updateDualGuess(	qpData_t* const qpData,
 		/* pStep = 0 */
 		interval->qpSolverQpoases.pFullStep = 0.;	/* constant objective term */
 	}
-//	if (lambdaK->isDefined == QPDUNES_TRUE) {
 	if ( interval->id > 0 ) {		/* lambdaK does not exist on first stage */
 		/* qFullStep -= [lambdaK.T 0]	*/
 		for ( ii=0; ii<_NX_; ++ii ) {
@@ -349,7 +346,6 @@ return_t qpOASES_updateDualGuess(	qpData_t* const qpData,
 	}
 
 	return QPDUNES_OK;
-//#endif
 }
 /*<<< END OF qpOASES_updateStageData */
 

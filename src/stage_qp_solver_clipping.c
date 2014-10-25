@@ -89,7 +89,6 @@ return_t clippingQpSolver_updateDualGuess(	qpData_t* const qpData,
 	 * Always recomputing q is less efficient.
 	 */
 
-//	if (lambdaK1->isDefined == QPDUNES_TRUE) {
 	if ( interval->id < _NI_ ) {	/* lambdaK1 does not exist on last stage */
 		/* qStep = C.T*lambdaK1 */
 		multiplyCTy( qpData, &(interval->qpSolverClipping.qStep), &(interval->C), lambdaK1 );
@@ -103,7 +102,6 @@ return_t clippingQpSolver_updateDualGuess(	qpData_t* const qpData,
 		interval->qpSolverClipping.pStep = 0.;	/* constant objective term */
 	}
 
-//	if (lambdaK->isDefined == QPDUNES_TRUE) {
 	if ( interval->id > 0 ) {		/* lambdaK does not exist on first stage */
 		/* qStep -= [lambdaK.T 0]	*/
 		for ( ii=0; ii<_NX_; ++ii ) {
