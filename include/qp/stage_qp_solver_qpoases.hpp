@@ -170,8 +170,8 @@ return_t qpOASES_doStep( qpData_t* const qpData,
 #>>>>>>                                           */
 return_t qpOASES_evalAddParametricObjFctn(	qpData_t* const qpData,
 											interval_t* const interval,
-											large_vector_t* resVec,
-											large_vector_t* alphaVec,
+											homotopyLog_vector_t* resVec,
+											homotopyLog_vector_t* alphaVec,
 											int_t nBasePoints
 											);
 
