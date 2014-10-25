@@ -106,8 +106,8 @@ return_t qpDUNES_setup(	qpData_t* const qpData,
 	
 	/* undefined not-defined lambda parts */
 	/* do not free, memory might be needed for interval rotation in MPC context */
-	qpData->intervals[0]->lambdaK.isDefined = QPDUNES_FALSE;
-	qpData->intervals[nI]->lambdaK1.isDefined = QPDUNES_FALSE;
+//	qpData->intervals[0]->lambdaK.isDefined = QPDUNES_FALSE;
+//	qpData->intervals[nI]->lambdaK1.isDefined = QPDUNES_FALSE;
 
 
 	/* remainder of qpData struct */
@@ -230,9 +230,9 @@ interval_t* qpDUNES_allocInterval(	qpData_t* const qpData,
 	interval->yPrev.data = (real_t*)calloc( 2*nV + 2*nD,sizeof(real_t) );
 
 	interval->lambdaK.data = (real_t*)calloc( nX,sizeof(real_t) );
-	interval->lambdaK.isDefined = QPDUNES_TRUE;							/* define both lambda parts by default */
+//	interval->lambdaK.isDefined = QPDUNES_TRUE;							/* define both lambda parts by default */
 	interval->lambdaK1.data = (real_t*)calloc( nX,sizeof(real_t) );
-	interval->lambdaK1.isDefined = QPDUNES_TRUE;
+//	interval->lambdaK1.isDefined = QPDUNES_TRUE;
 
 	/* get memory for clipping QP solver */
 	interval->qpSolverClipping.qStep.data  = (real_t*)calloc( nV,sizeof(real_t) );
@@ -1399,8 +1399,8 @@ return_t qpDUNES_shiftIntervals(	qpData_t* const qpData
 	qpData->intervals[_NI_-1]->rebuildHessianBlock = QPDUNES_TRUE;
 
 	/* update definedness of lambda parts */
-	qpData->intervals[0]->lambdaK.isDefined = QPDUNES_FALSE;
-	qpData->intervals[_NI_-1]->lambdaK.isDefined = QPDUNES_TRUE;
+//	qpData->intervals[0]->lambdaK.isDefined = QPDUNES_FALSE;
+//	qpData->intervals[_NI_-1]->lambdaK.isDefined = QPDUNES_TRUE;
 
 
 	// not needed: checks for AS changes are redundant, since blocks get rebuilt anyways
@@ -1445,12 +1445,12 @@ return_t qpDUNES_shiftIntervalsLTI(	qpData_t* const qpData
 		qpData->intervals[kk] = qpData->intervals[kk+1];
 		qpData->intervals[kk]->id = kk;			/* correct stage index */
 	}
-	qpData->intervals[0]->lambdaK.isDefined = QPDUNES_FALSE;	/* update definedness of lambda parts */
+//	qpData->intervals[0]->lambdaK.isDefined = QPDUNES_FALSE;	/* update definedness of lambda parts */
 
 	/*  hang the free interval on the second but last position */
 	qpData->intervals[_NI_-1] = freeInterval;
 	qpData->intervals[_NI_-1]->id = _NI_-1;							/* correct stage index */
-	qpData->intervals[_NI_-1]->lambdaK.isDefined = QPDUNES_TRUE;	/* update definedness of lambda parts */
+//	qpData->intervals[_NI_-1]->lambdaK.isDefined = QPDUNES_TRUE;	/* update definedness of lambda parts */
 
 
 	/** (2) correct dual Hessian matrix for AS changes in last iteration of previous QP
