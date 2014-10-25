@@ -138,7 +138,7 @@ typedef vector_t d2n1_vector_t;
 typedef vector_t xn_vector_t;
 typedef vector_t zn_vector_t;
 typedef vector_t zn1_vector_t;
-typedef vector_t large_vector_t;
+typedef vector_t homotopyLog_vector_t;
 
 
 
@@ -316,13 +316,13 @@ typedef struct
 
 
 	/* memory for objective function parameterization (used optionally in line search) */
-	large_vector_t parametricObjFctn_alpha;
-	large_vector_t parametricObjFctn_f;
-	large_vector_t parametricObjFctn_fPrime;
-	large_vector_t parametricObjFctn_fPrimePrime;
+	homotopyLog_vector_t parametricObjFctn_alpha;
+	homotopyLog_vector_t parametricObjFctn_f;
+	homotopyLog_vector_t parametricObjFctn_fPrime;
+	homotopyLog_vector_t parametricObjFctn_fPrimePrime;
 	int_t parametricObjFctn_nBasePoints;
 
-	large_vector_t parametricObjFctn_fSum;			/**< full dual objective value at alpha values of this stage */
+	homotopyLog_vector_t parametricObjFctn_fSum;			/**< full dual objective value at alpha values of this stage */
 
 
 	/* workspace */
