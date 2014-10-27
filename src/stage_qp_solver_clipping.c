@@ -42,8 +42,8 @@
 #>>>>>>                                           */
 return_t clippingQpSolver_updateDualGuess(	qpData_t* const qpData,
 											interval_t* const interval,
-											const z_vector_t* const lambdaK,
-											const z_vector_t* const lambdaK1
+											const x_vector_t* const lambdaK,
+											const x_vector_t* const lambdaK1
 											)
 {
 	int_t ii;
@@ -57,7 +57,7 @@ return_t clippingQpSolver_updateDualGuess(	qpData_t* const qpData,
 		/* qStep = C.T*lambdaK1 */
 		multiplyCTy( qpData, &(interval->qpSolverClipping.qStep), &(interval->C), lambdaK1 );
 		/* pStep = c*lambdaK1 */
-		interval->qpSolverClipping.pStep = scalarProd( lambdaK1, &(interval->c), _NX_ );	/* constant objective term */
+		interval->qpSolverClipping.pStep = scalarProd( (vector_t*)lambdaK1, (vector_t*)&(interval->c), _NX_ );	/* constant objective term */
 	}
 	else {
 		/* qStep = 0 */
@@ -76,7 +76,7 @@ return_t clippingQpSolver_updateDualGuess(	qpData_t* const qpData,
 
 	return QPDUNES_OK;
 }
-/*<<< END OF qp42_clippingQpSolver_updateStageData */
+/*<<< END OF clippingQpSolver_updateDualGuess */
 
 
 
@@ -85,9 +85,9 @@ return_t clippingQpSolver_updateDualGuess(	qpData_t* const qpData,
  *
 #>>>>>>                                           */
 // TODO: rename to clippingQpSolver
-return_t directQpSolver_solveUnconstrained( qpData_t* const qpData,
-												 interval_t* const interval,
-												 const z_vector_t* const qStep )
+return_t clippingQpSolver_solveUnconstrained(	qpData_t* const qpData,
+											interval_t* const interval,
+											const v_vector_t* const qStep )
 {
 	return_t statusFlag;
 
@@ -97,7 +97,7 @@ return_t directQpSolver_solveUnconstrained( qpData_t* const qpData,
 
 	return statusFlag;
 }
-/*<<< END OF qp42_directQpSolver_solveUnconstrained */
+/*<<< END OF clippingQpSolver_solveUnconstrained */
 
 
 /* ----------------------------------------------
@@ -135,27 +135,31 @@ return_t clippingQpSolver_getMinStepsize( 	const qpData_t* const qpData,
  * do a step of length alpha
  *
 #>>>>>>                                           */
-return_t directQpSolver_doStep( qpData_t* const qpData,
-								interval_t* const interval,
-								const z_vector_t* const stepDir,
-								real_t alpha,
-								z_vector_t* const zUnconstrained,
-								z_vector_t* const z,
-								y_vector_t* const mu,
-								z_vector_t* const q,
-								real_t* const p				)
+return_t clippingQpSolver_doStep( qpData_t* const qpData,
+								  interval_t* const interval,
+								  const z_vector_t* const stepDir,
+								  real_t alpha,
+								  v_vector_t* const zUnconstrained,
+								  v_vector_t* const z,
+								  y_vector_t* const mu,
+								  v_vector_t* const q,
+								  real_t* const p				)
 {
 	int ii;
 
 	/* update primal solution and get dual solution */
-	addVectorScaledVector( zUnconstrained, &(interval->qpSolverClipping.zUnconstrained), alpha, stepDir, interval->nV );
+	addVectorScaledVector( (vector_t*)zUnconstrained,
+						   (vector_t*)&(interval->qpSolverClipping.zUnconstrained),
+						   alpha,
+						   (vector_t*)stepDir,
+						   interval->nV );
 	if ( z != zUnconstrained ) {	/* skip copying if zUnconstrained and z are pointing to the same object (e.g., during line search, when just trying steps) */
 //		directQpSolver_saturateVector( qpData, z, mu, &(interval->zLow), &(interval->zUpp), interval->nV );
 //	}
 //	else {
 		qpDUNES_copyVector( z, zUnconstrained, interval->nV );
 	}
-	directQpSolver_saturateVector( qpData, z, mu, &(interval->zLow), &(interval->zUpp), &(interval->H), interval->nV );
+	clippingQpSolver_saturateVector( qpData, z, mu, &(interval->zLow), &(interval->zUpp), &(interval->H), interval->nV );
 
 	/* update q */
 	for ( ii=0; ii<interval->nV; ++ii ) {
@@ -167,7 +171,7 @@ return_t directQpSolver_doStep( qpData_t* const qpData,
 
 	return QPDUNES_OK;
 }
-/*<<< END OF directQpSolver_doStep */
+/*<<< END OF clippingQpSolver_doStep */
 
 
 /* ----------------------------------------------
@@ -175,14 +179,14 @@ return_t directQpSolver_doStep( qpData_t* const qpData,
  * 
 #>>>>>>                                           */
 /* TODO: pass less arguments */
-return_t directQpSolver_saturateVector(	qpData_t* const qpData,
-										d_vector_t* const vec,
-										y_vector_t* const mu,		/* multipliers, resembling the gaps to the bounds; + active, - inactive */
-										const d_vector_t* const lb,
-										const d_vector_t* const ub,
-										const zz_matrix_t* const H,
-										int_t nV
-										)
+return_t clippingQpSolver_saturateVector(	qpData_t* const qpData,
+											v_vector_t* const vec,
+											y_vector_t* const mu,		/* multipliers, resembling the gaps to the bounds; + active, - inactive */
+											const v_vector_t* const lb,
+											const v_vector_t* const ub,
+											const vv_matrix_t* const H,
+											int_t nV
+											)
 {
 	int_t ii;
 	
@@ -227,7 +231,7 @@ return_t directQpSolver_saturateVector(	qpData_t* const qpData,
 
 	return QPDUNES_OK;
 }
-/*<<< END OF directQpSolver_saturateVector */
+/*<<< END OF clippingQpSolver_saturateVector */
 
 
 /* ----------------------------------------------
@@ -238,8 +242,8 @@ return_t clippingQpSolver_ratioTest(	qpData_t* const qpData,
 										real_t* minStepSizeASChange,	/* minimum step size that leads to active set change */
 										d_vector_t* const zStepDir,
 										y_vector_t* const mu,			/* pseudo multipliers, resembling the gaps to the bounds; + active, - inactive */
-										const d_vector_t* const lb,
-										const d_vector_t* const ub,
+										const v_vector_t* const lb,
+										const v_vector_t* const ub,
 										int_t nV
 										)
 {
@@ -274,7 +278,7 @@ return_t clippingQpSolver_ratioTest(	qpData_t* const qpData,
 
 	return QPDUNES_OK;
 }
-/*<<< END OF directQpSolver_ratioTest */
+/*<<< END OF clippingQpSolver_ratioTest */
 
 
 
@@ -282,7 +286,7 @@ return_t clippingQpSolver_ratioTest(	qpData_t* const qpData,
  * ...
  *
 #>>>>>>                                           */
-real_t directQpSolver_getObjectiveValue(	qpData_t* const qpData,
+real_t clippingQpSolver_getObjectiveValue(	qpData_t* const qpData,
 												interval_t* const interval
 												)
 {
@@ -291,13 +295,13 @@ real_t directQpSolver_getObjectiveValue(	qpData_t* const qpData,
 	/* quadratic part */
 	objVal = 0.5 * multiplyzHz( qpData, &(interval->H), &(interval->z), interval->nV );
 	/* linear part */
-	objVal += scalarProd( &(interval->q), &(interval->z), interval->nV );
+	objVal += scalarProd( (vector_t*)&(interval->q), (vector_t*)&(interval->z), interval->nV );
 	/* constant part */
 	objVal += interval->p;
 
 	return objVal;
 }
-/*<<< END OF qp42_directQpSolver_saturate */
+/*<<< END OF clippingQpSolver_getObjectiveValue */
 
 
 /*

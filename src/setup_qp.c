@@ -1222,12 +1222,12 @@ return_t qpDUNES_setupAllLocalQPs(	qpData_t* const qpData,
 
 
 	/* (1) set up initial lambda guess */
-	qpDUNES_updateVector( &(qpData->intervals[0]->lambdaK1), &(qpData->lambda.data[0]), _NX_ );
+	qpDUNES_updateVector( (vector_t*)&(qpData->intervals[0]->lambdaK1), &(qpData->lambda.data[0]), _NX_ );
 	for( kk=1; kk<_NI_; ++kk ) {
-		qpDUNES_updateVector( &(qpData->intervals[kk]->lambdaK), &(qpData->lambda.data[(kk-1)*_NX_]), _NX_ );
-		qpDUNES_updateVector( &(qpData->intervals[kk]->lambdaK1), &(qpData->lambda.data[kk*_NX_]), _NX_ );
+		qpDUNES_updateVector( (vector_t*)&(qpData->intervals[kk]->lambdaK), &(qpData->lambda.data[(kk-1)*_NX_]), _NX_ );
+		qpDUNES_updateVector( (vector_t*)&(qpData->intervals[kk]->lambdaK1), &(qpData->lambda.data[kk*_NX_]), _NX_ );
 	}
-	qpDUNES_updateVector( &(qpData->intervals[_NI_]->lambdaK), &(qpData->lambda.data[(_NI_-1)*_NX_]), _NX_ );
+	qpDUNES_updateVector( (vector_t*)&(qpData->intervals[_NI_]->lambdaK), &(qpData->lambda.data[(_NI_-1)*_NX_]), _NX_ );
 
 
 	/* (2) decide which QP solver to use and set up */
@@ -1323,19 +1323,19 @@ return_t qpDUNES_setupClippingSolver(	qpData_t* const qpData,
 	/* (c) solve unconstrained local QP for g and initial lambda guess: */
 	/*	   - get (possibly updated) lambda guess */
 	if (interval->id > 0) {		/* lambdaK exists */
-		qpDUNES_updateVector( &(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
+		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
 	}
 	if (interval->id < _NI_) {		/* lambdaK1 exists */
-		qpDUNES_updateVector( &(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
+		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
 	}
 
 	/*     - update first order term */
 	/*       reset q; qStep is added in directQpSolver_doStep, when bounds are known */
 	qpDUNES_setupZeroVector( &(interval->q), interval->nV );
 	clippingQpSolver_updateDualGuess( qpData, interval, &(interval->lambdaK), &(interval->lambdaK1) );
-	addToVector( &(interval->qpSolverClipping.qStep), &(interval->g), interval->nV );	/* Note: qStep is rewritten in line before */
+	addToVector( (vector_t*)&(interval->qpSolverClipping.qStep), (vector_t*)&(interval->g), interval->nV );	/* Note: qStep is rewritten in line before */
 	/*     - solve */
-	statusFlag = directQpSolver_solveUnconstrained( qpData, interval, &(interval->qpSolverClipping.qStep) );
+	statusFlag = clippingQpSolver_solveUnconstrained( qpData, interval, &(interval->qpSolverClipping.qStep) );
 	if ( statusFlag != QPDUNES_OK ) {
 //		qpDUNES_printError( qpData, __FILE__, __LINE__, "QP on interval %d infeasible!", interval->id );
 		qpDUNES_printError( qpData, __FILE__, __LINE__, "Stage QP backsolve failed. Check if all stage QPs are positive definite.", interval->id );
@@ -1348,7 +1348,7 @@ return_t qpDUNES_setupClippingSolver(	qpData_t* const qpData,
 
 
 	/* clip directly on setup */
-	statusFlag = directQpSolver_doStep(	qpData,
+	statusFlag = clippingQpSolver_doStep(	qpData,
 														interval,
 														&(interval->qpSolverClipping.dz), 1,
 														&(interval->qpSolverClipping.zUnconstrained),
@@ -1380,10 +1380,10 @@ return_t qpDUNES_setupQpoases(	qpData_t* const qpData,
 	qpDUNES_copyVector( &(interval->q), &(interval->g), interval->nV );
 	/*	   - get (possibly updated) lambda guess */
 	if (interval->id > 0) {		/* lambdaK exists */
-		qpDUNES_updateVector( &(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
+		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
 	}
 	if (interval->id < _NI_) {		/* lambdaK1 exists */
-		qpDUNES_updateVector( &(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
+		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
 	}
 	qpOASES_updateDualGuess( qpData, interval, &(interval->lambdaK), &(interval->lambdaK1) );
 
@@ -1428,21 +1428,14 @@ return_t qpDUNES_updateQpoases(	qpData_t* const qpData,
 		// we always need to get original g, since we add lambda completely!
 //	}
 	qpDUNES_copyVector( &(interval->q), &(interval->g), interval->nV );
-//	qpDUNES_printMatrixData( interval->q.data, interval->nV, 1, "updateQpoases[%d]: (1: g only)", interval->id );
 	/*	   - get (possibly updated) lambda guess */
 	if (interval->id > 0) {		/* lambdaK exists */
-//		qpDUNES_printMatrixData( interval->lambdaK.data, 1, _NX_, "lambdaK[%d] was", interval->id );
-		qpDUNES_updateVector( &(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
-//		qpDUNES_printMatrixData( interval->lambdaK.data, 1, _NX_, "lambdaK[%d] is", interval->id );
+		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
 	}
 	if (interval->id < _NI_) {		/* lambdaK1 exists */
-//		qpDUNES_printMatrixData( interval->lambdaK1.data, 1, _NX_, "lambdaK1[%d] was", interval->id );
-		qpDUNES_updateVector( &(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
-//		qpDUNES_printMatrixData( interval->lambdaK1.data, 1, _NX_, "lambdaK1[%d] is", interval->id );
+		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
 	}
 	qpOASES_updateDualGuess( qpData, interval, &(interval->lambdaK), &(interval->lambdaK1) );
-//	qpDUNES_printMatrixData( interval->q.data, interval->nV, 1, "updateQpoases[%d]: (1: g with lambda)", interval->id );
-//	qpDUNES_printMatrixData( interval->qpSolverQpoases.qFullStep.data, interval->nV, 1, "updateQpoases[%d]: (1: qFS with lambda)", interval->id );
 
 
 	/* (b) update qpOASES data and rerun initial homotopy (i.e., solve first QP) */

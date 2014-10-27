@@ -288,9 +288,9 @@ return_t qpDUNES_setupScaledIdentityMatrix(	int_t nRows,
 
 
 return_t qpDUNES_setupVector(	vector_t* const to,
-							const real_t* const from,
-							int_t n
-							)
+								const real_t* const from,
+								int_t n
+								)
 {
 	return qpDUNES_updateVector( to,from,n );
 }
@@ -398,9 +398,9 @@ return_t qpDUNES_setupUniformVector(	vector_t* const to,
 
 
 return_t qpDUNES_copyVector(	vector_t* const to,
-							const vector_t* const from,
-							int_t n
-							)
+								const vector_t* const from,
+								int_t n
+								)
 {
 	int_t ii;
 	

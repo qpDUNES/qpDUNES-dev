@@ -183,17 +183,17 @@ return_t qpOASES_setup( qpData_t* qpData,
  * immediate resolves the QP here)
  *
 #>>>>>>                                           */
-return_t qpOASES_dataUpdate( qpData_t* const qpData,
-							qpoasesObject_t* const qpoasesObject,
-							interval_t* const interval,
-							boolean_t H_changed,
-							boolean_t zLow_changed,
-							boolean_t zUpp_changed,
-							boolean_t D_changed,
-							boolean_t dLow_changed,
-							boolean_t dUpp_changed,
-							int_t* nQpoasesIter
-							)
+return_t qpOASES_dataUpdate(	qpData_t* const qpData,
+								qpoasesObject_t* const qpoasesObject,
+								interval_t* const interval,
+								boolean_t H_changed,
+								boolean_t zLow_changed,
+								boolean_t zUpp_changed,
+								boolean_t D_changed,
+								boolean_t dLow_changed,
+								boolean_t dUpp_changed,
+								int_t* nQpoasesIter
+								)
 {
 	uint_t ii;
 
@@ -319,8 +319,8 @@ return_t qpOASES_dataUpdate( qpData_t* const qpData,
 #>>>>>>                                           */
 return_t qpOASES_updateDualGuess(	qpData_t* const qpData,
 									interval_t* const interval,
-									const z_vector_t* const lambdaK,
-									const z_vector_t* const lambdaK1
+									const x_vector_t* const lambdaK,
+									const x_vector_t* const lambdaK1
 									)
 {
 	uint_t ii;
@@ -328,13 +328,13 @@ return_t qpOASES_updateDualGuess(	qpData_t* const qpData,
 	if ( interval->id < _NI_ ) {	/* lambdaK1 does not exist on last stage */
 		/* qFullStep = q + C.T*lambdaK1 */
 		multiplyCTy( qpData, &(interval->qpSolverQpoases.qFullStep), &(interval->C), lambdaK1 );
-		addToVector( &(interval->qpSolverQpoases.qFullStep), &(interval->q), interval->nV );
+		addToVector( (vector_t*)&(interval->qpSolverQpoases.qFullStep), (vector_t*)&(interval->q), interval->nV );
 		/* pStep = c*lambdaK1 */
-		interval->qpSolverQpoases.pFullStep = scalarProd( lambdaK1, &(interval->c), _NX_ );	/* constant objective term */
+		interval->qpSolverQpoases.pFullStep = scalarProd( (vector_t*)lambdaK1, (vector_t*)&(interval->c), _NX_ );	/* constant objective term */
 	}
 	else {
 		/* qFullStep = q */
-		qpDUNES_copyVector( &(interval->qpSolverQpoases.qFullStep), &(interval->q), interval->nV );
+		qpDUNES_copyVector( (vector_t*)&(interval->qpSolverQpoases.qFullStep), (vector_t*)&(interval->q), interval->nV );
 		/* pStep = 0 */
 		interval->qpSolverQpoases.pFullStep = 0.;	/* constant objective term */
 	}
@@ -357,7 +357,7 @@ return_t qpOASES_updateDualGuess(	qpData_t* const qpData,
 return_t qpOASES_hotstart( 	qpData_t* qpData,
 							qpoasesObject_t* qpoasesObject,
 							interval_t* interval,
-							z_vector_t* q,
+							v_vector_t* q,
 							int_t* const numQpoasesIter,
 							boolean_t logHomotopy
 							)
@@ -619,9 +619,9 @@ return_t qpOASES_doStep( qpData_t* const qpData,
 						 qpoasesObject_t* qpoasesObject,
 						 interval_t* const interval,
 						 real_t alpha,
-						 z_vector_t* const z,
+						 v_vector_t* const z,
 						 y_vector_t* const mu,
-						 z_vector_t* const qCandidate,
+						 v_vector_t* const qCandidate,
 						 real_t* const p
 						 )
 {
