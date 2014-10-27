@@ -133,7 +133,7 @@ typedef vector_t x_vector_t;
 typedef vector_t u_vector_t;
 typedef vector_t z_vector_t;
 typedef vector_t d_vector_t;
-typedef vector_t d2_vector_t;
+typedef vector_t y_vector_t;
 typedef vector_t d2n1_vector_t;
 typedef vector_t xn_vector_t;
 typedef vector_t zn_vector_t;
@@ -301,8 +301,10 @@ typedef struct
 
 
 	/* dual QP solution */
-	d2_vector_t y;				/**< stage constraint multiplier vector  */
-	d2_vector_t yPrev;			/**< previous stage constraint multiplier vector (needed to detect AS changes)  */
+	y_vector_t* y;				/**< stage constraint multiplier vector (reference for easy, consistent swapping)  */
+	y_vector_t* yPrev;			/**< previous stage constraint multiplier vector (needed to detect AS changes)  */
+	y_vector_t yStorage1;		/**< storage for a multiplier vector	*/
+	y_vector_t yStorage2;		/**< storage for a multiplier vector	*/
 
 
 	/* QP solver */
