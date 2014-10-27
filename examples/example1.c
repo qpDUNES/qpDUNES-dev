@@ -115,7 +115,6 @@ int main( )
 	qpDUNES_setupAllLocalQPs( &qpData, isLTI=QPDUNES_TRUE );	/* determine local QP solvers and set up auxiliary data */
 
 	
-//	qp42_solve( &qpData, x0 );
 	qpDUNES_solve( &qpData );
 	
 	for( i=0; i<nI; ++i )
