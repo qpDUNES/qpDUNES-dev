@@ -1154,8 +1154,8 @@ return_t qpDUNES_updateIntervalData(	qpData_t* const qpData,
 				/* check if Hessian contribution changed */
 				if (interval->rebuildHessianBlock != QPDUNES_TRUE)	{
 					for (ii = 0; ii < nV; ++ii ) {
-						if ( (boolean_t) ( (interval->y.data[2 * ii] * interval->y.data[2 * ii + 1]) < 0 )  !=
-							 (boolean_t) ( (interval->yPrev.data[2 * ii] * interval->yPrev.data[2 * ii + 1]) < 0 ) )	/* AS change if sign is different */
+						if ( (boolean_t) ( (interval->y->data[2 * ii] * interval->y->data[2 * ii + 1]) < 0 )  !=
+							 (boolean_t) ( (interval->yPrev->data[2 * ii] * interval->yPrev->data[2 * ii + 1]) < 0 ) )	/* AS change if sign is different */
 						{
 							interval->rebuildHessianBlock = QPDUNES_TRUE;
 							break;
@@ -1353,7 +1353,7 @@ return_t qpDUNES_setupClippingSolver(	qpData_t* const qpData,
 														&(interval->qpSolverClipping.dz), 1,
 														&(interval->qpSolverClipping.zUnconstrained),
 														&(interval->z),
-														&(interval->y),
+														interval->y,
 														&(interval->q),
 														&(interval->p)
 														);
@@ -1542,7 +1542,7 @@ return_t qpDUNES_shiftIntervalsLTI(	qpData_t* const qpData
 	int_t kk, ii;
 
 	boolean_t rebuildHessianBlock_NI1;
-	real_t* yPrev_NI1;
+	y_vector_t* yPrev_NI1;
 
 
 	/** (1) Shift Interval pointers */
@@ -1565,15 +1565,15 @@ return_t qpDUNES_shiftIntervalsLTI(	qpData_t* const qpData
 	 *      and keep old AS statuses (through multipliers) for Hessian rebuilding checks	 */
 	/*  save status and multipliers of last interval */
 	rebuildHessianBlock_NI1 = qpData->intervals[_NI_-1]->rebuildHessianBlock;
-	yPrev_NI1 = qpData->intervals[_NI_-1]->yPrev.data;
+	yPrev_NI1 = qpData->intervals[_NI_-1]->yPrev;
 	/*  shift all statuses and multiplies (except the one from first interval) back again */
 	for (kk=_NI_-1; kk>0; --kk) {
 		qpData->intervals[kk]->rebuildHessianBlock = qpData->intervals[kk-1]->rebuildHessianBlock;
-		qpData->intervals[kk]->yPrev.data = qpData->intervals[kk-1]->yPrev.data;
+		qpData->intervals[kk]->yPrev = qpData->intervals[kk-1]->yPrev;
 	}
 	/*  correct dual Hessian update for first interval */
 	qpData->intervals[0]->rebuildHessianBlock = rebuildHessianBlock_NI1;
-	qpData->intervals[0]->yPrev.data = yPrev_NI1;
+	qpData->intervals[0]->yPrev = yPrev_NI1;
 
 
 	/** (3) check for active set changes from shift ... ((in)active constraints that were moved to different intervals) */
@@ -1602,9 +1602,8 @@ return_t qpDUNES_shiftIntervalsLTI(	qpData_t* const qpData
 
 		/* check if Hessian contribution changed */
 		for (ii = 0; ii < _NV(kk); ++ii ) {
-			if ( (boolean_t) ( (qpData->intervals[kk]->y.data[2 * ii] * qpData->intervals[kk]->y.data[2 * ii + 1]) < 0 )  !=
-//				 (boolean_t) ( (qpData->intervals[(kk-1)]->yPrev.data[2 * ii] * qpData->intervals[(kk-1)]->yPrev.data[2 * ii + 1]) < 0 ) )	/* AS change if sign is different */
-				 (boolean_t) ( (qpData->intervals[kk]->yPrev.data[2 * ii] * qpData->intervals[kk]->yPrev.data[2 * ii + 1]) < 0 ) )	/* AS change if sign is different */
+			if ( (boolean_t) ( (qpData->intervals[kk]->y->data[2 * ii] * qpData->intervals[kk]->y->data[2 * ii + 1]) < 0 )  !=
+				 (boolean_t) ( (qpData->intervals[kk]->yPrev->data[2 * ii] * qpData->intervals[kk]->yPrev->data[2 * ii + 1]) < 0 ) )	/* AS change if sign is different */
 			{
 				qpData->intervals[kk]->rebuildHessianBlock = QPDUNES_TRUE;
 				break;
