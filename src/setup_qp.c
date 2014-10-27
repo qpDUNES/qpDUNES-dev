@@ -82,6 +82,9 @@ return_t qpDUNES_setupStatic(	qpData_t* const qpData,
 		qpData->intervals[kk]->nD = (nD != 0) ? nD[kk] : 0;
 		qpData->intervals[kk]->nV = _NZ_;
 
+		qpData->intervals[kk]->y = &(qpData->intervals[kk]->yStorage1);
+		qpData->intervals[kk]->yPrev = &(qpData->intervals[kk]->yStorage2);
+
 		qpData->intervals[kk]->H.sparsityType = QPDUNES_MATRIX_UNDEFINED;
 		qpData->intervals[kk]->cholH.sparsityType = QPDUNES_MATRIX_UNDEFINED;
 		qpData->intervals[kk]->C.sparsityType = QPDUNES_MATRIX_UNDEFINED;
@@ -101,6 +104,9 @@ return_t qpDUNES_setupStatic(	qpData_t* const qpData,
 	qpData->intervals[_NI_]->id = _NI_;		/* give interval its initial stage index */
 	qpData->intervals[_NI_]->nD = (nD != 0) ? nD[_NI_] : 0;
 	qpData->intervals[_NI_]->nV = _NX_;
+
+	qpData->intervals[_NI_]->y = &(qpData->intervals[_NI_]->yStorage1);
+	qpData->intervals[_NI_]->yPrev = &(qpData->intervals[_NI_]->yStorage2);
 
 	qpData->intervals[_NI_]->H.sparsityType = QPDUNES_MATRIX_UNDEFINED;
 	qpData->intervals[_NI_]->cholH.sparsityType = QPDUNES_MATRIX_UNDEFINED;
@@ -325,7 +331,6 @@ interval_t* qpDUNES_allocInterval(	qpData_t* const qpData,
 
 	interval->zLow.data = (real_t*)calloc( nV,sizeof(real_t) );
 	interval->zUpp.data = (real_t*)calloc( nV,sizeof(real_t) );
-//	qpDUNES_printf("zUpp pointer = %d", (int)(interval->zUpp.data));
 
 	interval->D.data = (real_t*)calloc(  nD*nV,sizeof(real_t) );
 	interval->D.sparsityType = QPDUNES_MATRIX_UNDEFINED;
@@ -334,8 +339,10 @@ interval_t* qpDUNES_allocInterval(	qpData_t* const qpData,
 
 	interval->z.data = (real_t*)calloc( nV,sizeof(real_t) );
 
-	interval->y.data = (real_t*)calloc( 2*nV + 2*nD,sizeof(real_t) );	/* TODO: clean multiplier definition */
-	interval->yPrev.data = (real_t*)calloc( 2*nV + 2*nD,sizeof(real_t) );
+	interval->yStorage1.data = (real_t*)calloc( 2*nV + 2*nD,sizeof(real_t) );
+	interval->yStorage2.data = (real_t*)calloc( 2*nV + 2*nD,sizeof(real_t) );
+	interval->y = &(interval->yStorage1);
+	interval->yPrev = &(interval->yStorage2);
 
 	interval->lambdaK.data = (real_t*)calloc( nX,sizeof(real_t) );
 	interval->lambdaK1.data = (real_t*)calloc( nX,sizeof(real_t) );
