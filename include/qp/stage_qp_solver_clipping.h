@@ -30,8 +30,8 @@
  */
 
 
-#ifndef QP42_STAGE_QP_SOLVER_CLIPPING_H
-#define QP42_STAGE_QP_SOLVER_CLIPPING_H
+#ifndef QPDUNES_STAGE_QP_SOLVER_CLIPPING_H
+#define QPDUNES_STAGE_QP_SOLVER_CLIPPING_H
 
 
 #include <qp/types.h>
@@ -48,15 +48,15 @@
 /** ... */
 return_t clippingQpSolver_updateDualGuess(	qpData_t* const qpData,
 											interval_t* const interval,
-											const z_vector_t* const lambdaK,
-											const z_vector_t* const lambdaK1
+											const x_vector_t* const lambdaK,
+											const x_vector_t* const lambdaK1
 											);
 
 
 /** ... */
-return_t directQpSolver_solveUnconstrained( qpData_t* const qpData,
-									 	 	 	 interval_t* const interval,
-									 	 	 	 const z_vector_t* const qStep );
+return_t clippingQpSolver_solveUnconstrained( qpData_t* const qpData,
+											  interval_t* const interval,
+											  const v_vector_t* const qStep );
 
 
 /* ----------------------------------------------
@@ -74,55 +74,46 @@ return_t clippingQpSolver_getMinStepsize( 	const qpData_t* const qpData,
 
 
 /** ... */
-return_t directQpSolver_doStep( qpData_t* const qpData,
+return_t clippingQpSolver_doStep( qpData_t* const qpData,
 								interval_t* const interval,
-								const z_vector_t* const stepDir,
+								const v_vector_t* const stepDir,
 								real_t alpha,
-								z_vector_t* const zUnconstrained,
-								z_vector_t* const z,
-								d2_vector_t* const mu,
-								z_vector_t* const q,
+								v_vector_t* const zUnconstrained,
+								v_vector_t* const z,
+								y_vector_t* const mu,
+								v_vector_t* const q,
 								real_t* const p				);
 
 
-///** ... */
-//return_t directQpSolver_tryStep( qpData_t* const qpData,
-//								 interval_t* const interval,
-//								 z_vector_t* const z,
-//								 d2_vector_t* const mu,
-//								 int_t alpha,
-//								 const z_vector_t* const stepDir );
-
-
 /** ... */
-return_t directQpSolver_saturateVector(	qpData_t* const qpData,
-										d_vector_t* const vec,
-										d2_vector_t* const mu,
-										const d_vector_t* const lb,
-										const d_vector_t* const ub,
-										const zz_matrix_t* const H,
-										int_t nD
-										);
+return_t clippingQpSolver_saturateVector(	qpData_t* const qpData,
+											v_vector_t* const vec,
+											y_vector_t* const mu,
+											const v_vector_t* const lb,
+											const v_vector_t* const ub,
+											const vv_matrix_t* const H,
+											int_t nV
+											);
 
 
 /** ... */
 return_t clippingQpSolver_ratioTest(	qpData_t* const qpData,
-									real_t* minStepSizeASChange,	/* minimum step size that leads to active set change */
-									d_vector_t* const zStepDir,
-									d2_vector_t* const mu,			/* pseudo multipliers, resembling the gaps to the bounds; + active, - inactive */
-									const d_vector_t* const lb,
-									const d_vector_t* const ub,
-									int_t nV
-									);
+										real_t* minStepSizeASChange,	/* minimum step size that leads to active set change */
+										v_vector_t* const zStepDir,
+										y_vector_t* const mu,			/* pseudo multipliers, resembling the gaps to the bounds; + active, - inactive */
+										const v_vector_t* const lb,
+										const v_vector_t* const ub,
+										int_t nV
+										);
 
 
 /** ... */
-real_t directQpSolver_getObjectiveValue(	qpData_t* const qpData,
-												interval_t* const interval
-												);
+real_t clippingQpSolver_getObjectiveValue(	qpData_t* const qpData,
+											interval_t* const interval
+											);
 
 
-#endif	/* QP42_STAGE_QP_SOLVER_CLIPPING_H */
+#endif	/* QPDUNES_STAGE_QP_SOLVER_CLIPPING_H */
 
 
 /*

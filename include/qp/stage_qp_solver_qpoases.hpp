@@ -86,8 +86,8 @@ return_t qpOASES_dataUpdate( 	qpData_t* const qpData,
 /** ... */
 return_t qpOASES_updateDualGuess(	qpData_t* const qpData,
 									interval_t* const interval,
-									const z_vector_t* const lambdaK,
-									const z_vector_t* const lambdaK1
+									const x_vector_t* const lambdaK,
+									const x_vector_t* const lambdaK1
 									);
 
 
@@ -95,7 +95,7 @@ return_t qpOASES_updateDualGuess(	qpData_t* const qpData,
 return_t qpOASES_hotstart( 	qpData_t* qpData,
 							qpoasesObject_t* qpoasesObject,
 							interval_t* interval,
-							z_vector_t* q,
+							v_vector_t* q,
 							int_t* const numQpoasesIter,
 							boolean_t logHomotopy
 							);
@@ -109,7 +109,7 @@ return_t qpOASES_hotstart( 	qpData_t* qpData,
 return_t qpOASES_getDualSol( 	qpData_t* qpData,
 								interval_t* interval,
 								qpoasesObject_t* qpoasesObject,
-								d2_vector_t* mu
+								y_vector_t* mu
 								);
 
 
@@ -156,9 +156,9 @@ return_t qpOASES_doStep( qpData_t* const qpData,
 						 qpoasesObject_t* qpoasesObject,
 						 interval_t* const interval,
 						 real_t alpha,
-						 z_vector_t* const z,
-						 d2_vector_t* const mu,
-						 z_vector_t* const q,
+						 v_vector_t* const z,
+						 y_vector_t* const mu,
+						 v_vector_t* const q,
 						 real_t* const p				);
 
 

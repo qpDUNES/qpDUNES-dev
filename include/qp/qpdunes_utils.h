@@ -143,10 +143,10 @@ sparsityType_t qpDUNES_detectMatrixSparsity(	const real_t* const M,
  *	\date 2012
  */
 return_t qpDUNES_updateMatrixData(	matrix_t* const to,
-								const real_t* const from,
-								int_t nRows,
-								int_t nCols
-								);
+									const real_t* const from,
+									int_t nRows,
+									int_t nCols
+									);
 
 
 /** 
@@ -159,9 +159,9 @@ return_t qpDUNES_updateMatrixData(	matrix_t* const to,
  *	\date 2012
  */
 return_t qpDUNES_setupZeroMatrix(	int_t nRows,
-								int_t nCols,
-								matrix_t* to
-								);
+									int_t nCols,
+									matrix_t* to
+									);
 
 
 /** 
@@ -255,9 +255,9 @@ return_t qpDUNES_setupVector(	vector_t* const to,
  *	\date 2012
  */
 return_t qpDUNES_updateVector(	vector_t* const to,
-							const real_t* const from,
-							int_t n
-							);
+								const real_t* const from,
+								int_t n
+								);
 
 
 /** 
@@ -376,22 +376,22 @@ return_t qpDUNES_copyMatrix(	matrix_t* const to,
  *	\version 1.0beta
  *	\date 2012
  */
-return_t qpDUNES_makeMatrixDense( matrix_t* const M, 
-								int_t dim0,
-								int_t dim1
-								);
+return_t qpDUNES_makeMatrixDense( 	matrix_t* const M,
+									int_t dim0,
+									int_t dim1
+									);
 
 
 return_t qpDUNES_transposeMatrix(	matrix_t* const to,
-								const matrix_t* const from,
-								int_t dim0,
-								int_t dim1
-								);
+									const matrix_t* const from,
+									int_t dim0,
+									int_t dim1
+									);
 
 
 return_t qpDUNES_selftransposeMatrix(	matrix_t* const M,
-									int_t dim			/**< leading and secondary dimension of M */
-									);
+										int_t dim			/**< leading and secondary dimension of M */
+										);
 
 
 return_t qpDUNES_copyArray(	real_t* const to,

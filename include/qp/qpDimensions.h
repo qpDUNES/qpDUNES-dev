@@ -38,16 +38,21 @@
 #ifndef QPDIMENSIONS_H_
 #define QPDIMENSIONS_H_
 
-#assert defined(__STATIC_MEMORY__)
+#ifndef __STATIC_MEMORY__
+	#error "QP dimensions should only be specified at compile time for qpDUNES with the __STATIC_MEMORY__ flag enabled."
+#endif
 
 
 /* Define the QP problem's dimensions below */
-#define _NX_ 3				/* the number of states */
-#define _NU_ 1				/* the number of controls */
-#define _NZ_ (_NX_+_NU_)	/* the number of stage variables */
-#define _NI_ 10				/* the number of control intervals */
-#define _NDMAX_ 10			/* the maximum number of affine stage constraints over all stages */
-#define _NDTTL_ 100			/* the total number of affine stage constraints summed over all stages */
+#define _NX_ 3						/* the number of states */
+#define _NU_ 1						/* the number of controls */
+#define _NZ_ (_NX_+_NU_)			/* the number of stage variables */
+#define _NI_ 10						/* the number of control intervals */
+#define _NDMAX_ 10					/* the maximum number of affine stage constraints over all stages */
+#define _NDTTL_ 100					/* the total number of affine stage constraints summed over all stages */
+#define _NWSRMAX_ 5*(_NZ_+_NDMAX_)	/* number of qpOASES iterations per major DUNES iteration, i.e.,
+								 	 * number of working set recalculations; needs to be specified
+								 	 * for homotopy log memory allocation */
 
 
 #endif /* QPDIMENSIONS_H_ */

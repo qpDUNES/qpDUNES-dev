@@ -304,6 +304,19 @@ typedef struct
 
 
 /**
+ *	\brief Vector of size _NZ_
+ *
+ *	This type can be used for vectors of size _NZ_ or smaller
+ *
+ */
+typedef struct
+{
+	/** vector data array */
+	real_t data[_NZ_];
+} v_vector_t;
+
+
+/**
  * Vector of size _NDMAX_
  */
 typedef struct
@@ -431,7 +444,7 @@ typedef struct
 	qpoasesObject_t* qpoasesObject;
 
 	/* workspace */
-	z_vector_t qFullStep;			/**< linear term corresponding to full-step in lambda */
+	v_vector_t qFullStep;			/**< linear term corresponding to full-step in lambda */
 	real_t pFullStep;				/**< constant term corresponding to full-step in lambda */
 } qpSolverQpoases_t;
 
@@ -448,11 +461,11 @@ typedef struct
  */
 typedef struct
 {
-	z_vector_t zUnconstrained;	/**< unconstrained primal solution for current lambda guess */
-	z_vector_t dz;				/**< delta z - update in primal variables corresponding to a full step deltaLambda */
+	v_vector_t zUnconstrained;	/**< unconstrained primal solution for current lambda guess */
+	v_vector_t dz;				/**< delta z - update in primal variables corresponding to a full step deltaLambda */
 
 	/* workspace */
-	z_vector_t qStep;			/**< step in linear term for line search */
+	v_vector_t qStep;			/**< step in linear term for line search */
 	real_t pStep;				/**< step in constant term for line search */
 } qpSolverClipping_t;
 
@@ -488,11 +501,11 @@ typedef struct
 	vv_matrix_t cholH;			/**< inverse of Hessian */
 	real_t HQNorm;				/**< norm of Q-part of Hessian */     //FIXME: choose which norm to compute exactly, etc.
 
-	z_vector_t g;				/**< primal gradient block */
+	v_vector_t g;				/**< primal gradient block */
 
 
 	/* dualized objective function */
-	z_vector_t q;				/**< linear objective function term after dualization */
+	v_vector_t q;				/**< linear objective function term after dualization */
 	real_t p;					/**< constant objective function term after dualization */
 
 
@@ -502,21 +515,23 @@ typedef struct
 
 
 	/* constraints */
-	z_vector_t  zLow;			/**< lower variable bound */
-	z_vector_t  zUpp;			/**< upper variable bound */
+	v_vector_t  zLow;			/**< lower variable bound */
+	v_vector_t  zUpp;			/**< upper variable bound */
 	dz_matrix_t D;				/**< full constraint matrix */
 	d_vector_t  dLow;			/**< constraint lower bound */
 	d_vector_t  dUpp;			/**< constraint upper bound */
 
 
 	/* primal QP solution */
-	z_vector_t z;				/**< full primal solution for current lambda guess */
+	v_vector_t z;				/**< full primal solution for current lambda guess */
 	real_t optObjVal;			/**< objective value */
 
 
 	/* dual QP solution */
-	y_vector_t y;				/**< stage constraint multiplier vector  */
-	y_vector_t yPrev;			/**< previous stage constraint multiplier vector (needed to detect AS changes)  */
+	y_vector_t* y;				/**< stage constraint multiplier vector (reference for easy, consistent swapping)  */
+	y_vector_t* yPrev;			/**< previous stage constraint multiplier vector (needed to detect AS changes)  */
+	y_vector_t yStorage1;		/**< storage for a multiplier vector	*/
+	y_vector_t yStorage2;		/**< storage for a multiplier vector	*/
 
 
 	/* QP solver */
