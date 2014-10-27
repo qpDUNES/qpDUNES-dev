@@ -118,8 +118,8 @@ return_t qpOASES_setup( qpData_t* qpData,
 	qpOASES::returnValue qpOASES_statusFlag;
 
 	/* make matrix data dense */
-	qpDUNES_makeMatrixDense( &(interval->H), interval->nV, interval->nV );
-	qpDUNES_makeMatrixDense( &(interval->D), interval->nD, interval->nV );
+	qpDUNES_makeMatrixDense( (matrix_t*)&(interval->H), interval->nV, interval->nV );
+	qpDUNES_makeMatrixDense( (matrix_t*)&(interval->D), interval->nD, interval->nV );
 
 //	qpDUNES_printMatrixData( interval->D.data, interval->nD, interval->nV, "I am qpoases setup, D[%d] = ", interval->id );
 //	qpDUNES_printMatrixData( interval->dLow.data, interval->nD, 1, "I am qpoases setup, dLow[%d] = ", interval->id );
@@ -162,7 +162,7 @@ return_t qpOASES_setup( qpData_t* qpData,
 
 	/* get primal and dual solution */
 	static_cast<qpOASES::LoggedSQProblem*>(qpoasesObject->qpoases)->getPrimalSolution( static_cast<qpOASES::real_t*>(interval->z.data) );
-	qpOASES_getDualSol( qpData, interval, qpoasesObject, &(interval->y) );
+	qpOASES_getDualSol( qpData, interval, qpoasesObject, interval->y );
 
 	//	qpDUNES_printMatrixData( mu->data, 2*interval->nV+2*interval->nD, 1, "qpoases multipliers[%d]", interval->id );
 
@@ -293,7 +293,7 @@ return_t qpOASES_dataUpdate( qpData_t* const qpData,
 
 	/* get primal and dual solution */
 	static_cast<qpOASES::LoggedSQProblem*>(qpoasesObject->qpoases)->getPrimalSolution( static_cast<qpOASES::real_t*>(interval->z.data) );
-	qpOASES_getDualSol( qpData, interval, qpoasesObject, &(interval->y) );
+	qpOASES_getDualSol( qpData, interval, qpoasesObject, interval->y );
 
 	//	qpDUNES_printMatrixData( mu->data, 2*interval->nV+2*interval->nD, 1, "qpoases multipliers[%d]", interval->id );
 //	if (interval->id == 0)
@@ -502,7 +502,7 @@ return_t qpOASES_hotstart( 	qpData_t* qpData,
 return_t qpOASES_getDualSol( 	qpData_t* qpData,
 								interval_t* interval,
 								qpoasesObject_t* qpoasesObject,
-								d2_vector_t* mu
+								y_vector_t* mu
 								)
 {
 	int_t ii;
@@ -620,7 +620,7 @@ return_t qpOASES_doStep( qpData_t* const qpData,
 						 interval_t* const interval,
 						 real_t alpha,
 						 z_vector_t* const z,
-						 d2_vector_t* const mu,
+						 y_vector_t* const mu,
 						 z_vector_t* const qCandidate,
 						 real_t* const p
 						 )
