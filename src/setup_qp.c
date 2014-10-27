@@ -503,8 +503,8 @@ void qpDUNES_freeInterval(	qpData_t* const qpData,
 
 	qpDUNES_free( &(interval->z.data) );
 
-	qpDUNES_free( &(interval->y.data) );
-	qpDUNES_free( &(interval->yPrev.data) );
+	qpDUNES_free( &(interval->yStorage1.data) );
+	qpDUNES_free( &(interval->yStorage2.data) );
 
 	qpDUNES_free( &(interval->lambdaK.data) );
 	qpDUNES_free( &(interval->lambdaK1.data) );
