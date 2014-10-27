@@ -53,7 +53,7 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 	itLog_t* itLogPtr = &(qpData->log.itLog[0]);
 	itLogPtr->itNbr = 0;
 
-	real_t* y_swap = 0;
+	y_vector_t* ySwap = 0;
 
 
 	/** (3a) log and display */
@@ -99,8 +99,7 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 
 			/** (1Ab) do gradient step */
 			tNwtnSolveStart = getTime();
-			qpDUNES_copyVector(&(qpData->deltaLambda), &(qpData->gradient),
-					_NI_ * _NX_);
+			qpDUNES_copyVector( (vector_t*)&(qpData->deltaLambda), (vector_t*)&(qpData->gradient), _NI_*_NX_ );
 			statusFlag = QPDUNES_OK;
 			tNwtnSolveEnd = getTime();
 		}
@@ -139,7 +138,7 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 				case QPDUNES_OK:
 					break;
 				case QPDUNES_SUCC_OPTIMAL_SOLUTION_FOUND: /* zero gradient norm detected */
-					qpDUNES_printSuccess(qpData, "Optimal solution found: gradient norm %.1e",	vectorNorm(&(qpData->gradient), _NI_ * _NX_));
+					qpDUNES_printSuccess( qpData, "Optimal solution found: gradient norm %.1e",	vectorNorm( (vector_t*)&(qpData->gradient), _NI_*_NX_ ) );
 					if (qpData->options.logLevel >= QPDUNES_LOG_ITERATIONS)  qpDUNES_logIteration(qpData, itLogPtr, objValIncumbent, hessRefactorIdx);
 					/* save the final active set (the one where the solution lies).
 					 *   Even if the hessian is not yet updated according to the last
@@ -148,14 +147,13 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 					 *   Then ieqStatus needs to be consistent */
 					/* swap multipliers, such current multipliers are available as old multipliers in next QP solution */
 					for (kk = 0; kk < _NI_ + 1; ++kk) {
-						y_swap = qpData->intervals[kk]->yPrev.data;
-						qpData->intervals[kk]->yPrev.data = qpData->intervals[kk]->y.data;
-						qpData->intervals[kk]->y.data = y_swap;
+						ySwap = qpData->intervals[kk]->yPrev;
+						qpData->intervals[kk]->yPrev = qpData->intervals[kk]->y;
+						qpData->intervals[kk]->y = ySwap;
 						#ifdef __DEBUG__
-//						if ( (kk >= _NI_-3) || (kk == 0) )	qpDUNES_printMatrixData( qpData->intervals[kk]->z.data, 1, qpData->intervals[kk]->nV, "z@end[%3d]:", kk);
 						if (qpData->options.printLevel >= 4)	{
 							for (ii = 0; ii < 2* qpData->intervals[kk]->nV; ++ii)	{
-								if (qpData->intervals[kk]->yPrev.data[ii] > 0)	{
+								if (qpData->intervals[kk]->yPrev->data[ii] > 0)	{
 									qpDUNES_printf("[%d, %d] active", kk, ii);
 								}
 							}
@@ -365,7 +363,7 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 
 	if ( qpData->options.allowSuboptimalTermination == QPDUNES_TRUE )	{
 		qpDUNES_computeNewtonGradient(qpData, &(qpData->gradient), &(qpData->xVecTmp) );
-		qpDUNES_printSuccess(qpData, "Early termination due to iteration limit.\n          Dual suboptimal with remaining ascent slope %.1e",	vectorNorm(&(qpData->gradient), _NI_ * _NX_));
+		qpDUNES_printSuccess(qpData, "Early termination due to iteration limit.\n          Dual suboptimal with remaining ascent slope %.1e",	vectorNorm( (vector_t*)&(qpData->gradient), _NI_*_NX_ ) );
 		/* save the final active set (the one where the solution lies).
 		 *   Even if the hessian is not yet updated according to the last
 		 *   active set changes, the corresponding blocks are already flagged
@@ -373,14 +371,14 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 		 *   Then ieqStatus needs to be consistent */
 		/* swap multipliers, such current multipliers are available as old multipliers in next QP solution */
 		for (kk = 0; kk < _NI_ + 1; ++kk) {
-			y_swap = qpData->intervals[kk]->yPrev.data;
-			qpData->intervals[kk]->yPrev.data = qpData->intervals[kk]->y.data;
-			qpData->intervals[kk]->y.data = y_swap;
+			ySwap = qpData->intervals[kk]->yPrev;
+			qpData->intervals[kk]->yPrev = qpData->intervals[kk]->y;
+			qpData->intervals[kk]->y = ySwap;
 			#ifdef __DEBUG__
 //						if ( (kk >= _NI_-3) || (kk == 0) )	qpDUNES_printMatrixData( qpData->intervals[kk]->z.data, 1, qpData->intervals[kk]->nV, "z@end[%3d]:", kk);
 			if (qpData->options.printLevel >= 4)	{
 				for (ii = 0; ii < 2* qpData->intervals[kk]->nV; ++ii)	{
-					if (qpData->intervals[kk]->yPrev.data[ii] > 0)	{
+					if (qpData->intervals[kk]->yPrev->data[ii] > 0)	{
 						qpDUNES_printf("[%d, %d] active", kk, ii);
 					}
 				}
@@ -410,10 +408,10 @@ void qpDUNES_logIteration(	qpData_t* qpData,
 {
 	int_t kk, ii;
 
-	itLogPtr->gradNorm = vectorNorm(&(qpData->gradient), _NI_ * _NX_);
-	itLogPtr->stepNorm = vectorNorm(&(qpData->deltaLambda), _NI_ * _NX_);
+	itLogPtr->gradNorm = vectorNorm( (vector_t*)&(qpData->gradient), _NI_ * _NX_ );
+	itLogPtr->stepNorm = vectorNorm( (vector_t*)&(qpData->deltaLambda), _NI_ * _NX_ );
 	itLogPtr->stepSize = qpData->alpha;
-	itLogPtr->lambdaNorm = vectorNorm(&(qpData->lambda), _NI_ * _NX_);
+	itLogPtr->lambdaNorm = vectorNorm( (vector_t*)&(qpData->lambda), _NI_ * _NX_ );
 	itLogPtr->objVal = objValIncumbent;
 	itLogPtr->hessRefactorIdx = hessRefactorIdx;
 
@@ -639,7 +637,7 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
 
 	/** calculate gradient and check gradient norm for convergence */
 	qpDUNES_computeNewtonGradient(qpData, &(qpData->gradient), xVecTmp);
-	if ( (vectorNorm(&(qpData->gradient), _NX_ * _NI_) < qpData->options.stationarityTolerance) ) {
+	if ( (vectorNorm( (vector_t*)&(qpData->gradient), _NX_ * _NI_ ) < qpData->options.stationarityTolerance) ) {
 		return QPDUNES_SUCC_OPTIMAL_SOLUTION_FOUND;
 	}
 
@@ -1506,6 +1504,7 @@ return_t qpDUNES_determineStepLength(	qpData_t* const qpData,
 	real_t alphaMax = 1.;
 
 	xn_vector_t* lambdaTry = &(qpData->xnVecTmp);
+	y_vector_t* ySwap;
 
 	*itCntr = 0;
 
@@ -1550,9 +1549,9 @@ return_t qpDUNES_determineStepLength(	qpData_t* const qpData,
 	for ( kk = 0; kk < _NI_ + 1; ++kk )
 	{
 		interval = qpData->intervals[kk];
-		real_t* y_swap = interval->yPrev.data;
-		interval->yPrev.data = interval->y.data;
-		interval->y.data = y_swap;
+		ySwap = interval->yPrev;
+		interval->yPrev = interval->y;
+		interval->y = ySwap;
 	}
 
 
@@ -1715,7 +1714,7 @@ return_t qpDUNES_backTrackingLineSearch(	qpData_t* const qpData,
 	real_t objVal;
 
 	real_t minimumProgress = qpData->options.lineSearchMinRelProgress * fabs(objValIncumbent) + qpData->options.lineSearchMinAbsProgress;
-	real_t normDeltaLambda = vectorNorm( deltaLambdaFS, nV );
+	real_t normDeltaLambda = vectorNorm( (vector_t*)deltaLambdaFS, nV );
 
 	*alpha = alphaMax;
 
@@ -1940,7 +1939,7 @@ return_t qpDUNES_bisectionIntervalSearch(	qpData_t* const qpData,
 	real_t alphaC;
 
 	real_t alphaSlope;
-	real_t slopeNormalization = fmin( 1., vectorNorm((vector_t*)deltaLambdaFS,nV) ); 	/* demand more stationarity for smaller steps */
+	real_t slopeNormalization = fmin( 1., vectorNorm( (vector_t*)deltaLambdaFS, nV ) ); 	/* demand more stationarity for smaller steps */
 	/* FIXME: is this meaningful? */
 
 	/* todo: get memory passed on from determine step length */
@@ -2479,7 +2478,7 @@ return_t qpDUNES_infeasibilityCheck(	qpData_t* qpData
 //	qpDUNES_printMatrixData( qpData->hessian.data, _NI_*_NX_, 2*_NX_, "hess");
 //	qpDUNES_printMatrixData( qpData->deltaLambda.data, 1, _NI_*_NX_, "step");
 //	qpDUNES_printMatrixData( hessianStepProduct->data, 1, _NI_*_NX_, "hess step product");
-	ascentCurvature = vectorNorm( hessianStepProduct, _NI_ * _NX_ );
+	ascentCurvature = vectorNorm( (vector_t*)hessianStepProduct, _NI_ * _NX_ );
 //	qpDUNES_printf( "Curvature in Newton Step direction: %.3e", ascentCurvature );
 //	assert(1==0);
 	#ifdef __DEBUG__
@@ -2685,8 +2684,8 @@ return_t qpDUNES_getActSetChanges(	const qpData_t* const qpData,
 					 *       effect on the Hessian blocks is identical, no matter which
 					 *       bound is active. Still, we do reach a new region (and the
 					 *       dual gradient hanges), but just with an identical Hessian. */
-					isBoundActive = (boolean_t) ( (interval->y.data[2 * ii] * interval->y.data[2 * ii + 1]) < 0 );	/* y.lb < 0  &&  y.ub < 0  => inactive */
-					wasBoundActive = (boolean_t) ( (interval->yPrev.data[2 * ii] * interval->yPrev.data[2 * ii + 1]) < 0 );
+					isBoundActive = (boolean_t) ( (interval->y->data[2 * ii] * interval->y->data[2 * ii + 1]) < 0 );	/* y.lb < 0  &&  y.ub < 0  => inactive */
+					wasBoundActive = (boolean_t) ( (interval->yPrev->data[2 * ii] * interval->yPrev->data[2 * ii + 1]) < 0 );
 					if ( isBoundActive != wasBoundActive )	/* AS change if sign is different */
 					{
 						++(*nChgdConstr);
