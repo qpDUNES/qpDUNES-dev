@@ -32,42 +32,6 @@
 
 #include <qp/stage_qp_solver_clipping.h>
 
-/* ----------------------------------------------
- * solve QP
- * 
-#>>>>>>                                           */
-//return_t qp42_directQpSolver_solve( qpData_t* const qpData,
-//									 interval_t* const interval )
-//{
-//	int_t ii;
-//	return_t statusFlag;
-//
-//	int_t nV = interval->nV;	/* number of QP variables */
-//
-//	assert( interval->nD == nV );	/* assert that vector dimensions match */
-//
-//	for( ii = 0; ii < nV; ++ii ) {
-//		if( interval->dLow.data[ii] - interval->dUpp.data[ii] > qpData->options.equalityTolerance ) {
-//			qp42_printError( qpData, __FILE__, __LINE__, "Local QP infeasible!" );
-//			return QPDUNES_ERR_SUB_QP_INFEASIBLE;
-//		}
-//	}
-//
-//	/* solve unconstraint QP */
-//	qp42_directQpSolver_solveUnconstrained( qpData, interval );
-//
-//	/* saturate variables at simple bounds */
-//	statusFlag = qp42_directQpSolver_saturateVector( qpData, &(interval->dz), &(interval->y), &(interval->dLow), &(interval->dUpp), nV );
-//	assert( statusFlag == QPDUNES_OK );
-//
-////	/* get objective function value:  0.5*zOpt.T*H*zOpt + g.T*zOpt */
-////	interval->optObjVal = scalarProd( &(interval->gMod), &(interval->dz), nV );
-////	multiplyHz( qpData, &(interval->zVecTmp), &(interval->H), &(interval->dz) );
-////	interval->optObjVal += 0.5 * scalarProd( &(interval->zVecTmp), &(interval->dz), nV );
-//
-//	return QPDUNES_OK;
-//}
-///*<<< END OF qp42_solveLocalQP */
 
 
 /* ----------------------------------------------
@@ -131,12 +95,6 @@ return_t directQpSolver_solveUnconstrained( qpData_t* const qpData,
 	statusFlag = multiplyInvHz( qpData, &(interval->qpSolverClipping.dz), &(interval->cholH), qStep, interval->nV );
 	negateVector( &(interval->qpSolverClipping.dz), interval->nV );
 
-//	qpDUNES_printMatrixData(interval->qpSolverClipping.dz.data, 1, interval->nV, "dz" );
-//	qp42_printMatrixData(interval->cholH.data, interval->nV, interval->nV, "cholH" );
-//	qpDUNES_printMatrixData(interval->H.data, interval->nV, interval->nV, "H" );
-//	qp42_printf( "cholH: %d", interval->cholH.sparsityType );
-//	qpDUNES_printMatrixData(qStep->data, 1, interval->nV, "qStep" );
-
 	return statusFlag;
 }
 /*<<< END OF qp42_directQpSolver_solveUnconstrained */
@@ -159,14 +117,10 @@ return_t clippingQpSolver_getMinStepsize( 	const qpData_t* const qpData,
 	real_t alphaASChange;
 
 	for( ii=0; ii<interval->nV; ++ii ) {
-		lbRatio = interval->y.data[2*ii] / interval->qpSolverClipping.dz.data[ii];
-		ubRatio = - interval->y.data[2*ii+1] / interval->qpSolverClipping.dz.data[ii];
+		lbRatio = interval->y->data[2*ii] / interval->qpSolverClipping.dz.data[ii];
+		ubRatio = - interval->y->data[2*ii+1] / interval->qpSolverClipping.dz.data[ii];
 		alphaASChange = qpDUNES_fmin( (lbRatio >= 0.) ? lbRatio : qpData->options.QPDUNES_INFTY ,
 									  (ubRatio >= 0.) ? ubRatio : qpData->options.QPDUNES_INFTY );
-//		/* WARNING: compiler support for 1./0. == inf, and (2. < inf) == TRUE are assumed */
-//		alphaASChange = 1./
-//				qpDUNES_fmax( interval->qpSolverClipping.dz.data[ii] / interval->y.data[2*ii] ,
-//						      interval->qpSolverClipping.dz.data[ii] / - interval->y.data[2*ii+1] );
 		if ( (alphaASChange >= 0. ) && (alphaASChange < *alphaMin) ) {
 			*alphaMin = alphaASChange;
 		}
@@ -187,7 +141,7 @@ return_t directQpSolver_doStep( qpData_t* const qpData,
 								real_t alpha,
 								z_vector_t* const zUnconstrained,
 								z_vector_t* const z,
-								d2_vector_t* const mu,
+								y_vector_t* const mu,
 								z_vector_t* const q,
 								real_t* const p				)
 {
@@ -223,7 +177,7 @@ return_t directQpSolver_doStep( qpData_t* const qpData,
 /* TODO: pass less arguments */
 return_t directQpSolver_saturateVector(	qpData_t* const qpData,
 										d_vector_t* const vec,
-										d2_vector_t* const mu,		/* multipliers, resembling the gaps to the bounds; + active, - inactive */
+										y_vector_t* const mu,		/* multipliers, resembling the gaps to the bounds; + active, - inactive */
 										const d_vector_t* const lb,
 										const d_vector_t* const ub,
 										const zz_matrix_t* const H,
@@ -269,20 +223,6 @@ return_t directQpSolver_saturateVector(	qpData_t* const qpData,
 			qpDUNES_printError( qpData, __FILE__, __LINE__, "Unknown sparsity type of QP hessian" );
 			return QPDUNES_ERR_UNKNOWN_MATRIX_SPARSITY_TYPE;
 	}
-//		if ( interval->y.data[2*ii] > qpData->options.equalityTolerance ) { /* lower bound active */
-//			actSetStatus[kk][ii] = -1;
-//			++(*nActConstr);
-//		}
-//		else {
-//			if ( interval->y.data[2*ii+1] > qpData->options.equalityTolerance ) { /* upper bound active */
-//				actSetStatus[kk][ii] = 1;
-//				++(*nActConstr);
-//			}
-//			else {		/* no constraint bound active */
-//				actSetStatus[kk][ii] = 0;
-//			}
-//		}
-	
 
 
 	return QPDUNES_OK;
@@ -297,7 +237,7 @@ return_t directQpSolver_saturateVector(	qpData_t* const qpData,
 return_t clippingQpSolver_ratioTest(	qpData_t* const qpData,
 										real_t* minStepSizeASChange,	/* minimum step size that leads to active set change */
 										d_vector_t* const zStepDir,
-										d2_vector_t* const mu,			/* pseudo multipliers, resembling the gaps to the bounds; + active, - inactive */
+										y_vector_t* const mu,			/* pseudo multipliers, resembling the gaps to the bounds; + active, - inactive */
 										const d_vector_t* const lb,
 										const d_vector_t* const ub,
 										int_t nV
@@ -317,8 +257,6 @@ return_t clippingQpSolver_ratioTest(	qpData_t* const qpData,
 				 ( lb->data[ii] < qpData->options.QPDUNES_INFTY * (-1 + qpData->options.equalityTolerance) ) )
 			{
 				*minStepSizeASChange = stepRatio;
-//				qpDUNES_printf("dist to lb: %.3e", mu->data[2*ii]);
-//				qpDUNES_printf("step dir: %.3e", zStepDir->data[ii]);
 			}
 		}
 
@@ -329,14 +267,9 @@ return_t clippingQpSolver_ratioTest(	qpData_t* const qpData,
 				 ( ub->data[ii] < qpData->options.QPDUNES_INFTY * (1 - qpData->options.equalityTolerance) ) )
 			{
 				*minStepSizeASChange = stepRatio;
-//				qpDUNES_printf("dist to ub: %.3e", mu->data[2*ii+1]);
-//				qpDUNES_printf("step dir: %.3e", zStepDir->data[ii]);
 			}
 		}
 	}
-
-
-//	qpDUNES_printf("min step size ratio: %.3e", *minStepSizeASChange);
 
 
 	return QPDUNES_OK;
