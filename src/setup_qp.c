@@ -34,7 +34,118 @@
 
 
 /* ----------------------------------------------
- * memory allocation
+ * static memory problem setup routine
+ *
+#>>>>>>                                           */
+return_t qpDUNES_setupStatic(	qpData_t* const qpData,
+//						uint_t nI,
+//						uint_t nX,
+//						uint_t nU,
+						uint_t* nD,
+						qpOptions_t* options
+						)
+{
+#ifdef __STATIC_MEMORY__
+	uint_t ii, kk;
+
+
+	/* set up options */
+	if (options != 0) {
+		qpData->options = *options;
+	}
+	else {
+		qpData->options = qpDUNES_setupDefaultOptions();
+	}
+
+	/* set up dimensions */
+//	int_t nZ = nX+nU;
+//	int_t nDttl = 0;	/* total number of constraints */
+//	qpData->nI = nI;
+//	qpData->nX = nX;
+//	qpData->nU = nU;
+//	qpData->nZ = nZ;
+//	if (nD != 0) {
+//		for( kk=0; kk<nI+1; ++kk ) {
+//			nDttl += nD[kk];
+//		}
+//	}
+//	qpData->nDttl = nDttl;
+//	qpData->intervals = (interval_t**)calloc( nI+1,sizeof(interval_t*) );
+
+
+	/* normal intervals */
+	for( kk=0; kk<_NI_; ++kk )
+	{
+		qpData->intervals[kk] = &(qpData->intervalsData[kk]);		/* register intervalData intervals array */
+
+		qpData->intervals[kk]->id = kk;		/* give interval its initial stage index */
+		qpData->intervals[kk]->nD = (nD != 0) ? nD[kk] : 0;
+		qpData->intervals[kk]->nV = _NZ_;
+
+		qpData->intervals[kk]->H.sparsityType = QPDUNES_MATRIX_UNDEFINED;
+		qpData->intervals[kk]->cholH.sparsityType = QPDUNES_MATRIX_UNDEFINED;
+		qpData->intervals[kk]->C.sparsityType = QPDUNES_MATRIX_UNDEFINED;
+		qpData->intervals[kk]->D.sparsityType = QPDUNES_MATRIX_UNDEFINED;
+
+		//	/* get memory for qpOASES QP solver */
+		//	/* TODO: use the static memory version qpOASES, obtain an instance in the scope of the interval definition (qpDataStatic.h) and put its pointer into the qpOASES object here
+		//	interval->qpSolverQpoases.qpoasesObject = qpOASES_constructor( qpData, nV, nD );
+
+		qpData->intervals[kk]->qpSolverSpecification = QPDUNES_STAGE_QP_SOLVER_UNDEFINED;
+	}
+
+
+	/* last interval */
+	qpData->intervals[_NI_] = &(qpData->intervalsData[_NI_]);		/* register intervalData intervals array */
+
+	qpData->intervals[_NI_]->id = _NI_;		/* give interval its initial stage index */
+	qpData->intervals[_NI_]->nD = (nD != 0) ? nD[_NI_] : 0;
+	qpData->intervals[_NI_]->nV = _NX_;
+
+	qpData->intervals[_NI_]->H.sparsityType = QPDUNES_MATRIX_UNDEFINED;
+	qpData->intervals[_NI_]->cholH.sparsityType = QPDUNES_MATRIX_UNDEFINED;
+	qpData->intervals[_NI_]->C.sparsityType = QPDUNES_MATRIX_UNDEFINED;
+	qpData->intervals[_NI_]->D.sparsityType = QPDUNES_MATRIX_UNDEFINED;
+
+//	/* get memory for qpOASES QP solver */
+//	/* TODO: use the static memory version qpOASES, obtain an instance in the scope of the interval definition (qpDataStatic.h) and put its pointer into the qpOASES object here
+//	interval->qpSolverQpoases.qpoasesObject = qpOASES_constructor( qpData, nV, nD );
+
+	qpData->intervals[_NI_]->qpSolverSpecification = QPDUNES_STAGE_QP_SOLVER_UNDEFINED;
+
+
+	/** Set up central components */
+
+	/* set incumbent objective function value to minus infinity */
+	qpData->optObjVal = -qpData->options.QPDUNES_INFTY;
+
+
+	/* Set up log struct */
+	if ( qpData->options.logLevel >= QPDUNES_LOG_ITERATIONS )
+	{
+		qpDUNES_printError( qpData, __FILE__, __LINE__, "Sorry, detailed iterations logging is not available in static memory version of qpDUNES. Please ensure 'options.logLevel = 0' is set.");
+		return QPDUNES_ERR_INVALID_ARGUMENT;
+	}
+	else {
+		qpData->log.itLog = &(qpData->log.itLogData);
+	}
+
+
+	qpDUNES_printHeader( qpData );
+
+
+	return QPDUNES_OK;
+#else
+	qpDUNES_printError( qpData, __FILE__, __LINE__, "To use the static memory version of qpDUNES, please compile with the __STATIC_MEMORY__ compiler flag enabled.");
+	return QPDUNES_ERR_INVALID_ARGUMENT;
+#endif
+}
+/*<<< END OF qpDUNES_setupStatic */
+
+
+
+/* ----------------------------------------------
+ * dynamic memory allocation
  * 
 #>>>>>>                                           */
 return_t qpDUNES_setup(	qpData_t* const qpData,
@@ -45,6 +156,7 @@ return_t qpDUNES_setup(	qpData_t* const qpData,
 						qpOptions_t* options
 						)
 {
+#ifndef __STATIC_MEMORY__
 	uint_t ii, kk;
 	
 	int_t nZ = nX+nU;
@@ -168,17 +280,19 @@ return_t qpDUNES_setup(	qpData_t* const qpData,
 		qpData->log.itLog[0].numQpoasesIter = (int_t*)calloc( nI+1,sizeof(int_t) );
 	}
 
-//	/* reset current active set to force initial Hessian factorization */
-//	qpDUNES_indicateDataChange( qpData );
-	/* this is done when data is passed */
-
 
 	qpDUNES_printHeader( qpData );
 
-
 	return QPDUNES_OK;
+
+#else
+
+	qpDUNES_printError( qpData, __FILE__, __LINE__, "To use the dynamic memory version of qpDUNES, please compile with the __STATIC_MEMORY__ compiler flag disabled.");
+	return QPDUNES_ERR_INVALID_ARGUMENT;
+
+#endif
 }
-/*<<< END OF qpDUNES_allocate */
+/*<<< END OF qpDUNES_setup */
 
 
 /* ----------------------------------------------
@@ -351,7 +465,7 @@ return_t qpDUNES_cleanup(	qpData_t* const qpData
 
 	return QPDUNES_OK;
 }
-/*<<< END OF qpDUNES_deallocate */
+/*<<< END OF qpDUNES_cleanup */
 
 
 

@@ -35,7 +35,42 @@
 #ifndef QPDUNES_QPDATASTATIC_H
 #define QPDUNES_QPDATASTATIC_H
 
-#include <qpDimensions.h>
+#include <qp/qpDimensions.h>
+
+
+/**
+ *	\brief Abstract matrix type to be used for general purpose matrix routines
+ *
+ *	...
+ *
+ *	\author Janick Frasch
+ *	\version 1.0beta
+ *	\date 2014
+ */
+typedef struct
+{
+	/** matrix sparsity specification */
+	sparsityType_t sparsityType;
+
+	/** matrix data array */
+	real_t* data;
+} matrix_t;
+
+
+/**
+ *	\brief Abstract vector type to be used for general purpose vector routines
+ *
+ *	...
+ *
+ *	\author Janick Frasch
+ *	\version 1.0beta
+ *	\date 2014
+ */
+typedef struct
+{
+	/** vector data array */
+	real_t* data;
+} vector_t;
 
 
 
@@ -175,7 +210,7 @@ typedef struct
 /**
  *	\brief Matrix of size _NZ_ by _NZ_
  *
- *	...
+ *	This type can be used for matrices of size _NZ_ by _NZ_ or smaller
  *
  *	\author Janick Frasch
  *	\version 1.0beta
@@ -188,7 +223,6 @@ typedef struct
 
 	/** matrix data array */
 	real_t data[_NZ_*_NZ_];
-todo! check where v is used!
 } vv_matrix_t;
 
 
@@ -237,85 +271,134 @@ typedef struct
 	real_t data[_NI_*2*_NX_];
 } xn2x_matrix_t;
 
-//typedef matrix_t xnxn_matrix_t;
-
 
 
 /**
- *	\brief generic vector data type
- *
- *	...
- *
- *	\author Janick Frasch, Hans Joachim Ferreau
- *	\version 1.0beta
- *	\date 2012
+ * Vector of size _NX_
  */
 typedef struct
 {
-	/** vector property flags */
-	boolean_t isDefined;
-	boolean_t hasChanged;
-
 	/** vector data array */
-	real_t* data;
-} vector_t;
-
-typedef vector_t x_vector_t;
-typedef vector_t u_vector_t;
-typedef vector_t z_vector_t;
-typedef vector_t d_vector_t;
-typedef vector_t d2_vector_t;
-typedef vector_t d2n1_vector_t;
-typedef vector_t xn_vector_t;
-typedef vector_t zn_vector_t;
-typedef vector_t zn1_vector_t;
-typedef vector_t large_vector_t;
-
+	real_t data[_NX_];
+} x_vector_t;
 
 
 /**
- *	\brief generic integer vector data type
- *
- *	...
- *
- *	\author Janick Frasch, Hans Joachim Ferreau
- *	\version 1.0beta
- *	\date 2012
+ * Vector of size _NU_
  */
 typedef struct
 {
-	/** vector property flags */
-	boolean_t isDefined;
-	boolean_t hasChanged;
-
 	/** vector data array */
-	int_t* data;
-} intVector_t;
-
-typedef intVector_t zn_intVector_t;
+	real_t data[_NU_];
+} u_vector_t;
 
 
 /**
- *	\brief function pointers for qpOASES methods
- *
- *	...
- *
- *	\author Janick Frasch
- *	\version 1.0beta
- *	\date 2013
+ * Vector of size _NZ_
  */
-//typedef int (*qpoasesInitFctnPntr)( const real_t* const _H, const real_t* const _g, const real_t* const _A,
-//							const real_t* const _lb, const real_t* const _ub,
-//							const real_t* const _lbA, const real_t* const _ubA,
-//							int& nWSR );
-//typedef int (*qpoasesHotstartFctnPntr)( const real_t* const g_new,
-//								const real_t* const lb_new, const real_t* const ub_new,
-//								const real_t* const lbA_new, const real_t* const ubA_new,
-//								int& nWSR );
-//typedef void (*qpoasesGetPrimalSolutionFctnPntr)( real_t* const xOpt );
-//typedef real_t (*qpoasesGetObjValFctnPntr)();
+typedef struct
+{
+	/** vector data array */
+	real_t data[_NZ_];
+} z_vector_t;
 
 
+/**
+ * Vector of size _NDMAX_
+ */
+typedef struct
+{
+	/** vector data array */
+	real_t data[_NDMAX_];
+} d_vector_t;
+
+
+/**
+ * Vector of size 2*(_NDMAX_+_NZ_)
+ */
+typedef struct
+{
+	/** vector data array */
+	real_t data[2*(_NDMAX_+_NZ_)];
+} y_vector_t;
+
+
+//typedef struct
+//{
+//	/** vector property flags */
+//	boolean_t isDefined;
+//
+//	/** vector data array */
+//	real_t* data;
+//} d2n1_vector_t;
+
+
+/**
+ * Vector of size _NX_*_NI_
+ */
+typedef struct
+{
+	/** vector data array */
+	real_t data[_NX_*_NI_];
+} xn_vector_t;
+
+
+//typedef struct
+//{
+//	/** vector property flags */
+//	boolean_t isDefined;
+//
+//	/** vector data array */
+//	real_t* data;
+//} zn_vector_t;
+
+
+//typedef struct
+//{
+//	/** vector property flags */
+//	boolean_t isDefined;
+//
+//	/** vector data array */
+//	real_t* data;
+//} zn1_vector_t;
+
+
+/**
+ * Vector of size of the maximum number of permitted active set changes (homotopy log in qpOASES)
+ * +2 for beginning and end of homotopy
+ */
+typedef struct
+{
+	/** vector data array */
+	real_t data[_NWSRMAX_+2];
+} homotopyLog_vector_t;
+
+
+
+///**
+// *	\brief generic integer vector data type
+// *
+// *	...
+// *
+// *	\author Janick Frasch, Hans Joachim Ferreau
+// *	\version 1.0beta
+// *	\date 2012
+// */
+//typedef struct
+//{
+//	/** vector property flags */
+//	boolean_t isDefined;
+//	boolean_t hasChanged;
+//
+//	/** vector data array */
+//	int_t* data;
+//} intVector_t;
+//
+//typedef intVector_t zn_intVector_t;
+
+
+
+// TODO: use static version of qpOASES
 /**
  *	\brief pointer to qpOASES object for C++ method access
  *
@@ -432,8 +515,8 @@ typedef struct
 
 
 	/* dual QP solution */
-	d2_vector_t y;				/**< stage constraint multiplier vector  */
-	d2_vector_t yPrev;			/**< previous stage constraint multiplier vector (needed to detect AS changes)  */
+	y_vector_t y;				/**< stage constraint multiplier vector  */
+	y_vector_t yPrev;			/**< previous stage constraint multiplier vector (needed to detect AS changes)  */
 
 
 	/* QP solver */
@@ -447,13 +530,13 @@ typedef struct
 
 
 	/* memory for objective function parameterization (used optionally in line search) */
-	large_vector_t parametricObjFctn_alpha;
-	large_vector_t parametricObjFctn_f;
-	large_vector_t parametricObjFctn_fPrime;
-	large_vector_t parametricObjFctn_fPrimePrime;
+	homotopyLog_vector_t parametricObjFctn_alpha;
+	homotopyLog_vector_t parametricObjFctn_f;
+	homotopyLog_vector_t parametricObjFctn_fPrime;
+	homotopyLog_vector_t parametricObjFctn_fPrimePrime;
 	int_t parametricObjFctn_nBasePoints;
 
-	large_vector_t parametricObjFctn_fSum;			/**< full dual objective value at alpha values of this stage */
+	homotopyLog_vector_t parametricObjFctn_fSum;			/**< full dual objective value at alpha values of this stage */
 
 
 	/* workspace */
@@ -550,26 +633,6 @@ typedef struct
  */
 typedef struct
 {
-	/* data: vectors, matrices */
-	xn_vector_t lambda;
-	xn_vector_t deltaLambda;
-
-	xn2x_matrix_t hessian;
-	xn2x_matrix_t cholHessian;
-	xn_vector_t gradient;
-
-	zn1_vector_t dz;
-	zn1_vector_t zUnconstrained;
-	zn1_vector_t z;
-
-	d2n1_vector_t y;
-
-	xn_vector_t regDirections; 		/* log the regularized directions delta, for Newton system (H+diag(delta))*lambda = -g */
-
-	#ifdef __ANALYZE_FACTORIZATION__
-	xnxn_matrix_t invHessian;
-	#endif
-
 	/* timings */
 	real_t tIt;
 	real_t tNwtnSetup;
@@ -588,12 +651,11 @@ typedef struct
 	uint_t nChgdConstr;
 	int_t hessRefactorIdx;
 
-
 	/* flags, etc. */
 	uint_t itNbr;
 	boolean_t isHessianRegularized;
 	uint_t numLineSearchIter;
-	int_t* numQpoasesIter;
+	int_t numQpoasesIter[_NI_+1];
 
 } itLog_t;
 
@@ -609,20 +671,23 @@ typedef struct
  */
 typedef struct
 {
-	/* Problem dimensions */
-	uint_t nI;
-	uint_t nX;
-	uint_t nU;
-	uint_t nZ;
-	uint_t nDttl;				/**< total number of local constraints */
-
-	/* Problem data */
-	interval_t** intervals;
-
-	/* options */
-	qpOptions_t qpOptions;
+//	/* Problem dimensions */
+//	uint_t nI;
+//	uint_t nX;
+//	uint_t nU;
+//	uint_t nZ;
+//	uint_t nDttl;				/**< total number of local constraints */
+//
+//	/* Problem data */
+////	interval_t intervalsData[_NI_+1];
+////	interval_t* intervals[_NI_+1];
+////	janick: todo at runtime: stack intavalsData pointers into intervals array
+//
+//	/* options */
+//	qpOptions_t qpOptions;
 
 	/* iterations log */
+	itLog_t itLogData;
 	itLog_t* itLog;
 
 	int_t numIter;
@@ -643,13 +708,14 @@ typedef struct
 typedef struct
 {
 	/* variables */
-	uint_t nI;
-	uint_t nX;
-	uint_t nU;
-	uint_t nZ;
-	uint_t nDttl;				/**< total number of local constraints */
+//	uint_t nI;
+//	uint_t nX;
+//	uint_t nU;
+//	uint_t nZ;
+//	uint_t nDttl;				/**< total number of local constraints */
 
-	interval_t** intervals;		/**< array of pointers to interval structs; double pointer for more efficient shifting */
+	interval_t intervalsData[_NI_+1];
+	interval_t* intervals[_NI_+1];		/**< array of pointers to interval structs; double pointer for more efficient shifting */
 
 	xn_vector_t lambda;
 	xn_vector_t deltaLambda;
