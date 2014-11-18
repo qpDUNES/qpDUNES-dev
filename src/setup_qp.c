@@ -489,8 +489,12 @@ return_t qpDUNES_init(	qpData_t* const qpData,
 	/** determine local QP solvers and set up auxiliary data */
 	qpDUNES_setupAllLocalQPs( qpData, isLTI );
 
-	/** compute Cholesky factorization of default newton hessian */
-	qpDUNES_setupCholDefaultHessian(qpData);
+	/** setup unconstrained Hessian if required */
+	if( qpData->options.regType == QPDUNES_REG_UNCONSTRAINED_HESSIAN )
+	{
+		/** compute Cholesky factorization of default newton hessian */
+		qpDUNES_setupCholDefaultHessian(qpData);
+	}
 
 	return QPDUNES_OK;
 }

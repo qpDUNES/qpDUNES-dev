@@ -339,7 +339,7 @@ void initQP( int nrhs, const mxArray* const prhs[] )
 	}
 
 
-	/* III) ACTUALLY SET UP QP42 PROBLEM: */
+	/* III) ACTUALLY SET UP QPDUNES PROBLEM: */
 	qpDUNES_setupMatlab( &qpDataGlobal, nI, nX, nU, nD, optionsPtr );
 
 	/* transpose matrices (Fortran to C) */
