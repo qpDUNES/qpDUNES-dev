@@ -53,7 +53,7 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 	itLog_t* itLogPtr = &(qpData->log.itLog[0]);
 	itLogPtr->itNbr = 0;
 
-	y_vector_t* ySwap = 0;
+	real_t* y_swap = 0;
 
 
 	/** (3a) log and display */
@@ -99,7 +99,8 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 
 			/** (1Ab) do gradient step */
 			tNwtnSolveStart = getTime();
-			qpDUNES_copyVector( (vector_t*)&(qpData->deltaLambda), (vector_t*)&(qpData->gradient), _NI_*_NX_ );
+			qpDUNES_copyVector(&(qpData->deltaLambda), &(qpData->gradient),
+					_NI_ * _NX_);
 			statusFlag = QPDUNES_OK;
 			tNwtnSolveEnd = getTime();
 		}
@@ -138,7 +139,7 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 				case QPDUNES_OK:
 					break;
 				case QPDUNES_SUCC_OPTIMAL_SOLUTION_FOUND: /* zero gradient norm detected */
-					qpDUNES_printSuccess( qpData, "Optimal solution found: gradient norm %.1e",	vectorNorm( (vector_t*)&(qpData->gradient), _NI_*_NX_ ) );
+					qpDUNES_printSuccess(qpData, "Optimal solution found: gradient norm %.1e",	vectorNorm(&(qpData->gradient), _NI_ * _NX_));
 					if (qpData->options.logLevel >= QPDUNES_LOG_ITERATIONS)  qpDUNES_logIteration(qpData, itLogPtr, objValIncumbent, hessRefactorIdx);
 					/* save the final active set (the one where the solution lies).
 					 *   Even if the hessian is not yet updated according to the last
@@ -147,13 +148,14 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 					 *   Then ieqStatus needs to be consistent */
 					/* swap multipliers, such current multipliers are available as old multipliers in next QP solution */
 					for (kk = 0; kk < _NI_ + 1; ++kk) {
-						ySwap = qpData->intervals[kk]->yPrev;
-						qpData->intervals[kk]->yPrev = qpData->intervals[kk]->y;
-						qpData->intervals[kk]->y = ySwap;
+						y_swap = qpData->intervals[kk]->yPrev.data;
+						qpData->intervals[kk]->yPrev.data = qpData->intervals[kk]->y.data;
+						qpData->intervals[kk]->y.data = y_swap;
 						#ifdef __DEBUG__
+//						if ( (kk >= _NI_-3) || (kk == 0) )	qpDUNES_printMatrixData( qpData->intervals[kk]->z.data, 1, qpData->intervals[kk]->nV, "z@end[%3d]:", kk);
 						if (qpData->options.printLevel >= 4)	{
 							for (ii = 0; ii < 2* qpData->intervals[kk]->nV; ++ii)	{
-								if (qpData->intervals[kk]->yPrev->data[ii] > 0)	{
+								if (qpData->intervals[kk]->yPrev.data[ii] > 0)	{
 									qpDUNES_printf("[%d, %d] active", kk, ii);
 								}
 							}
@@ -363,7 +365,7 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 
 	if ( qpData->options.allowSuboptimalTermination == QPDUNES_TRUE )	{
 		qpDUNES_computeNewtonGradient(qpData, &(qpData->gradient), &(qpData->xVecTmp) );
-		qpDUNES_printSuccess(qpData, "Early termination due to iteration limit.\n          Dual suboptimal with remaining ascent slope %.1e",	vectorNorm( (vector_t*)&(qpData->gradient), _NI_*_NX_ ) );
+		qpDUNES_printSuccess(qpData, "Early termination due to iteration limit.\n          Dual suboptimal with remaining ascent slope %.1e",	vectorNorm(&(qpData->gradient), _NI_ * _NX_));
 		/* save the final active set (the one where the solution lies).
 		 *   Even if the hessian is not yet updated according to the last
 		 *   active set changes, the corresponding blocks are already flagged
@@ -371,14 +373,14 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 		 *   Then ieqStatus needs to be consistent */
 		/* swap multipliers, such current multipliers are available as old multipliers in next QP solution */
 		for (kk = 0; kk < _NI_ + 1; ++kk) {
-			ySwap = qpData->intervals[kk]->yPrev;
-			qpData->intervals[kk]->yPrev = qpData->intervals[kk]->y;
-			qpData->intervals[kk]->y = ySwap;
+			y_swap = qpData->intervals[kk]->yPrev.data;
+			qpData->intervals[kk]->yPrev.data = qpData->intervals[kk]->y.data;
+			qpData->intervals[kk]->y.data = y_swap;
 			#ifdef __DEBUG__
 //						if ( (kk >= _NI_-3) || (kk == 0) )	qpDUNES_printMatrixData( qpData->intervals[kk]->z.data, 1, qpData->intervals[kk]->nV, "z@end[%3d]:", kk);
 			if (qpData->options.printLevel >= 4)	{
 				for (ii = 0; ii < 2* qpData->intervals[kk]->nV; ++ii)	{
-					if (qpData->intervals[kk]->yPrev->data[ii] > 0)	{
+					if (qpData->intervals[kk]->yPrev.data[ii] > 0)	{
 						qpDUNES_printf("[%d, %d] active", kk, ii);
 					}
 				}
@@ -408,19 +410,18 @@ void qpDUNES_logIteration(	qpData_t* qpData,
 {
 	int_t kk, ii;
 
-	itLogPtr->gradNorm = vectorNorm( (vector_t*)&(qpData->gradient), _NI_ * _NX_ );
-	itLogPtr->stepNorm = vectorNorm( (vector_t*)&(qpData->deltaLambda), _NI_ * _NX_ );
+	itLogPtr->gradNorm = vectorNorm(&(qpData->gradient), _NI_ * _NX_);
+	itLogPtr->stepNorm = vectorNorm(&(qpData->deltaLambda), _NI_ * _NX_);
 	itLogPtr->stepSize = qpData->alpha;
-	itLogPtr->lambdaNorm = vectorNorm( (vector_t*)&(qpData->lambda), _NI_ * _NX_ );
+	itLogPtr->lambdaNorm = vectorNorm(&(qpData->lambda), _NI_ * _NX_);
 	itLogPtr->objVal = objValIncumbent;
 	itLogPtr->hessRefactorIdx = hessRefactorIdx;
 
 	/* full logging */
-#ifndef __STATIC_MEMORY__
 	if (qpData->options.logLevel == QPDUNES_LOG_ALL_DATA) {
 		/* - dual variables */
-		qpDUNES_copyVector( (vector_t*)&(itLogPtr->lambda), (vector_t*)&(qpData->lambda), _NI_ * _NX_);
-		qpDUNES_copyVector( (vector_t*)&(itLogPtr->deltaLambda), (vector_t*)&(qpData->deltaLambda),
+		qpDUNES_copyVector(&(itLogPtr->lambda), &(qpData->lambda), _NI_ * _NX_);
+		qpDUNES_copyVector(&(itLogPtr->deltaLambda), &(qpData->deltaLambda),
 				_NI_ * _NX_);
 		/* - Newton system */
 		for (ii = 0; ii < _NI_ * _NX_ * 2 * _NX_; ++ii) {
@@ -451,8 +452,8 @@ void qpDUNES_logIteration(	qpData_t* qpData,
 			/* y */
 //			assert( interval->nD == interval->nV );		/* otherwise the copying below doesn't work */
 //			for( ii=0; ii<interval->nD; ++ii ) {
-//				itLogPtr->y->data[kk*2*_NZ_+2*ii] = interval->y->data[2*ii];
-//				itLogPtr->y->data[kk*2*_NZ_+2*ii+1] = interval->y->data[2*ii+1];
+//				itLogPtr->y.data[kk*2*_NZ_+2*ii] = interval->y.data[2*ii];
+//				itLogPtr->y.data[kk*2*_NZ_+2*ii+1] = interval->y.data[2*ii+1];
 //			}
 		}
 #if defined(__ANALYZE_FACTORIZATION__)
@@ -472,9 +473,8 @@ void qpDUNES_logIteration(	qpData_t* qpData,
 				unitVec->data[ii] = 0.;
 			}
 		}
-#endif	/* __ANALYZE_FACTORIZATION__ */
+#endif
 	}
-#endif /* __STATIC_MEMORY__ */
 
 	return;
 }
@@ -494,16 +494,16 @@ return_t qpDUNES_updateAllLocalQPs(	qpData_t* const qpData,
 
 	/* first interval: */
 	interval = qpData->intervals[0];
-	qpDUNES_updateVector( (vector_t*)&(interval->lambdaK1), &(lambda->data[0]), _NX_ );
+	qpDUNES_updateVector( &(interval->lambdaK1), &(lambda->data[0]), _NX_ );
 	/* intermediate intervals: */
 	for (kk = 1; kk < _NI_; ++kk) {
 		interval = qpData->intervals[kk];
-		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK), &(lambda->data[(kk - 1) * _NX_]), _NX_ );
-		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK1), &(lambda->data[kk * _NX_]), _NX_ );
+		qpDUNES_updateVector( &(interval->lambdaK), &(lambda->data[(kk - 1) * _NX_]), _NX_ );
+		qpDUNES_updateVector( &(interval->lambdaK1), &(lambda->data[kk * _NX_]), _NX_ );
 	}
 	/* last interval: */
 	interval = qpData->intervals[_NI_];
-	qpDUNES_updateVector( (vector_t*)&(interval->lambdaK), &(lambda->data[(_NI_ - 1) * _NX_]), _NX_ );
+	qpDUNES_updateVector( &(interval->lambdaK), &(lambda->data[(_NI_ - 1) * _NX_]), _NX_ );
 
 	for (kk = 0; kk < _NI_ + 1; ++kk) {
 		interval = qpData->intervals[kk];
@@ -579,7 +579,7 @@ return_t qpDUNES_solveLocalQP(	qpData_t* const qpData,
 	switch (interval->qpSolverSpecification) {
 		case QPDUNES_STAGE_QP_SOLVER_CLIPPING:
 			/* solve QPs in first-order term updates only, to mimic homotopy */
-			statusFlag = clippingQpSolver_solveUnconstrained( qpData, interval, &(interval->qpSolverClipping.qStep) );
+			statusFlag = directQpSolver_solveUnconstrained(qpData, interval, &(interval->qpSolverClipping.qStep));
 			if (statusFlag != QPDUNES_OK) {
 				qpDUNES_printError(qpData, __FILE__, __LINE__, "Direct QP solver infeasible.");
 				return statusFlag;
@@ -639,7 +639,7 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
 
 	/** calculate gradient and check gradient norm for convergence */
 	qpDUNES_computeNewtonGradient(qpData, &(qpData->gradient), xVecTmp);
-	if ( (vectorNorm( (vector_t*)&(qpData->gradient), _NX_ * _NI_ ) < qpData->options.stationarityTolerance) ) {
+	if ( (vectorNorm(&(qpData->gradient), _NX_ * _NI_) < qpData->options.stationarityTolerance) ) {
 		return QPDUNES_SUCC_OPTIMAL_SOLUTION_FOUND;
 	}
 
@@ -688,10 +688,10 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
 				/* Annihilate columns in invQ; note: this can only be applied for diagonal matrices */
 				qpDUNES_makeMatrixDense(xxMatTmp, _NX_, _NX_);
 				for (ii = 0; ii < _NX_; ++ii) {
-					if ((intervals[kk + 1]->y->data[2 * ii] >= qpData->options.equalityTolerance) ||		// check if local constraint lb_x is active
-						(intervals[kk + 1]->y->data[2 * ii + 1] >= qpData->options.equalityTolerance))	// check if local constraint ub_x is active		// WARNING: weakly active constraints are excluded here!
+					if ((intervals[kk + 1]->y.data[2 * ii] >= qpData->options.equalityTolerance) ||		// check if local constraint lb_x is active
+						(intervals[kk + 1]->y.data[2 * ii + 1] >= qpData->options.equalityTolerance))	// check if local constraint ub_x is active		// WARNING: weakly active constraints are excluded here!
 					/* check if a bound is active. WARNING: WEAKLY ACTIVE CONSTRAINTS ARE EXCLUDED HERE! */
-//					if ( intervals[kk + 1]->y->data[2 * ii] * intervals[kk + 1]->y->data[2 * ii + 1] <= -qpData->options.activenessTolerance )
+//					if ( intervals[kk + 1]->y.data[2 * ii] * intervals[kk + 1]->y.data[2 * ii + 1] <= -qpData->options.activenessTolerance )
 					{
 						xxMatTmp->data[ii * _NX_ + ii] = 0.;
 					}
@@ -780,9 +780,10 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
 				for (ii=0; ii<_NX_; ++ii) {
 					for (jj=0; jj<_NX_; ++jj) {
 						/* cheap way of annihilating columns; TODO: make already in multiplication routine! */
-						if ( ( intervals[kk]->y->data[2*jj] <= qpData->options.equalityTolerance ) &&		// check if local constraint lb_x is inactive
-							 ( intervals[kk]->y->data[2*jj+1] <= qpData->options.equalityTolerance ) )		// check if local constraint ub_x is inactive
+						if ( ( intervals[kk]->y.data[2*jj] <= qpData->options.equalityTolerance ) &&		// check if local constraint lb_x is inactive
+							 ( intervals[kk]->y.data[2*jj+1] <= qpData->options.equalityTolerance ) )		// check if local constraint ub_x is inactive
 						/* check if a bound is active. WARNING: WEAKLY ACTIVE CONSTRAINTS ARE EXCLUDED HERE! */
+//						if ( intervals[kk]->y.data[2 * jj] * intervals[kk]->y.data[2 * jj + 1] > -qpData->options.activenessTolerance )
 						{
 							accHessian( kk, -1, ii, jj ) = - xxMatTmp->data[ii * _NX_ + jj];
 						}
@@ -883,7 +884,7 @@ return_t qpDUNES_computeNewtonGradient(	qpData_t* const qpData,
 //		if ( (kk >= _NI_-4) || (kk == 0) )	qpDUNES_printMatrixData( intervals[kk+1]->z.data, 1, intervals[kk+1]->nV, "z[%3d]:", kk+1);
 		/* ( C_kk*z_kk^opt + c_kk ) - x_(kk+1)^opt */
 		multiplyCz(qpData, gradPiece, &(intervals[kk]->C), &(intervals[kk]->z));
-		addToVector( (vector_t*)gradPiece, (vector_t*)&(intervals[kk]->c), _NX_);
+		addToVector(gradPiece, &(intervals[kk]->c), _NX_);
 
 		/* subtractFromVector( xVecTmp, &(intervals[kk+1]->x), _NX_ ); */
 		for (ii = 0; ii < _NX_; ++ii) {
@@ -1505,7 +1506,6 @@ return_t qpDUNES_determineStepLength(	qpData_t* const qpData,
 	real_t alphaMax = 1.;
 
 	xn_vector_t* lambdaTry = &(qpData->xnVecTmp);
-	y_vector_t* ySwap;
 
 	*itCntr = 0;
 
@@ -1550,9 +1550,9 @@ return_t qpDUNES_determineStepLength(	qpData_t* const qpData,
 	for ( kk = 0; kk < _NI_ + 1; ++kk )
 	{
 		interval = qpData->intervals[kk];
-		ySwap = interval->yPrev;
-		interval->yPrev = interval->y;
-		interval->y = ySwap;
+		real_t* y_swap = interval->yPrev.data;
+		interval->yPrev.data = interval->y.data;
+		interval->y.data = y_swap;
 	}
 
 
@@ -1561,32 +1561,23 @@ return_t qpDUNES_determineStepLength(	qpData_t* const qpData,
 	{
 		*alpha = 1.;
 
-		addVectorScaledVector( (vector_t*)lambda, (vector_t*)lambda, *alpha, (vector_t*)deltaLambdaFS, nV); /* temporary; TODO: move out to mother function */
+		addVectorScaledVector(lambda, lambda, *alpha, deltaLambdaFS, nV); /* temporary; TODO: move out to mother function */
 		for (kk = 0; kk < _NI_ + 1; ++kk) {
 			interval = qpData->intervals[kk];
 			/* update primal, dual, and internal QP solver variables */
 			switch (interval->qpSolverSpecification) {
 				case QPDUNES_STAGE_QP_SOLVER_CLIPPING:
-					clippingQpSolver_doStep(	qpData,
-											interval,
-											&(interval->qpSolverClipping.dz),
-											*alpha,
-											&(interval->qpSolverClipping.zUnconstrained),
-											&(interval->z),
-											interval->y,
-											&(interval->q),
-											&(interval->p)	);
+					directQpSolver_doStep(qpData, interval,
+							&(interval->qpSolverClipping.dz), *alpha,
+							&(interval->qpSolverClipping.zUnconstrained),
+							&(interval->z), &(interval->y), &(interval->q),
+							&(interval->p));
 					break;
 
 				case QPDUNES_STAGE_QP_SOLVER_QPOASES:
-					qpOASES_doStep(	qpData,
-									interval->qpSolverQpoases.qpoasesObject,
-									interval,
-									*alpha,
-									&(interval->z),
-									interval->y,
-									&(interval->q),
-									&(interval->p)	);
+					qpOASES_doStep(qpData, interval->qpSolverQpoases.qpoasesObject,
+							interval, *alpha, &(interval->z), &(interval->y),
+							&(interval->q), &(interval->p));
 					break;
 
 				default:
@@ -1680,16 +1671,16 @@ return_t qpDUNES_determineStepLength(	qpData_t* const qpData,
 		/* update primal, dual, and internal QP solver variables */
 		switch (interval->qpSolverSpecification) {
 			case QPDUNES_STAGE_QP_SOLVER_CLIPPING:
-				clippingQpSolver_doStep(qpData, interval,
+				directQpSolver_doStep(qpData, interval,
 						&(interval->qpSolverClipping.dz), *alpha,
 						&(interval->qpSolverClipping.zUnconstrained),
-						&(interval->z), interval->y, &(interval->q),
+						&(interval->z), &(interval->y), &(interval->q),
 						&(interval->p));
 				break;
 
 			case QPDUNES_STAGE_QP_SOLVER_QPOASES:
 				qpOASES_doStep(qpData, interval->qpSolverQpoases.qpoasesObject,
-						interval, *alpha, &(interval->z), interval->y,
+						interval, *alpha, &(interval->z), &(interval->y),
 						&(interval->q), &(interval->p));
 				break;
 
@@ -1724,7 +1715,7 @@ return_t qpDUNES_backTrackingLineSearch(	qpData_t* const qpData,
 	real_t objVal;
 
 	real_t minimumProgress = qpData->options.lineSearchMinRelProgress * fabs(objValIncumbent) + qpData->options.lineSearchMinAbsProgress;
-	real_t normDeltaLambda = vectorNorm( (vector_t*)deltaLambdaFS, nV );
+	real_t normDeltaLambda = vectorNorm( deltaLambdaFS, nV );
 
 	*alpha = alphaMax;
 
@@ -1793,7 +1784,7 @@ return_t qpDUNES_reductionLineSearchWithASChange(	qpData_t* const qpData,
 			(*itCntr) < qpData->options.maxNumLineSearchRefinementIterations;
 			++(*itCntr)) {
 		*alpha = 0.5 * (alphaMin + alphaMax);
-		addVectorScaledVector( (vector_t*)lambdaTry, (vector_t*)lambda, *alpha, (vector_t*)deltaLambdaFS, nV);
+		addVectorScaledVector(lambdaTry, lambda, *alpha, deltaLambdaFS, nV);
 		qpDUNES_solveAllLocalQPs(qpData, lambdaTry, 0);
 		objVal = qpDUNES_computeObjectiveValue(qpData);
 
@@ -1825,14 +1816,14 @@ return_t qpDUNES_reductionLineSearchWithASChange(	qpData_t* const qpData,
  *
  >>>>>>                                           */
 return_t qpDUNES_goldenSectionIntervalSearch(	qpData_t* const qpData,
-												real_t* const alpha,
-												uint_t* const itCntr,
-												xn_vector_t* const lambda,
-												const xn_vector_t* const deltaLambdaFS,
-												xn_vector_t* const lambdaTry,
-												int_t nV,
-												real_t alphaMin,
-												real_t alphaMax	)
+											real_t* const alpha,
+											uint_t* const itCntr,
+											xn_vector_t* const lambda,
+											const xn_vector_t* const deltaLambdaFS,
+											xn_vector_t* const lambdaTry,
+											int_t nV,
+											real_t alphaMin,
+											real_t alphaMax	)
 {
 	assert(1 == 0);
 	printf("qpDUNES_goldenSectionIntervalSearch not fixed yet!");
@@ -1844,19 +1835,19 @@ return_t qpDUNES_goldenSectionIntervalSearch(	qpData_t* const qpData,
 	real_t goldSec = 0.6180339887; /**< golden section ratio for interval line search (sqrt(5)-1)/2 */
 
 	aLL = alphaMin;
-	addVectorScaledVector( (vector_t*)lambdaTry, (vector_t*)lambda, aLL, (vector_t*)deltaLambdaFS, nV);
+	addVectorScaledVector(lambdaTry, lambda, aLL, deltaLambdaFS, nV);
 	qpDUNES_solveAllLocalQPs(qpData, lambdaTry, 0);
 	objValLL = qpDUNES_computeObjectiveValue(qpData);
 
 	aRR = alphaMax;
-	addVectorScaledVector( (vector_t*)lambdaTry, (vector_t*)lambda, aRR, (vector_t*)deltaLambdaFS, nV);
+	addVectorScaledVector(lambdaTry, lambda, aRR, deltaLambdaFS, nV);
 	qpDUNES_solveAllLocalQPs(qpData, lambdaTry, 0);
 	objValRR = qpDUNES_computeObjectiveValue(qpData);
 
 	/** (1) ensure that L, R have bigger objective Values than LL and RR, respectively */
 	for ( /*continuous itCntr*/; (*itCntr) < qpData->options.maxNumLineSearchRefinementIterations; ++(*itCntr)) {
 		aL = aRR - goldSec * (aRR);
-		addVectorScaledVector( (vector_t*)lambdaTry, (vector_t*)lambda, aL, (vector_t*)deltaLambdaFS, nV);
+		addVectorScaledVector(lambdaTry, lambda, aL, deltaLambdaFS, nV);
 		qpDUNES_solveAllLocalQPs(qpData, lambdaTry, 0);
 		objValL = qpDUNES_computeObjectiveValue(qpData);
 
@@ -1870,8 +1861,8 @@ return_t qpDUNES_goldenSectionIntervalSearch(	qpData_t* const qpData,
 	}
 	for ( /*continuous itCntr*/; (*itCntr) < qpData->options.maxNumLineSearchRefinementIterations; ++(*itCntr)) {
 		aR = aLL + goldSec * (aRR - aLL);
-		addVectorScaledVector( (vector_t*)lambdaTry, (vector_t*)lambda, aR, (vector_t*)deltaLambdaFS, nV);
-		qpDUNES_solveAllLocalQPs( qpData, lambdaTry, 0);
+		addVectorScaledVector(lambdaTry, lambda, aR, deltaLambdaFS, nV);
+		qpDUNES_solveAllLocalQPs(qpData, lambdaTry, 0);
 		objValR = qpDUNES_computeObjectiveValue(qpData);
 
 		if (objValRR > objValR) { /* minimum has to lie on right-most interval */
@@ -1906,7 +1897,7 @@ return_t qpDUNES_goldenSectionIntervalSearch(	qpData_t* const qpData,
 			objValR = objValL;
 
 			aL = aRR - goldSec * (aRR - aLL);
-			addVectorScaledVector( (vector_t*)lambdaTry, (vector_t*)lambda, aL, (vector_t*)deltaLambdaFS, nV);
+			addVectorScaledVector(lambdaTry, lambda, aL, deltaLambdaFS, nV);
 			qpDUNES_solveAllLocalQPs(qpData, lambdaTry, 0);
 			alphaCheckedLast = aL;
 			objValL = qpDUNES_computeObjectiveValue(qpData);
@@ -1917,7 +1908,7 @@ return_t qpDUNES_goldenSectionIntervalSearch(	qpData_t* const qpData,
 			objValL = objValR;
 
 			aR = aLL + goldSec * (aRR - aLL);
-			addVectorScaledVector( (vector_t*)lambdaTry, (vector_t*)lambda, aR, (vector_t*)deltaLambdaFS, nV);
+			addVectorScaledVector(lambdaTry, lambda, aR, deltaLambdaFS, nV);
 			qpDUNES_solveAllLocalQPs(qpData, lambdaTry, 0);
 			alphaCheckedLast = aR;
 			objValR = qpDUNES_computeObjectiveValue(qpData);
@@ -1949,7 +1940,7 @@ return_t qpDUNES_bisectionIntervalSearch(	qpData_t* const qpData,
 	real_t alphaC;
 
 	real_t alphaSlope;
-	real_t slopeNormalization = fmin( 1., vectorNorm( (vector_t*)deltaLambdaFS, nV ) ); 	/* demand more stationarity for smaller steps */
+	real_t slopeNormalization = fmin( 1., vectorNorm((vector_t*)deltaLambdaFS,nV) ); 	/* demand more stationarity for smaller steps */
 	/* FIXME: is this meaningful? */
 
 	/* todo: get memory passed on from determine step length */
@@ -1967,21 +1958,15 @@ return_t qpDUNES_bisectionIntervalSearch(	qpData_t* const qpData,
 			interval = qpData->intervals[kk];
 			z_vector_t* zTry = &(interval->zVecTmp);
 			/* get primal variables for trial step length */
-			addVectorScaledVector( (vector_t*)zTry,	(vector_t*)&(interval->qpSolverClipping.zUnconstrained), alphaMax,	(vector_t*)&(interval->qpSolverClipping.dz), interval->nV);
-			clippingQpSolver_saturateVector( qpData,
-											 (v_vector_t*)zTry,
-											 interval->y,
-											 &(interval->zLow),
-											 &(interval->zUpp),
-											 &(interval->H),
-											 interval->nV	);
+			addVectorScaledVector(zTry,	&(interval->qpSolverClipping.zUnconstrained), alphaMax,	&(interval->qpSolverClipping.dz), interval->nV);
+			directQpSolver_saturateVector(qpData, zTry, &(interval->y), &(interval->zLow), &(interval->zUpp), &(interval->H), interval->nV);
 		}
 
 		/* manual gradient computation; TODO: use function, but watch out with z, dz, zTry, etc. */
 		for (kk = 0; kk < _NI_; ++kk) {
 			/* ( A_kk*x_kk^opt + B_kk*u_kk^opt + c_kk ) - x_(kk+1)^opt */
 			multiplyCz( qpData, &(qpData->xVecTmp), &(qpData->intervals[kk]->C), &(qpData->intervals[kk]->zVecTmp) );
-			addToVector( (vector_t*)&(qpData->xVecTmp), (vector_t*)&(qpData->intervals[kk]->c), _NX_); /* TODO: avoid using global memory!!! */
+			addToVector(&(qpData->xVecTmp), &(qpData->intervals[kk]->c), _NX_); /* TODO: avoid using global memory!!! */
 
 			/* subtractFromVector( xVecTmp, &(intervals[kk+1]->x), _NX_ ); */
 			for (ii = 0; ii < _NX_; ++ii) {
@@ -1994,7 +1979,7 @@ return_t qpDUNES_bisectionIntervalSearch(	qpData_t* const qpData,
 			}
 		}
 //		computeNewtonGradient( qpData, gradientTry, &(qpData->xVecTmp) );	/* TODO: avoid to use own memory here! */
-		alphaSlope = scalarProd( (vector_t*)gradientTry, (vector_t*)deltaLambdaFS, nV);
+		alphaSlope = scalarProd(gradientTry, deltaLambdaFS, nV);
 
 		/* take full step if stationary */
 		if (fabs(alphaSlope / slopeNormalization) <= qpData->options.lineSearchStationarityTolerance)
@@ -2034,25 +2019,15 @@ return_t qpDUNES_bisectionIntervalSearch(	qpData_t* const qpData,
 			interval = qpData->intervals[kk];
 			z_vector_t* zTry = &(interval->zVecTmp);
 			/* get primal variables for trial step length */
-			addVectorScaledVector( (vector_t*)zTry,
-								   (vector_t*)&(interval->qpSolverClipping.zUnconstrained),
-								   alphaC,
-								   (vector_t*)&(interval->qpSolverClipping.dz),
-								   interval->nV );
-			clippingQpSolver_saturateVector( qpData,
-											 (v_vector_t*)zTry,
-											 interval->y,
-											 &(interval->zLow),
-											 &(interval->zUpp),
-											 &(interval->H),
-											 interval->nV	);
+			addVectorScaledVector( zTry, &(interval->qpSolverClipping.zUnconstrained), alphaC, &(interval->qpSolverClipping.dz), interval->nV );
+			directQpSolver_saturateVector( qpData, zTry, &(interval->y), &(interval->zLow), &(interval->zUpp), &(interval->H), interval->nV );
 		}
 
 		/* manual gradient computation; TODO: use function, but watch out with z, dz, zTry, etc. */
 		for (kk = 0; kk < _NI_; ++kk) {
 			/* ( A_kk*x_kk^opt + B_kk*u_kk^opt + c_kk ) - x_(kk+1)^opt */
 			multiplyCz( qpData, &(qpData->xVecTmp), &(qpData->intervals[kk]->C), &(qpData->intervals[kk]->zVecTmp) );
-			addToVector( (vector_t*)&(qpData->xVecTmp), (vector_t*)&(qpData->intervals[kk]->c), _NX_ );
+			addToVector( &(qpData->xVecTmp), &(qpData->intervals[kk]->c), _NX_ );
 
 			/* subtractFromVector( xVecTmp, &(intervals[kk+1]->x), _NX_ ); */
 			for (ii = 0; ii < _NX_; ++ii) {
@@ -2065,7 +2040,7 @@ return_t qpDUNES_bisectionIntervalSearch(	qpData_t* const qpData,
 			}
 		}
 //		computeNewtonGradient( qpData, gradientTry, &(qpData->xVecTmp) );	/* TODO: avoid to use own memory here! */
-		alphaSlope = scalarProd( (vector_t*)gradientTry, (vector_t*)deltaLambdaFS, nV );
+		alphaSlope = scalarProd(gradientTry, deltaLambdaFS, nV);
 
 		/* check for stationarity in search direction */
 //		qpDUNES_printf("AlphaC = %.15e is tried, alphaSlope = %.15e, normalization = %.15e", alphaC, alphaSlope, slopeNormalization );
@@ -2159,19 +2134,15 @@ return_t qpDUNES_qpadApproxIntervalSearch(	qpData_t* const qpData,
 			interval = qpData->intervals[kk];
 			z_vector_t* zTry = &(interval->zVecTmp);
 			/* get primal variables for trial step length */
-			addVectorScaledVector( (vector_t*)zTry,
-								   (vector_t*)&(interval->qpSolverClipping.zUnconstrained),
-								   alphaD,
-								   (vector_t*)&(interval->qpSolverClipping.dz),
-								   interval->nV);
-			clippingQpSolver_saturateVector(qpData, zTry, interval->y, &(interval->zLow), &(interval->zUpp), &(interval->H), interval->nV);
+			addVectorScaledVector(zTry, &(interval->qpSolverClipping.zUnconstrained), alphaD, &(interval->qpSolverClipping.dz), interval->nV);
+			directQpSolver_saturateVector(qpData, zTry, &(interval->y),	&(interval->zLow), &(interval->zUpp), &(interval->H), interval->nV);
 		}
 
 		/* manual gradient computation; TODO: use function, but watch out with z, dz, zTry, etc. */
 		for (kk = 0; kk < _NI_; ++kk) {
 			/* ( A_kk*x_kk^opt + B_kk*u_kk^opt + c_kk ) - x_(kk+1)^opt */
 			multiplyCz(qpData, &(qpData->xVecTmp), &(qpData->intervals[kk]->C), &(qpData->intervals[kk]->zVecTmp));
-			addToVector( (vector_t*)&(qpData->xVecTmp), (vector_t*)&(qpData->intervals[kk]->c), _NX_);
+			addToVector(&(qpData->xVecTmp), &(qpData->intervals[kk]->c), _NX_);
 
 			/* subtractFromVector( xVecTmp, &(intervals[kk+1]->x), _NX_ ); */
 			for (ii = 0; ii < _NX_; ++ii) {
@@ -2183,7 +2154,7 @@ return_t qpDUNES_qpadApproxIntervalSearch(	qpData_t* const qpData,
 				gradientTry->data[kk * _NX_ + ii] = qpData->xVecTmp.data[ii];
 			}
 		}
-		alphaSlope = fabs(scalarProd( (vector_t*)gradientTry, (vector_t*)deltaLambdaFS, nV ));
+		alphaSlope = fabs(scalarProd(gradientTry, deltaLambdaFS, nV));
 //		end of cleaner...
 
 		qpDUNES_printf("alphaSlope is %.5e", alphaSlope);
@@ -2478,7 +2449,7 @@ return_t qpDUNES_infeasibilityCheck(	qpData_t* qpData
 	for( kk=0; kk< _NI_+1; ++kk ) {
 		interval = qpData->intervals[kk];
 		clippingQpSolver_ratioTest( qpData, &minStepSizeASChange_k,
-									&(interval->qpSolverClipping.dz), interval->y,
+									&(interval->qpSolverClipping.dz), &(interval->y),
 									&(interval->zLow), &(interval->zUpp), interval->nV );
 		if ( minStepSizeASChange_k < minStepSizeASChange )
 		{
@@ -2508,7 +2479,7 @@ return_t qpDUNES_infeasibilityCheck(	qpData_t* qpData
 //	qpDUNES_printMatrixData( qpData->hessian.data, _NI_*_NX_, 2*_NX_, "hess");
 //	qpDUNES_printMatrixData( qpData->deltaLambda.data, 1, _NI_*_NX_, "step");
 //	qpDUNES_printMatrixData( hessianStepProduct->data, 1, _NI_*_NX_, "hess step product");
-	ascentCurvature = vectorNorm( (vector_t*)hessianStepProduct, _NI_ * _NX_ );
+	ascentCurvature = vectorNorm( hessianStepProduct, _NI_ * _NX_ );
 //	qpDUNES_printf( "Curvature in Newton Step direction: %.3e", ascentCurvature );
 //	assert(1==0);
 	#ifdef __DEBUG__
@@ -2567,12 +2538,12 @@ return_t qpDUNES_getDualSol(const qpData_t* const qpData, real_t* const lambda, 
 			case QPDUNES_STAGE_QP_SOLVER_CLIPPING:
 				/* we still have to clean the multipliers */
 				for ( ii=0; ii<nStageMult; ++ii )	{
-					y[nDOffset+ii] = (qpData->intervals[kk]->y->data[ii] > 0)  ?  qpData->intervals[kk]->y->data[ii]  :  0.0;
+					y[nDOffset+ii] = (qpData->intervals[kk]->y.data[ii] > 0)  ?  qpData->intervals[kk]->y.data[ii]  :  0.0;
 				}
 				break;
 
 			case QPDUNES_STAGE_QP_SOLVER_QPOASES:
-				qpDUNES_copyArray( &(y[nDOffset]), qpData->intervals[kk]->y->data, nStageMult );
+				qpDUNES_copyArray( &(y[nDOffset]), qpData->intervals[kk]->y.data, nStageMult );
 				break;
 
 			default:
@@ -2604,7 +2575,8 @@ real_t qpDUNES_computeObjectiveValue(qpData_t* const qpData) {
 				* multiplyzHz(qpData, &(interval->H), &(interval->z),
 						interval->nV);
 		/* linear objective part */
-		interval->optObjVal += scalarProd( (vector_t*)&(interval->q), (vector_t*)&(interval->z), interval->nV );
+		interval->optObjVal += scalarProd(&(interval->q), &(interval->z),
+				interval->nV);
 		/* constant objective part */
 		interval->optObjVal += interval->p;
 
@@ -2647,38 +2619,27 @@ real_t qpDUNES_computeParametricObjectiveValue(	qpData_t* const qpData,
 		/* get primal variables for trial step length */
 		switch (interval->qpSolverSpecification) {
 			case QPDUNES_STAGE_QP_SOLVER_CLIPPING:
-				clippingQpSolver_doStep( qpData,
-										 interval,
-										 &(interval->qpSolverClipping.dz),
-										 alpha,
-										 &(interval->z),
-										 &(interval->z),
-										 interval->y,
-										 (v_vector_t*)qTry,
-										 &pTry );
+				directQpSolver_doStep( qpData, interval, &(interval->qpSolverClipping.dz), alpha, &(interval->z ), &(interval->z), &(interval->y), qTry, &pTry );
 				break;
 
 			case QPDUNES_STAGE_QP_SOLVER_QPOASES:
-				qpOASES_doStep( qpData,
-								interval->qpSolverQpoases.qpoasesObject,
-								interval,
-								alpha,
-								&(interval->z),
-								interval->y,
-								(v_vector_t*)qTry,
-								&pTry );
+				qpOASES_doStep( qpData, interval->qpSolverQpoases.qpoasesObject, interval, alpha, &(interval->z), &(interval->y), qTry, &pTry );
 				break;
 
 			default:
 				qpDUNES_printError(qpData, __FILE__, __LINE__,	"Stage QP solver undefined! Bailing out...");
 				return QPDUNES_ERR_INVALID_ARGUMENT;
 		}
+//		addVectorScaledVector( &(interval->z), &(interval->qpSolverClipping.zUnconstrained), alpha, &(interval->qpSolverClipping.dz), interval->nV );
+//		directQpSolver_saturateVector( qpData, &(interval->z), &(interval->y), &(interval->dLow), &(interval->dUpp), interval->nV );
 
 		/* quadratic objective part */
 		interval->optObjVal = 0.5 * multiplyzHz(qpData, &(interval->H), &(interval->z),	interval->nV);
 		/* linear objective part */
-		interval->optObjVal += scalarProd( (vector_t*)qTry, (vector_t*)&(interval->z), interval->nV );
+//		addVectorScaledVector( qTry, &(interval->q), alpha, &(interval->qpSolverClipping.qStep), interval->nV );
+		interval->optObjVal += scalarProd(qTry, &(interval->z), interval->nV);
 		/* constant objective part */
+//		interval->optObjVal += interval->p + (alpha) * interval->qpSolverClipping.pStep;
 		interval->optObjVal += pTry;
 
 		objVal += interval->optObjVal;
@@ -2724,8 +2685,8 @@ return_t qpDUNES_getActSetChanges(	const qpData_t* const qpData,
 					 *       effect on the Hessian blocks is identical, no matter which
 					 *       bound is active. Still, we do reach a new region (and the
 					 *       dual gradient hanges), but just with an identical Hessian. */
-					isBoundActive = (boolean_t) ( (interval->y->data[2 * ii] * interval->y->data[2 * ii + 1]) < 0 );	/* y.lb < 0  &&  y.ub < 0  => inactive */
-					wasBoundActive = (boolean_t) ( (interval->yPrev->data[2 * ii] * interval->yPrev->data[2 * ii + 1]) < 0 );
+					isBoundActive = (boolean_t) ( (interval->y.data[2 * ii] * interval->y.data[2 * ii + 1]) < 0 );	/* y.lb < 0  &&  y.ub < 0  => inactive */
+					wasBoundActive = (boolean_t) ( (interval->yPrev.data[2 * ii] * interval->yPrev.data[2 * ii + 1]) < 0 );
 					if ( isBoundActive != wasBoundActive )	/* AS change if sign is different */
 					{
 						++(*nChgdConstr);

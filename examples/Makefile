@@ -48,7 +48,6 @@ IFLAGS      =  -I. \
 
 QPDUNES_EXES = \
 	example1${EXE} \
-	example1_static${EXE} \
 	example1_ltv${EXE} \
 	example2_affine${EXE} \
 	example3_affine_mpc${EXE} \
@@ -75,9 +74,6 @@ all: ${QPDUNES_EXES}
 
 
 example1${EXE}: example1.${OBJEXT} ../src/libqpdunes.a ../externals/qpOASES-3.0beta/bin/libqpOASES.a
-	${CPP} ${DEF_TARGET} ${CPPFLAGS} $< ${QPDUNES_LIB} ${QPOASES_LIB} ${LIBS}
-	
-example1_static${EXE}: example1_static.${OBJEXT} ../src/libqpdunes.a ../externals/qpOASES-3.0beta/bin/libqpOASES.a
 	${CPP} ${DEF_TARGET} ${CPPFLAGS} $< ${QPDUNES_LIB} ${QPOASES_LIB} ${LIBS}
 
 example1_ltv${EXE}: example1_ltv.${OBJEXT} ../interfaces/mpc/libmpcdunes.a ../src/libqpdunes.a

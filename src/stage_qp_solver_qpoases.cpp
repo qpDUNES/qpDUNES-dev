@@ -118,8 +118,8 @@ return_t qpOASES_setup( qpData_t* qpData,
 	qpOASES::returnValue qpOASES_statusFlag;
 
 	/* make matrix data dense */
-	qpDUNES_makeMatrixDense( (matrix_t*)&(interval->H), interval->nV, interval->nV );
-	qpDUNES_makeMatrixDense( (matrix_t*)&(interval->D), interval->nD, interval->nV );
+	qpDUNES_makeMatrixDense( &(interval->H), interval->nV, interval->nV );
+	qpDUNES_makeMatrixDense( &(interval->D), interval->nD, interval->nV );
 
 //	qpDUNES_printMatrixData( interval->D.data, interval->nD, interval->nV, "I am qpoases setup, D[%d] = ", interval->id );
 //	qpDUNES_printMatrixData( interval->dLow.data, interval->nD, 1, "I am qpoases setup, dLow[%d] = ", interval->id );
@@ -162,7 +162,7 @@ return_t qpOASES_setup( qpData_t* qpData,
 
 	/* get primal and dual solution */
 	static_cast<qpOASES::LoggedSQProblem*>(qpoasesObject->qpoases)->getPrimalSolution( static_cast<qpOASES::real_t*>(interval->z.data) );
-	qpOASES_getDualSol( qpData, interval, qpoasesObject, interval->y );
+	qpOASES_getDualSol( qpData, interval, qpoasesObject, &(interval->y) );
 
 	//	qpDUNES_printMatrixData( mu->data, 2*interval->nV+2*interval->nD, 1, "qpoases multipliers[%d]", interval->id );
 
@@ -183,17 +183,17 @@ return_t qpOASES_setup( qpData_t* qpData,
  * immediate resolves the QP here)
  *
 #>>>>>>                                           */
-return_t qpOASES_dataUpdate(	qpData_t* const qpData,
-								qpoasesObject_t* const qpoasesObject,
-								interval_t* const interval,
-								boolean_t H_changed,
-								boolean_t zLow_changed,
-								boolean_t zUpp_changed,
-								boolean_t D_changed,
-								boolean_t dLow_changed,
-								boolean_t dUpp_changed,
-								int_t* nQpoasesIter
-								)
+return_t qpOASES_dataUpdate( qpData_t* const qpData,
+							qpoasesObject_t* const qpoasesObject,
+							interval_t* const interval,
+							boolean_t H_changed,
+							boolean_t zLow_changed,
+							boolean_t zUpp_changed,
+							boolean_t D_changed,
+							boolean_t dLow_changed,
+							boolean_t dUpp_changed,
+							int_t* nQpoasesIter
+							)
 {
 	uint_t ii;
 
@@ -293,7 +293,7 @@ return_t qpOASES_dataUpdate(	qpData_t* const qpData,
 
 	/* get primal and dual solution */
 	static_cast<qpOASES::LoggedSQProblem*>(qpoasesObject->qpoases)->getPrimalSolution( static_cast<qpOASES::real_t*>(interval->z.data) );
-	qpOASES_getDualSol( qpData, interval, qpoasesObject, interval->y );
+	qpOASES_getDualSol( qpData, interval, qpoasesObject, &(interval->y) );
 
 	//	qpDUNES_printMatrixData( mu->data, 2*interval->nV+2*interval->nD, 1, "qpoases multipliers[%d]", interval->id );
 //	if (interval->id == 0)
@@ -319,26 +319,27 @@ return_t qpOASES_dataUpdate(	qpData_t* const qpData,
 #>>>>>>                                           */
 return_t qpOASES_updateDualGuess(	qpData_t* const qpData,
 									interval_t* const interval,
-									const x_vector_t* const lambdaK,
-									const x_vector_t* const lambdaK1
+									const z_vector_t* const lambdaK,
+									const z_vector_t* const lambdaK1
 									)
 {
+//#ifndef __MATLAB__
 	uint_t ii;
 
-	if ( interval->id < _NI_ ) {	/* lambdaK1 does not exist on last stage */
+	if (lambdaK1->isDefined == QPDUNES_TRUE) {
 		/* qFullStep = q + C.T*lambdaK1 */
 		multiplyCTy( qpData, &(interval->qpSolverQpoases.qFullStep), &(interval->C), lambdaK1 );
-		addToVector( (vector_t*)&(interval->qpSolverQpoases.qFullStep), (vector_t*)&(interval->q), interval->nV );
+		addToVector( &(interval->qpSolverQpoases.qFullStep), &(interval->q), interval->nV );
 		/* pStep = c*lambdaK1 */
-		interval->qpSolverQpoases.pFullStep = scalarProd( (vector_t*)lambdaK1, (vector_t*)&(interval->c), _NX_ );	/* constant objective term */
+		interval->qpSolverQpoases.pFullStep = scalarProd( lambdaK1, &(interval->c), _NX_ );	/* constant objective term */
 	}
 	else {
 		/* qFullStep = q */
-		qpDUNES_copyVector( (vector_t*)&(interval->qpSolverQpoases.qFullStep), (vector_t*)&(interval->q), interval->nV );
+		qpDUNES_copyVector( &(interval->qpSolverQpoases.qFullStep), &(interval->q), interval->nV );
 		/* pStep = 0 */
 		interval->qpSolverQpoases.pFullStep = 0.;	/* constant objective term */
 	}
-	if ( interval->id > 0 ) {		/* lambdaK does not exist on first stage */
+	if (lambdaK->isDefined == QPDUNES_TRUE) {
 		/* qFullStep -= [lambdaK.T 0]	*/
 		for ( ii=0; ii<_NX_; ++ii ) {
 			interval->qpSolverQpoases.qFullStep.data[ii] -= lambdaK->data[ii];
@@ -346,6 +347,7 @@ return_t qpOASES_updateDualGuess(	qpData_t* const qpData,
 	}
 
 	return QPDUNES_OK;
+//#endif
 }
 /*<<< END OF qpOASES_updateStageData */
 
@@ -357,7 +359,7 @@ return_t qpOASES_updateDualGuess(	qpData_t* const qpData,
 return_t qpOASES_hotstart( 	qpData_t* qpData,
 							qpoasesObject_t* qpoasesObject,
 							interval_t* interval,
-							v_vector_t* q,
+							z_vector_t* q,
 							int_t* const numQpoasesIter,
 							boolean_t logHomotopy
 							)
@@ -502,7 +504,7 @@ return_t qpOASES_hotstart( 	qpData_t* qpData,
 return_t qpOASES_getDualSol( 	qpData_t* qpData,
 								interval_t* interval,
 								qpoasesObject_t* qpoasesObject,
-								y_vector_t* mu
+								d2_vector_t* mu
 								)
 {
 	int_t ii;
@@ -619,9 +621,9 @@ return_t qpOASES_doStep( qpData_t* const qpData,
 						 qpoasesObject_t* qpoasesObject,
 						 interval_t* const interval,
 						 real_t alpha,
-						 v_vector_t* const z,
-						 y_vector_t* const mu,
-						 v_vector_t* const qCandidate,
+						 z_vector_t* const z,
+						 d2_vector_t* const mu,
+						 z_vector_t* const qCandidate,
 						 real_t* const p
 						 )
 {
@@ -676,8 +678,8 @@ return_t qpOASES_doStep( qpData_t* const qpData,
 #>>>>>>                                           */
 return_t qpOASES_evalAddParametricObjFctn(	qpData_t* const qpData,
 											interval_t* const interval,
-											homotopyLog_vector_t* resVec,			/* results vector, to be added to! */
-											homotopyLog_vector_t* alphaVec,
+											large_vector_t* resVec,			/* results vector, to be added to! */
+											large_vector_t* alphaVec,
 											int_t nBasePoints
 											)
 {

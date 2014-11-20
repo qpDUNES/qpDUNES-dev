@@ -34,124 +34,7 @@
 
 
 /* ----------------------------------------------
- * static memory problem setup routine
- *
-#>>>>>>                                           */
-return_t qpDUNES_setupStatic(	qpData_t* const qpData,
-//						uint_t nI,
-//						uint_t nX,
-//						uint_t nU,
-						uint_t* nD,
-						qpOptions_t* options
-						)
-{
-#ifdef __STATIC_MEMORY__
-	uint_t ii, kk;
-
-
-	/* set up options */
-	if (options != 0) {
-		qpData->options = *options;
-	}
-	else {
-		qpData->options = qpDUNES_setupDefaultOptions();
-	}
-
-	/* set up dimensions */
-//	int_t nZ = nX+nU;
-//	int_t nDttl = 0;	/* total number of constraints */
-//	qpData->nI = nI;
-//	qpData->nX = nX;
-//	qpData->nU = nU;
-//	qpData->nZ = nZ;
-//	if (nD != 0) {
-//		for( kk=0; kk<nI+1; ++kk ) {
-//			nDttl += nD[kk];
-//		}
-//	}
-//	qpData->nDttl = nDttl;
-//	qpData->intervals = (interval_t**)calloc( nI+1,sizeof(interval_t*) );
-
-
-	/* normal intervals */
-	for( kk=0; kk<_NI_; ++kk )
-	{
-		qpData->intervals[kk] = &(qpData->intervalsData[kk]);		/* register intervalData intervals array */
-
-		qpData->intervals[kk]->id = kk;		/* give interval its initial stage index */
-		qpData->intervals[kk]->nD = (nD != 0) ? nD[kk] : 0;
-		qpData->intervals[kk]->nV = _NZ_;
-
-		qpData->intervals[kk]->y = &(qpData->intervals[kk]->yStorage1);
-		qpData->intervals[kk]->yPrev = &(qpData->intervals[kk]->yStorage2);
-
-		qpData->intervals[kk]->H.sparsityType = QPDUNES_MATRIX_UNDEFINED;
-		qpData->intervals[kk]->cholH.sparsityType = QPDUNES_MATRIX_UNDEFINED;
-		qpData->intervals[kk]->C.sparsityType = QPDUNES_MATRIX_UNDEFINED;
-		qpData->intervals[kk]->D.sparsityType = QPDUNES_MATRIX_UNDEFINED;
-
-		//	/* get memory for qpOASES QP solver */
-		//	/* TODO: use the static memory version qpOASES, obtain an instance in the scope of the interval definition (qpDataStatic.h) and put its pointer into the qpOASES object here
-		//	interval->qpSolverQpoases.qpoasesObject = qpOASES_constructor( qpData, nV, nD );
-
-		qpData->intervals[kk]->qpSolverSpecification = QPDUNES_STAGE_QP_SOLVER_UNDEFINED;
-	}
-
-
-	/* last interval */
-	qpData->intervals[_NI_] = &(qpData->intervalsData[_NI_]);		/* register intervalData intervals array */
-
-	qpData->intervals[_NI_]->id = _NI_;		/* give interval its initial stage index */
-	qpData->intervals[_NI_]->nD = (nD != 0) ? nD[_NI_] : 0;
-	qpData->intervals[_NI_]->nV = _NX_;
-
-	qpData->intervals[_NI_]->y = &(qpData->intervals[_NI_]->yStorage1);
-	qpData->intervals[_NI_]->yPrev = &(qpData->intervals[_NI_]->yStorage2);
-
-	qpData->intervals[_NI_]->H.sparsityType = QPDUNES_MATRIX_UNDEFINED;
-	qpData->intervals[_NI_]->cholH.sparsityType = QPDUNES_MATRIX_UNDEFINED;
-	qpData->intervals[_NI_]->C.sparsityType = QPDUNES_MATRIX_UNDEFINED;
-	qpData->intervals[_NI_]->D.sparsityType = QPDUNES_MATRIX_UNDEFINED;
-
-//	/* get memory for qpOASES QP solver */
-//	/* TODO: use the static memory version qpOASES, obtain an instance in the scope of the interval definition (qpDataStatic.h) and put its pointer into the qpOASES object here
-//	interval->qpSolverQpoases.qpoasesObject = qpOASES_constructor( qpData, nV, nD );
-
-	qpData->intervals[_NI_]->qpSolverSpecification = QPDUNES_STAGE_QP_SOLVER_UNDEFINED;
-
-
-	/** Set up central components */
-
-	/* set incumbent objective function value to minus infinity */
-	qpData->optObjVal = -qpData->options.QPDUNES_INFTY;
-
-
-	/* Set up log struct */
-	if ( qpData->options.logLevel >= QPDUNES_LOG_ITERATIONS )
-	{
-		qpDUNES_printError( qpData, __FILE__, __LINE__, "Sorry, detailed iterations logging is not available in static memory version of qpDUNES. Please ensure 'options.logLevel = 0' is set.");
-		return QPDUNES_ERR_INVALID_ARGUMENT;
-	}
-	else {
-		qpData->log.itLog = &(qpData->log.itLogData);
-	}
-
-
-	qpDUNES_printHeader( qpData );
-
-
-	return QPDUNES_OK;
-#else
-	qpDUNES_printError( qpData, __FILE__, __LINE__, "To use the static memory version of qpDUNES, please compile with the __STATIC_MEMORY__ compiler flag enabled.");
-	return QPDUNES_ERR_INVALID_ARGUMENT;
-#endif
-}
-/*<<< END OF qpDUNES_setupStatic */
-
-
-
-/* ----------------------------------------------
- * dynamic memory allocation
+ * memory allocation
  * 
 #>>>>>>                                           */
 return_t qpDUNES_setup(	qpData_t* const qpData,
@@ -162,7 +45,6 @@ return_t qpDUNES_setup(	qpData_t* const qpData,
 						qpOptions_t* options
 						)
 {
-#ifndef __STATIC_MEMORY__
 	uint_t ii, kk;
 	
 	int_t nZ = nX+nU;
@@ -221,6 +103,12 @@ return_t qpDUNES_setup(	qpData_t* const qpData,
 	qpData->intervals[nI]->uVecTmp.data  = (real_t*)calloc( nU,sizeof(real_t) );
 	qpData->intervals[nI]->zVecTmp.data  = (real_t*)calloc( nZ,sizeof(real_t) );
 	
+	
+	/* undefined not-defined lambda parts */
+	/* do not free, memory might be needed for interval rotation in MPC context */
+	qpData->intervals[0]->lambdaK.isDefined = QPDUNES_FALSE;
+	qpData->intervals[nI]->lambdaK1.isDefined = QPDUNES_FALSE;
+
 
 	/* remainder of qpData struct */
 	qpData->lambda.data      = (real_t*)calloc( nX*nI,sizeof(real_t) );
@@ -286,19 +174,17 @@ return_t qpDUNES_setup(	qpData_t* const qpData,
 		qpData->log.itLog[0].numQpoasesIter = (int_t*)calloc( nI+1,sizeof(int_t) );
 	}
 
+//	/* reset current active set to force initial Hessian factorization */
+//	qpDUNES_indicateDataChange( qpData );
+	/* this is done when data is passed */
+
 
 	qpDUNES_printHeader( qpData );
 
+
 	return QPDUNES_OK;
-
-#else
-
-	qpDUNES_printError( qpData, __FILE__, __LINE__, "To use the dynamic memory version of qpDUNES, please compile with the __STATIC_MEMORY__ compiler flag disabled.");
-	return QPDUNES_ERR_INVALID_ARGUMENT;
-
-#endif
 }
-/*<<< END OF qpDUNES_setup */
+/*<<< END OF qpDUNES_allocate */
 
 
 /* ----------------------------------------------
@@ -331,6 +217,7 @@ interval_t* qpDUNES_allocInterval(	qpData_t* const qpData,
 
 	interval->zLow.data = (real_t*)calloc( nV,sizeof(real_t) );
 	interval->zUpp.data = (real_t*)calloc( nV,sizeof(real_t) );
+//	qpDUNES_printf("zUpp pointer = %d", (int)(interval->zUpp.data));
 
 	interval->D.data = (real_t*)calloc(  nD*nV,sizeof(real_t) );
 	interval->D.sparsityType = QPDUNES_MATRIX_UNDEFINED;
@@ -339,13 +226,13 @@ interval_t* qpDUNES_allocInterval(	qpData_t* const qpData,
 
 	interval->z.data = (real_t*)calloc( nV,sizeof(real_t) );
 
-	interval->yStorage1.data = (real_t*)calloc( 2*nV + 2*nD,sizeof(real_t) );
-	interval->yStorage2.data = (real_t*)calloc( 2*nV + 2*nD,sizeof(real_t) );
-	interval->y = &(interval->yStorage1);
-	interval->yPrev = &(interval->yStorage2);
+	interval->y.data = (real_t*)calloc( 2*nV + 2*nD,sizeof(real_t) );	/* TODO: clean multiplier definition */
+	interval->yPrev.data = (real_t*)calloc( 2*nV + 2*nD,sizeof(real_t) );
 
 	interval->lambdaK.data = (real_t*)calloc( nX,sizeof(real_t) );
+	interval->lambdaK.isDefined = QPDUNES_TRUE;							/* define both lambda parts by default */
 	interval->lambdaK1.data = (real_t*)calloc( nX,sizeof(real_t) );
+	interval->lambdaK1.isDefined = QPDUNES_TRUE;
 
 	/* get memory for clipping QP solver */
 	interval->qpSolverClipping.qStep.data  = (real_t*)calloc( nV,sizeof(real_t) );
@@ -472,7 +359,7 @@ return_t qpDUNES_cleanup(	qpData_t* const qpData
 
 	return QPDUNES_OK;
 }
-/*<<< END OF qpDUNES_cleanup */
+/*<<< END OF qpDUNES_deallocate */
 
 
 
@@ -503,8 +390,8 @@ void qpDUNES_freeInterval(	qpData_t* const qpData,
 
 	qpDUNES_free( &(interval->z.data) );
 
-	qpDUNES_free( &(interval->yStorage1.data) );
-	qpDUNES_free( &(interval->yStorage2.data) );
+	qpDUNES_free( &(interval->y.data) );
+	qpDUNES_free( &(interval->yPrev.data) );
 
 	qpDUNES_free( &(interval->lambdaK.data) );
 	qpDUNES_free( &(interval->lambdaK1.data) );
@@ -1159,8 +1046,8 @@ return_t qpDUNES_updateIntervalData(	qpData_t* const qpData,
 				/* check if Hessian contribution changed */
 				if (interval->rebuildHessianBlock != QPDUNES_TRUE)	{
 					for (ii = 0; ii < nV; ++ii ) {
-						if ( (boolean_t) ( (interval->y->data[2 * ii] * interval->y->data[2 * ii + 1]) < 0 )  !=
-							 (boolean_t) ( (interval->yPrev->data[2 * ii] * interval->yPrev->data[2 * ii + 1]) < 0 ) )	/* AS change if sign is different */
+						if ( (boolean_t) ( (interval->y.data[2 * ii] * interval->y.data[2 * ii + 1]) < 0 )  !=
+							 (boolean_t) ( (interval->yPrev.data[2 * ii] * interval->yPrev.data[2 * ii + 1]) < 0 ) )	/* AS change if sign is different */
 						{
 							interval->rebuildHessianBlock = QPDUNES_TRUE;
 							break;
@@ -1227,12 +1114,12 @@ return_t qpDUNES_setupAllLocalQPs(	qpData_t* const qpData,
 
 
 	/* (1) set up initial lambda guess */
-	qpDUNES_updateVector( (vector_t*)&(qpData->intervals[0]->lambdaK1), &(qpData->lambda.data[0]), _NX_ );
+	qpDUNES_updateVector( &(qpData->intervals[0]->lambdaK1), &(qpData->lambda.data[0]), _NX_ );
 	for( kk=1; kk<_NI_; ++kk ) {
-		qpDUNES_updateVector( (vector_t*)&(qpData->intervals[kk]->lambdaK), &(qpData->lambda.data[(kk-1)*_NX_]), _NX_ );
-		qpDUNES_updateVector( (vector_t*)&(qpData->intervals[kk]->lambdaK1), &(qpData->lambda.data[kk*_NX_]), _NX_ );
+		qpDUNES_updateVector( &(qpData->intervals[kk]->lambdaK), &(qpData->lambda.data[(kk-1)*_NX_]), _NX_ );
+		qpDUNES_updateVector( &(qpData->intervals[kk]->lambdaK1), &(qpData->lambda.data[kk*_NX_]), _NX_ );
 	}
-	qpDUNES_updateVector( (vector_t*)&(qpData->intervals[_NI_]->lambdaK), &(qpData->lambda.data[(_NI_-1)*_NX_]), _NX_ );
+	qpDUNES_updateVector( &(qpData->intervals[_NI_]->lambdaK), &(qpData->lambda.data[(_NI_-1)*_NX_]), _NX_ );
 
 
 	/* (2) decide which QP solver to use and set up */
@@ -1328,19 +1215,19 @@ return_t qpDUNES_setupClippingSolver(	qpData_t* const qpData,
 	/* (c) solve unconstrained local QP for g and initial lambda guess: */
 	/*	   - get (possibly updated) lambda guess */
 	if (interval->id > 0) {		/* lambdaK exists */
-		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
+		qpDUNES_updateVector( &(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
 	}
 	if (interval->id < _NI_) {		/* lambdaK1 exists */
-		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
+		qpDUNES_updateVector( &(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
 	}
 
 	/*     - update first order term */
 	/*       reset q; qStep is added in directQpSolver_doStep, when bounds are known */
 	qpDUNES_setupZeroVector( &(interval->q), interval->nV );
 	clippingQpSolver_updateDualGuess( qpData, interval, &(interval->lambdaK), &(interval->lambdaK1) );
-	addToVector( (vector_t*)&(interval->qpSolverClipping.qStep), (vector_t*)&(interval->g), interval->nV );	/* Note: qStep is rewritten in line before */
+	addToVector( &(interval->qpSolverClipping.qStep), &(interval->g), interval->nV );	/* Note: qStep is rewritten in line before */
 	/*     - solve */
-	statusFlag = clippingQpSolver_solveUnconstrained( qpData, interval, &(interval->qpSolverClipping.qStep) );
+	statusFlag = directQpSolver_solveUnconstrained( qpData, interval, &(interval->qpSolverClipping.qStep) );
 	if ( statusFlag != QPDUNES_OK ) {
 //		qpDUNES_printError( qpData, __FILE__, __LINE__, "QP on interval %d infeasible!", interval->id );
 		qpDUNES_printError( qpData, __FILE__, __LINE__, "Stage QP backsolve failed. Check if all stage QPs are positive definite.", interval->id );
@@ -1353,12 +1240,12 @@ return_t qpDUNES_setupClippingSolver(	qpData_t* const qpData,
 
 
 	/* clip directly on setup */
-	statusFlag = clippingQpSolver_doStep(	qpData,
+	statusFlag = directQpSolver_doStep(	qpData,
 														interval,
 														&(interval->qpSolverClipping.dz), 1,
 														&(interval->qpSolverClipping.zUnconstrained),
 														&(interval->z),
-														interval->y,
+														&(interval->y),
 														&(interval->q),
 														&(interval->p)
 														);
@@ -1385,10 +1272,10 @@ return_t qpDUNES_setupQpoases(	qpData_t* const qpData,
 	qpDUNES_copyVector( &(interval->q), &(interval->g), interval->nV );
 	/*	   - get (possibly updated) lambda guess */
 	if (interval->id > 0) {		/* lambdaK exists */
-		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
+		qpDUNES_updateVector( &(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
 	}
 	if (interval->id < _NI_) {		/* lambdaK1 exists */
-		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
+		qpDUNES_updateVector( &(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
 	}
 	qpOASES_updateDualGuess( qpData, interval, &(interval->lambdaK), &(interval->lambdaK1) );
 
@@ -1433,14 +1320,21 @@ return_t qpDUNES_updateQpoases(	qpData_t* const qpData,
 		// we always need to get original g, since we add lambda completely!
 //	}
 	qpDUNES_copyVector( &(interval->q), &(interval->g), interval->nV );
+//	qpDUNES_printMatrixData( interval->q.data, interval->nV, 1, "updateQpoases[%d]: (1: g only)", interval->id );
 	/*	   - get (possibly updated) lambda guess */
 	if (interval->id > 0) {		/* lambdaK exists */
-		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
+//		qpDUNES_printMatrixData( interval->lambdaK.data, 1, _NX_, "lambdaK[%d] was", interval->id );
+		qpDUNES_updateVector( &(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
+//		qpDUNES_printMatrixData( interval->lambdaK.data, 1, _NX_, "lambdaK[%d] is", interval->id );
 	}
 	if (interval->id < _NI_) {		/* lambdaK1 exists */
-		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
+//		qpDUNES_printMatrixData( interval->lambdaK1.data, 1, _NX_, "lambdaK1[%d] was", interval->id );
+		qpDUNES_updateVector( &(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
+//		qpDUNES_printMatrixData( interval->lambdaK1.data, 1, _NX_, "lambdaK1[%d] is", interval->id );
 	}
 	qpOASES_updateDualGuess( qpData, interval, &(interval->lambdaK), &(interval->lambdaK1) );
+//	qpDUNES_printMatrixData( interval->q.data, interval->nV, 1, "updateQpoases[%d]: (1: g with lambda)", interval->id );
+//	qpDUNES_printMatrixData( interval->qpSolverQpoases.qFullStep.data, interval->nV, 1, "updateQpoases[%d]: (1: qFS with lambda)", interval->id );
 
 
 	/* (b) update qpOASES data and rerun initial homotopy (i.e., solve first QP) */
@@ -1509,6 +1403,9 @@ return_t qpDUNES_shiftIntervals(	qpData_t* const qpData
 	qpData->intervals[_NI_-1]->id = _NI_-1;		/* correct stage index */
 	qpData->intervals[_NI_-1]->rebuildHessianBlock = QPDUNES_TRUE;
 
+	/* update definedness of lambda parts */
+	qpData->intervals[0]->lambdaK.isDefined = QPDUNES_FALSE;
+	qpData->intervals[_NI_-1]->lambdaK.isDefined = QPDUNES_TRUE;
 
 
 	// not needed: checks for AS changes are redundant, since blocks get rebuilt anyways
@@ -1540,7 +1437,7 @@ return_t qpDUNES_shiftIntervalsLTI(	qpData_t* const qpData
 	int_t kk, ii;
 
 	boolean_t rebuildHessianBlock_NI1;
-	y_vector_t* yPrev_NI1;
+	real_t* yPrev_NI1;
 
 
 	/** (1) Shift Interval pointers */
@@ -1553,25 +1450,27 @@ return_t qpDUNES_shiftIntervalsLTI(	qpData_t* const qpData
 		qpData->intervals[kk] = qpData->intervals[kk+1];
 		qpData->intervals[kk]->id = kk;			/* correct stage index */
 	}
+	qpData->intervals[0]->lambdaK.isDefined = QPDUNES_FALSE;	/* update definedness of lambda parts */
 
 	/*  hang the free interval on the second but last position */
 	qpData->intervals[_NI_-1] = freeInterval;
 	qpData->intervals[_NI_-1]->id = _NI_-1;							/* correct stage index */
+	qpData->intervals[_NI_-1]->lambdaK.isDefined = QPDUNES_TRUE;	/* update definedness of lambda parts */
 
 
 	/** (2) correct dual Hessian matrix for AS changes in last iteration of previous QP
 	 *      and keep old AS statuses (through multipliers) for Hessian rebuilding checks	 */
 	/*  save status and multipliers of last interval */
 	rebuildHessianBlock_NI1 = qpData->intervals[_NI_-1]->rebuildHessianBlock;
-	yPrev_NI1 = qpData->intervals[_NI_-1]->yPrev;
+	yPrev_NI1 = qpData->intervals[_NI_-1]->yPrev.data;
 	/*  shift all statuses and multiplies (except the one from first interval) back again */
 	for (kk=_NI_-1; kk>0; --kk) {
 		qpData->intervals[kk]->rebuildHessianBlock = qpData->intervals[kk-1]->rebuildHessianBlock;
-		qpData->intervals[kk]->yPrev = qpData->intervals[kk-1]->yPrev;
+		qpData->intervals[kk]->yPrev.data = qpData->intervals[kk-1]->yPrev.data;
 	}
 	/*  correct dual Hessian update for first interval */
 	qpData->intervals[0]->rebuildHessianBlock = rebuildHessianBlock_NI1;
-	qpData->intervals[0]->yPrev = yPrev_NI1;
+	qpData->intervals[0]->yPrev.data = yPrev_NI1;
 
 
 	/** (3) check for active set changes from shift ... ((in)active constraints that were moved to different intervals) */
@@ -1600,8 +1499,9 @@ return_t qpDUNES_shiftIntervalsLTI(	qpData_t* const qpData
 
 		/* check if Hessian contribution changed */
 		for (ii = 0; ii < _NV(kk); ++ii ) {
-			if ( (boolean_t) ( (qpData->intervals[kk]->y->data[2 * ii] * qpData->intervals[kk]->y->data[2 * ii + 1]) < 0 )  !=
-				 (boolean_t) ( (qpData->intervals[kk]->yPrev->data[2 * ii] * qpData->intervals[kk]->yPrev->data[2 * ii + 1]) < 0 ) )	/* AS change if sign is different */
+			if ( (boolean_t) ( (qpData->intervals[kk]->y.data[2 * ii] * qpData->intervals[kk]->y.data[2 * ii + 1]) < 0 )  !=
+//				 (boolean_t) ( (qpData->intervals[(kk-1)]->yPrev.data[2 * ii] * qpData->intervals[(kk-1)]->yPrev.data[2 * ii + 1]) < 0 ) )	/* AS change if sign is different */
+				 (boolean_t) ( (qpData->intervals[kk]->yPrev.data[2 * ii] * qpData->intervals[kk]->yPrev.data[2 * ii + 1]) < 0 ) )	/* AS change if sign is different */
 			{
 				qpData->intervals[kk]->rebuildHessianBlock = QPDUNES_TRUE;
 				break;

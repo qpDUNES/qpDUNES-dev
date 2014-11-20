@@ -35,42 +35,7 @@
 #ifndef QPDUNES_QPDATASTATIC_H
 #define QPDUNES_QPDATASTATIC_H
 
-#include <qp/qpDimensions.h>
-
-
-/**
- *	\brief Abstract matrix type to be used for general purpose matrix routines
- *
- *	...
- *
- *	\author Janick Frasch
- *	\version 1.0beta
- *	\date 2014
- */
-typedef struct
-{
-	/** matrix sparsity specification */
-	sparsityType_t sparsityType;
-
-	/** matrix data array */
-	real_t* data;
-} matrix_t;
-
-
-/**
- *	\brief Abstract vector type to be used for general purpose vector routines
- *
- *	...
- *
- *	\author Janick Frasch
- *	\version 1.0beta
- *	\date 2014
- */
-typedef struct
-{
-	/** vector data array */
-	real_t* data;
-} vector_t;
+#include <qpDimensions.h>
 
 
 
@@ -210,7 +175,7 @@ typedef struct
 /**
  *	\brief Matrix of size _NZ_ by _NZ_
  *
- *	This type can be used for matrices of size _NZ_ by _NZ_ or smaller
+ *	...
  *
  *	\author Janick Frasch
  *	\version 1.0beta
@@ -223,6 +188,7 @@ typedef struct
 
 	/** matrix data array */
 	real_t data[_NZ_*_NZ_];
+todo! check where v is used!
 } vv_matrix_t;
 
 
@@ -271,147 +237,85 @@ typedef struct
 	real_t data[_NI_*2*_NX_];
 } xn2x_matrix_t;
 
+//typedef matrix_t xnxn_matrix_t;
 
-
-/**
- * Vector of size _NX_
- */
-typedef struct
-{
-	/** vector data array */
-	real_t data[_NX_];
-} x_vector_t;
 
 
 /**
- * Vector of size _NU_
- */
-typedef struct
-{
-	/** vector data array */
-	real_t data[_NU_];
-} u_vector_t;
-
-
-/**
- * Vector of size _NZ_
- */
-typedef struct
-{
-	/** vector data array */
-	real_t data[_NZ_];
-} z_vector_t;
-
-
-/**
- *	\brief Vector of size _NZ_
+ *	\brief generic vector data type
  *
- *	This type can be used for vectors of size _NZ_ or smaller
+ *	...
  *
+ *	\author Janick Frasch, Hans Joachim Ferreau
+ *	\version 1.0beta
+ *	\date 2012
  */
 typedef struct
 {
+	/** vector property flags */
+	boolean_t isDefined;
+	boolean_t hasChanged;
+
 	/** vector data array */
-	real_t data[_NZ_];
-} v_vector_t;
+	real_t* data;
+} vector_t;
+
+typedef vector_t x_vector_t;
+typedef vector_t u_vector_t;
+typedef vector_t z_vector_t;
+typedef vector_t d_vector_t;
+typedef vector_t d2_vector_t;
+typedef vector_t d2n1_vector_t;
+typedef vector_t xn_vector_t;
+typedef vector_t zn_vector_t;
+typedef vector_t zn1_vector_t;
+typedef vector_t large_vector_t;
+
 
 
 /**
- * Vector of size _NDMAX_
+ *	\brief generic integer vector data type
+ *
+ *	...
+ *
+ *	\author Janick Frasch, Hans Joachim Ferreau
+ *	\version 1.0beta
+ *	\date 2012
  */
 typedef struct
 {
+	/** vector property flags */
+	boolean_t isDefined;
+	boolean_t hasChanged;
+
 	/** vector data array */
-	real_t data[_NDMAX_];
-} d_vector_t;
+	int_t* data;
+} intVector_t;
+
+typedef intVector_t zn_intVector_t;
 
 
 /**
- * Vector of size 2*(_NDMAX_+_NZ_)
+ *	\brief function pointers for qpOASES methods
+ *
+ *	...
+ *
+ *	\author Janick Frasch
+ *	\version 1.0beta
+ *	\date 2013
  */
-typedef struct
-{
-	/** vector data array */
-	real_t data[2*(_NDMAX_+_NZ_)];
-} y_vector_t;
+//typedef int (*qpoasesInitFctnPntr)( const real_t* const _H, const real_t* const _g, const real_t* const _A,
+//							const real_t* const _lb, const real_t* const _ub,
+//							const real_t* const _lbA, const real_t* const _ubA,
+//							int& nWSR );
+//typedef int (*qpoasesHotstartFctnPntr)( const real_t* const g_new,
+//								const real_t* const lb_new, const real_t* const ub_new,
+//								const real_t* const lbA_new, const real_t* const ubA_new,
+//								int& nWSR );
+//typedef void (*qpoasesGetPrimalSolutionFctnPntr)( real_t* const xOpt );
+//typedef real_t (*qpoasesGetObjValFctnPntr)();
 
 
-//typedef struct
-//{
-//	/** vector property flags */
-//	boolean_t isDefined;
-//
-//	/** vector data array */
-//	real_t* data;
-//} d2n1_vector_t;
-
-
-/**
- * Vector of size _NX_*_NI_
- */
-typedef struct
-{
-	/** vector data array */
-	real_t data[_NX_*_NI_];
-} xn_vector_t;
-
-
-//typedef struct
-//{
-//	/** vector property flags */
-//	boolean_t isDefined;
-//
-//	/** vector data array */
-//	real_t* data;
-//} zn_vector_t;
-
-
-//typedef struct
-//{
-//	/** vector property flags */
-//	boolean_t isDefined;
-//
-//	/** vector data array */
-//	real_t* data;
-//} zn1_vector_t;
-
-
-/**
- * Vector of size of the maximum number of permitted active set changes (homotopy log in qpOASES)
- * +2 for beginning and end of homotopy
- */
-typedef struct
-{
-	/** vector data array */
-	real_t data[_NWSRMAX_+2];
-} homotopyLog_vector_t;
-
-
-
-///**
-// *	\brief generic integer vector data type
-// *
-// *	...
-// *
-// *	\author Janick Frasch, Hans Joachim Ferreau
-// *	\version 1.0beta
-// *	\date 2012
-// */
-//typedef struct
-//{
-//	/** vector property flags */
-//	boolean_t isDefined;
-//	boolean_t hasChanged;
-//
-//	/** vector data array */
-//	int_t* data;
-//} intVector_t;
-//
-//typedef intVector_t zn_intVector_t;
-
-
-
-// TODO: use static version of qpOASES
 /**
  *	\brief pointer to qpOASES object for C++ method access
  *
@@ -444,7 +348,7 @@ typedef struct
 	qpoasesObject_t* qpoasesObject;
 
 	/* workspace */
-	v_vector_t qFullStep;			/**< linear term corresponding to full-step in lambda */
+	z_vector_t qFullStep;			/**< linear term corresponding to full-step in lambda */
 	real_t pFullStep;				/**< constant term corresponding to full-step in lambda */
 } qpSolverQpoases_t;
 
@@ -461,11 +365,11 @@ typedef struct
  */
 typedef struct
 {
-	v_vector_t zUnconstrained;	/**< unconstrained primal solution for current lambda guess */
-	v_vector_t dz;				/**< delta z - update in primal variables corresponding to a full step deltaLambda */
+	z_vector_t zUnconstrained;	/**< unconstrained primal solution for current lambda guess */
+	z_vector_t dz;				/**< delta z - update in primal variables corresponding to a full step deltaLambda */
 
 	/* workspace */
-	v_vector_t qStep;			/**< step in linear term for line search */
+	z_vector_t qStep;			/**< step in linear term for line search */
 	real_t pStep;				/**< step in constant term for line search */
 } qpSolverClipping_t;
 
@@ -501,11 +405,11 @@ typedef struct
 	vv_matrix_t cholH;			/**< inverse of Hessian */
 	real_t HQNorm;				/**< norm of Q-part of Hessian */     //FIXME: choose which norm to compute exactly, etc.
 
-	v_vector_t g;				/**< primal gradient block */
+	z_vector_t g;				/**< primal gradient block */
 
 
 	/* dualized objective function */
-	v_vector_t q;				/**< linear objective function term after dualization */
+	z_vector_t q;				/**< linear objective function term after dualization */
 	real_t p;					/**< constant objective function term after dualization */
 
 
@@ -515,23 +419,21 @@ typedef struct
 
 
 	/* constraints */
-	v_vector_t  zLow;			/**< lower variable bound */
-	v_vector_t  zUpp;			/**< upper variable bound */
+	z_vector_t  zLow;			/**< lower variable bound */
+	z_vector_t  zUpp;			/**< upper variable bound */
 	dz_matrix_t D;				/**< full constraint matrix */
 	d_vector_t  dLow;			/**< constraint lower bound */
 	d_vector_t  dUpp;			/**< constraint upper bound */
 
 
 	/* primal QP solution */
-	v_vector_t z;				/**< full primal solution for current lambda guess */
+	z_vector_t z;				/**< full primal solution for current lambda guess */
 	real_t optObjVal;			/**< objective value */
 
 
 	/* dual QP solution */
-	y_vector_t* y;				/**< stage constraint multiplier vector (reference for easy, consistent swapping)  */
-	y_vector_t* yPrev;			/**< previous stage constraint multiplier vector (needed to detect AS changes)  */
-	y_vector_t yStorage1;		/**< storage for a multiplier vector	*/
-	y_vector_t yStorage2;		/**< storage for a multiplier vector	*/
+	d2_vector_t y;				/**< stage constraint multiplier vector  */
+	d2_vector_t yPrev;			/**< previous stage constraint multiplier vector (needed to detect AS changes)  */
 
 
 	/* QP solver */
@@ -545,13 +447,13 @@ typedef struct
 
 
 	/* memory for objective function parameterization (used optionally in line search) */
-	homotopyLog_vector_t parametricObjFctn_alpha;
-	homotopyLog_vector_t parametricObjFctn_f;
-	homotopyLog_vector_t parametricObjFctn_fPrime;
-	homotopyLog_vector_t parametricObjFctn_fPrimePrime;
+	large_vector_t parametricObjFctn_alpha;
+	large_vector_t parametricObjFctn_f;
+	large_vector_t parametricObjFctn_fPrime;
+	large_vector_t parametricObjFctn_fPrimePrime;
 	int_t parametricObjFctn_nBasePoints;
 
-	homotopyLog_vector_t parametricObjFctn_fSum;			/**< full dual objective value at alpha values of this stage */
+	large_vector_t parametricObjFctn_fSum;			/**< full dual objective value at alpha values of this stage */
 
 
 	/* workspace */
@@ -648,6 +550,26 @@ typedef struct
  */
 typedef struct
 {
+	/* data: vectors, matrices */
+	xn_vector_t lambda;
+	xn_vector_t deltaLambda;
+
+	xn2x_matrix_t hessian;
+	xn2x_matrix_t cholHessian;
+	xn_vector_t gradient;
+
+	zn1_vector_t dz;
+	zn1_vector_t zUnconstrained;
+	zn1_vector_t z;
+
+	d2n1_vector_t y;
+
+	xn_vector_t regDirections; 		/* log the regularized directions delta, for Newton system (H+diag(delta))*lambda = -g */
+
+	#ifdef __ANALYZE_FACTORIZATION__
+	xnxn_matrix_t invHessian;
+	#endif
+
 	/* timings */
 	real_t tIt;
 	real_t tNwtnSetup;
@@ -666,11 +588,12 @@ typedef struct
 	uint_t nChgdConstr;
 	int_t hessRefactorIdx;
 
+
 	/* flags, etc. */
 	uint_t itNbr;
 	boolean_t isHessianRegularized;
 	uint_t numLineSearchIter;
-	int_t numQpoasesIter[_NI_+1];
+	int_t* numQpoasesIter;
 
 } itLog_t;
 
@@ -686,23 +609,20 @@ typedef struct
  */
 typedef struct
 {
-//	/* Problem dimensions */
-//	uint_t nI;
-//	uint_t nX;
-//	uint_t nU;
-//	uint_t nZ;
-//	uint_t nDttl;				/**< total number of local constraints */
-//
-//	/* Problem data */
-////	interval_t intervalsData[_NI_+1];
-////	interval_t* intervals[_NI_+1];
-////	janick: todo at runtime: stack intavalsData pointers into intervals array
-//
-//	/* options */
-//	qpOptions_t qpOptions;
+	/* Problem dimensions */
+	uint_t nI;
+	uint_t nX;
+	uint_t nU;
+	uint_t nZ;
+	uint_t nDttl;				/**< total number of local constraints */
+
+	/* Problem data */
+	interval_t** intervals;
+
+	/* options */
+	qpOptions_t qpOptions;
 
 	/* iterations log */
-	itLog_t itLogData;
 	itLog_t* itLog;
 
 	int_t numIter;
@@ -723,14 +643,13 @@ typedef struct
 typedef struct
 {
 	/* variables */
-//	uint_t nI;
-//	uint_t nX;
-//	uint_t nU;
-//	uint_t nZ;
-//	uint_t nDttl;				/**< total number of local constraints */
+	uint_t nI;
+	uint_t nX;
+	uint_t nU;
+	uint_t nZ;
+	uint_t nDttl;				/**< total number of local constraints */
 
-	interval_t intervalsData[_NI_+1];
-	interval_t* intervals[_NI_+1];		/**< array of pointers to interval structs; double pointer for more efficient shifting */
+	interval_t** intervals;		/**< array of pointers to interval structs; double pointer for more efficient shifting */
 
 	xn_vector_t lambda;
 	xn_vector_t deltaLambda;

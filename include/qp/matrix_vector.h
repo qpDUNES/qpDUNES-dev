@@ -477,9 +477,9 @@ return_t addVectors(	vector_t* const res,
 
 
 return_t addToVector(	vector_t* const res,
-						const vector_t* const update,
-						int_t len
-						);
+					const vector_t* const update,
+					int_t len
+					);
 
 
 return_t subtractVectors(	vector_t* const res,
@@ -578,7 +578,7 @@ return_t addCInvHCT(	qpData_t* const qpData,
 						const xz_matrix_t* const C,
 //						const xx_matrix_t* const A,
 //						const xu_matrix_t* const B,
-						const y_vector_t* const y,
+						const d2_vector_t* const y,
 //						xz_matrix_t* const C,			/**< temporary matrix to build up C as once */
 						xx_matrix_t* const xxMatTmp,
 						ux_matrix_t* const uxMatTmp,

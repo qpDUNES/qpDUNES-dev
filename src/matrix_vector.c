@@ -94,7 +94,7 @@ return_t multiplyInvRu(	qpData_t* const qpData,
  >>>>>                                            */
 real_t multiplyzHz( qpData_t* const qpData,
 					 const vv_matrix_t* const H,
-					 const v_vector_t* const z,
+					 const z_vector_t* const z,
 					 const int_t nV	)
 {
 	return multiplyVectorMatrixVector( (matrix_t*)H, (vector_t*)z, nV );
@@ -368,7 +368,7 @@ return_t addCInvHCT(	qpData_t* const qpData,
 						xx_matrix_t* const res,
 						const vv_matrix_t* const cholH,
 						const xz_matrix_t* const C,
-						const y_vector_t* const y,
+						const d2_vector_t* const y,
 						xx_matrix_t* const xxMatTmp,
 						ux_matrix_t* const uxMatTmp,
 						zx_matrix_t* const zxMatTmp

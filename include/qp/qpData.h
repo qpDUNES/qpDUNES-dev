@@ -132,14 +132,13 @@ typedef struct
 typedef vector_t x_vector_t;
 typedef vector_t u_vector_t;
 typedef vector_t z_vector_t;
-typedef vector_t v_vector_t;
 typedef vector_t d_vector_t;
-typedef vector_t y_vector_t;
+typedef vector_t d2_vector_t;
 typedef vector_t d2n1_vector_t;
 typedef vector_t xn_vector_t;
 typedef vector_t zn_vector_t;
 typedef vector_t zn1_vector_t;
-typedef vector_t homotopyLog_vector_t;
+typedef vector_t large_vector_t;
 
 
 
@@ -218,7 +217,7 @@ typedef struct
 	qpoasesObject_t* qpoasesObject;
 
 	/* workspace */
-	v_vector_t qFullStep;			/**< linear term corresponding to full-step in lambda */
+	z_vector_t qFullStep;			/**< linear term corresponding to full-step in lambda */
 	real_t pFullStep;				/**< constant term corresponding to full-step in lambda */
 } qpSolverQpoases_t;
 
@@ -235,11 +234,11 @@ typedef struct
  */
 typedef struct
 {
-	v_vector_t zUnconstrained;	/**< unconstrained primal solution for current lambda guess */
-	v_vector_t dz;				/**< delta z - update in primal variables corresponding to a full step deltaLambda */
+	z_vector_t zUnconstrained;	/**< unconstrained primal solution for current lambda guess */
+	z_vector_t dz;				/**< delta z - update in primal variables corresponding to a full step deltaLambda */
 
 	/* workspace */
-	v_vector_t qStep;			/**< step in linear term for line search */
+	z_vector_t qStep;			/**< step in linear term for line search */
 	real_t pStep;				/**< step in constant term for line search */
 } qpSolverClipping_t;
 
@@ -275,11 +274,11 @@ typedef struct
 	vv_matrix_t cholH;			/**< inverse of Hessian */
 	real_t HQNorm;				/**< norm of Q-part of Hessian */     //FIXME: choose which norm to compute exactly, etc.
 
-	v_vector_t g;				/**< primal gradient block */
+	z_vector_t g;				/**< primal gradient block */
 
 
 	/* dualized objective function */
-	v_vector_t q;				/**< linear objective function term after dualization */
+	z_vector_t q;				/**< linear objective function term after dualization */
 	real_t p;					/**< constant objective function term after dualization */
 
 
@@ -289,23 +288,21 @@ typedef struct
 
 
 	/* constraints */
-	v_vector_t  zLow;			/**< lower variable bound */
-	v_vector_t  zUpp;			/**< upper variable bound */
+	z_vector_t  zLow;			/**< lower variable bound */
+	z_vector_t  zUpp;			/**< upper variable bound */
 	dz_matrix_t D;				/**< full constraint matrix */
 	d_vector_t  dLow;			/**< constraint lower bound */
 	d_vector_t  dUpp;			/**< constraint upper bound */
 
 
 	/* primal QP solution */
-	v_vector_t z;				/**< full primal solution for current lambda guess */
+	z_vector_t z;				/**< full primal solution for current lambda guess */
 	real_t optObjVal;			/**< objective value */
 
 
 	/* dual QP solution */
-	y_vector_t* y;				/**< stage constraint multiplier vector (reference for easy, consistent swapping)  */
-	y_vector_t* yPrev;			/**< previous stage constraint multiplier vector (needed to detect AS changes)  */
-	y_vector_t yStorage1;		/**< storage for a multiplier vector	*/
-	y_vector_t yStorage2;		/**< storage for a multiplier vector	*/
+	d2_vector_t y;				/**< stage constraint multiplier vector  */
+	d2_vector_t yPrev;			/**< previous stage constraint multiplier vector (needed to detect AS changes)  */
 
 
 	/* QP solver */
@@ -319,13 +316,13 @@ typedef struct
 
 
 	/* memory for objective function parameterization (used optionally in line search) */
-	homotopyLog_vector_t parametricObjFctn_alpha;
-	homotopyLog_vector_t parametricObjFctn_f;
-	homotopyLog_vector_t parametricObjFctn_fPrime;
-	homotopyLog_vector_t parametricObjFctn_fPrimePrime;
+	large_vector_t parametricObjFctn_alpha;
+	large_vector_t parametricObjFctn_f;
+	large_vector_t parametricObjFctn_fPrime;
+	large_vector_t parametricObjFctn_fPrimePrime;
 	int_t parametricObjFctn_nBasePoints;
 
-	homotopyLog_vector_t parametricObjFctn_fSum;			/**< full dual objective value at alpha values of this stage */
+	large_vector_t parametricObjFctn_fSum;			/**< full dual objective value at alpha values of this stage */
 
 
 	/* workspace */
