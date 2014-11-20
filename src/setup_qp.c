@@ -375,7 +375,7 @@ interval_t* qpDUNES_allocInterval(	qpData_t* const qpData,
 #else
 
 	qpDUNES_printError( qpData, __FILE__, __LINE__, "To use the dynamic memory version of qpDUNES, please compile with the __STATIC_MEMORY__ compiler flag disabled.");
-	return QPDUNES_ERR_INVALID_ARGUMENT;
+	return 0;
 
 #endif
 }
@@ -501,6 +501,8 @@ void qpDUNES_freeInterval(	qpData_t* const qpData,
 						interval_t* const interval
 						)
 {
+#ifndef __STATIC_MEMORY__
+
 	qpDUNES_free( &(interval->H.data) );
 
 	qpDUNES_free( &(interval->g.data) );
@@ -542,24 +544,15 @@ void qpDUNES_freeInterval(	qpData_t* const qpData,
 	qpDUNES_free( &(interval->parametricObjFctn_fPrime.data) );
 	qpDUNES_free( &(interval->parametricObjFctn_fPrimePrime.data) );
 	qpDUNES_free( &(interval->parametricObjFctn_fSum.data) );
+
+#else
+
+	qpDUNES_printError( qpData, __FILE__, __LINE__, "To use the dynamic memory version of qpDUNES, please compile with the __STATIC_MEMORY__ compiler flag disabled.");
+	return;
+
+#endif
 }
 /*<<< END OF qpDUNES_freeInterval */
-
-
-
-///* ----------------------------------------------
-// *
-//#>>>>>>                                           */
-//void qpDUNES_indicateDataChange(	qpData_t* const qpData,
-//									interval_t* const interval
-//									)
-//{
-//	int_t ii;
-//
-//	/* initialize prevIeqStatus to safe values when data was changed to force Hessian refactorization */
-//	interval->rebuildHessianBlock = QPDUNES_TRUE;
-//}
-///*<<< END OF qpDUNES_indicateDataChange */
 
 
 
@@ -1272,7 +1265,7 @@ return_t qpDUNES_setupAllLocalQPs(	qpData_t* const qpData,
 				if ( (isLTI) && (kk != 0) && (kk != _NI_) )	{
 					/* only first Hessian needs to be factorized in LTI case, others can be copied;
 					 * last one might still be different, due to terminal cost, even in LTI case */
-					qpDUNES_copyMatrix( &(interval->cholH), &(qpData->intervals[0]->cholH), interval->nV, interval->nV );
+					qpDUNES_copyMatrix( (abstractMatrix_t*)&(interval->cholH), (abstractMatrix_t*)&(qpData->intervals[0]->cholH), interval->nV, interval->nV );
 
 					refactorStageHessian = QPDUNES_FALSE;
 				}
@@ -1295,33 +1288,6 @@ return_t qpDUNES_setupAllLocalQPs(	qpData_t* const qpData,
 		}
 	}
 
-	/* compute H.Q norm */
-	/* TODO: check if really needed */
-	/* TODO: this is deprecated; either fix, or remove */
-	/* fixme: check which norm to actually use */
-	/* TODO: only compute if a regularization option that needs the norm is chosen! */
-//	for( kk=0; kk<_NI_+1; ++kk ) {
-//		qpData->intervals[kk]->HQNorm = qpData->options.QPDUNES_INFTY;
-//		/* TODO: make also work for non-diagonal weighting matrices! */
-//		if ( qpData->intervals[kk]->H.HQ.sparsityType == QPDUNES_DIAGONAL ) {
-//			for( ii=0; ii<_NX_; ++ii ) {
-//				/* for diagonal matrices this corresponds to the spectral norm */
-////				qpData->intervals[kk]->HQNorm = qpDUNES_fmax( qpData->intervals[kk]->H.HQ.data[ii], qpData->intervals[kk]->HQNorm );
-//				/* this gives us the mininum eigen value */
-////				qpData->intervals[kk]->HQNorm = qpDUNES_fmin( qpData->intervals[kk]->H.HQ.data[ii], qpData->intervals[kk]->HQNorm );
-//			}
-////			qpDUNES_printf( "this is norm[%d]: %.1e", kk, qpData->intervals[kk]->HQNorm );
-//		}
-//		else {
-//			if ( qpData->intervals[kk]->H.HQ.sparsityType == QPDUNES_IDENTITY ) {
-////				qpData->intervals[kk]->HQNorm = 1.;
-//			}
-//			else {
-//				qpDUNES_printError( qpData, __FILE__, __LINE__, "norm computation for general weighting matrices not yet implemented" );
-//				return QPDUNES_ERR_UNKNOWN_ERROR;
-//			}
-//		}
-//	}
 
 	return QPDUNES_OK;
 }
@@ -1354,7 +1320,7 @@ return_t qpDUNES_setupClippingSolver(	qpData_t* const qpData,
 
 	/*     - update first order term */
 	/*       reset q; qStep is added in directQpSolver_doStep, when bounds are known */
-	qpDUNES_setupZeroVector( &(interval->q), interval->nV );
+	qpDUNES_setupZeroVector( (abstractVector_t*)&(interval->q), interval->nV );
 	clippingQpSolver_updateDualGuess( qpData, interval, &(interval->lambdaK), &(interval->lambdaK1) );
 	addToVector( (abstractVector_t*)&(interval->qpSolverClipping.qStep), (abstractVector_t*)&(interval->g), interval->nV );	/* Note: qStep is rewritten in line before */
 	/*     - solve */
@@ -1366,20 +1332,20 @@ return_t qpDUNES_setupClippingSolver(	qpData_t* const qpData,
 		return statusFlag;
 	}
 
-	qpDUNES_setupZeroVector( &(interval->qpSolverClipping.zUnconstrained), interval->nV );	/* reset zUnconstrained */
+	qpDUNES_setupZeroVector( (abstractVector_t*)&(interval->qpSolverClipping.zUnconstrained), interval->nV );	/* reset zUnconstrained */
 
 
 
 	/* clip directly on setup */
 	statusFlag = clippingQpSolver_doStep(	qpData,
-														interval,
-														&(interval->qpSolverClipping.dz), 1,
-														&(interval->qpSolverClipping.zUnconstrained),
-														&(interval->z),
-														interval->y,
-														&(interval->q),
-														&(interval->p)
-														);
+											interval,
+											&(interval->qpSolverClipping.dz), 1,
+											&(interval->qpSolverClipping.zUnconstrained),
+											&(interval->z),
+											interval->y,
+											&(interval->q),
+											&(interval->p)
+											);
 
 //	qpDUNES_printMatrixData( interval->z.data, 1, interval->nV, "starting with z[%d] = ", interval->id);
 
@@ -1400,7 +1366,7 @@ return_t qpDUNES_setupQpoases(	qpData_t* const qpData,
 
 	/* (a) prepare first order term: initial lambda guess and g */
 	/*	   - get primal first order term */
-	qpDUNES_copyVector( &(interval->q), &(interval->g), interval->nV );
+	qpDUNES_copyVector( (abstractVector_t*)&(interval->q), (abstractVector_t*)&(interval->g), interval->nV );
 	/*	   - get (possibly updated) lambda guess */
 	if (interval->id > 0) {		/* lambdaK exists */
 		qpDUNES_updateVector( (abstractVector_t*)&(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
@@ -1450,7 +1416,7 @@ return_t qpDUNES_updateQpoases(	qpData_t* const qpData,
 //	if (g_changed == QPDUNES_TRUE) {
 		// we always need to get original g, since we add lambda completely!
 //	}
-	qpDUNES_copyVector( &(interval->q), &(interval->g), interval->nV );
+	qpDUNES_copyVector( (abstractVector_t*)&(interval->q), (abstractVector_t*)&(interval->g), interval->nV );
 	/*	   - get (possibly updated) lambda guess */
 	if (interval->id > 0) {		/* lambdaK exists */
 		qpDUNES_updateVector( (abstractVector_t*)&(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
@@ -1726,15 +1692,18 @@ qpOptions_t qpDUNES_setupDefaultOptions( )
 return_t qpDUNES_setupLog(	qpData_t* const qpData
 							)
 {
-	log_t* itLog = &(qpData->log);
+	if ( qpData->options.logLevel >= QPDUNES_LOG_ITERATIONS )
+	{
+		log_t* itLog = &(qpData->log);
 
-	itLog->nI = _NI_;
-	itLog->nX = _NX_;
-	itLog->nU = _NU_;
-	itLog->nZ = _NZ_;
-	itLog->nDttl = _NDTTL_;
+		itLog->nI = _NI_;
+		itLog->nX = _NX_;
+		itLog->nU = _NU_;
+		itLog->nZ = _NZ_;
+		itLog->nDttl = _NDTTL_;
 
-	itLog->qpOptions = qpData->options;	/* WARNING: this relies on qpOptions_t to only have primitive non-pointer data */
+		itLog->qpOptions = qpData->options;	/* WARNING: this relies on qpOptions_t to only have primitive non-pointer data */
+	}
 
 	return QPDUNES_OK;
 }

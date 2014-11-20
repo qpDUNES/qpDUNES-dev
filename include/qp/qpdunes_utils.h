@@ -302,8 +302,8 @@ return_t qpDUNES_updateConstraintVector( 	abstractVector_t* const to,
  *	\date 2012
  */
 return_t qpDUNES_setupZeroVector(	abstractVector_t* const to,
-								int_t n
-								);
+									int_t n
+									);
 
 
 /** 

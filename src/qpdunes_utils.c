@@ -419,9 +419,9 @@ return_t qpDUNES_updateSimpleBoundVector(	qpData_t* qpData,
  *
  >>>>>                                            */
 return_t qpDUNES_updateConstraintVector( 	abstractVector_t* const to,
-										const real_t* const dBnd,
-										int_t nD
-										)
+											const real_t* const dBnd,
+											int_t nD
+											)
 {
 	int_t i;
 	
@@ -445,8 +445,8 @@ return_t qpDUNES_updateConstraintVector( 	abstractVector_t* const to,
  *
  >>>>>                                            */
 return_t qpDUNES_setupZeroVector(	abstractVector_t* const to,
-								int_t n
-								)
+									int_t n
+									)
 {
 	int_t i;
 	

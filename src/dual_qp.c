@@ -1657,7 +1657,7 @@ return_t qpDUNES_determineStepLength(	qpData_t* const qpData,
 	/* UPDATE VARIABLES */
 	/* lambda */
 //	addVectorScaledVector( lambda, lambda, *alpha, deltaLambdaFS, nV );
-	addScaledVector(lambda, *alpha, deltaLambdaFS, nV);
+	addScaledVector( (abstractVector_t*)lambda, *alpha, (abstractVector_t*)deltaLambdaFS, nV );
 	/* stage QP variables */
 	for (kk = 0; kk < _NI_ + 1; ++kk) {
 		interval = qpData->intervals[kk];

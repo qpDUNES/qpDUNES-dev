@@ -130,20 +130,20 @@ return_t mpcDUNES_cleanup(	mpcProblem_t* const mpcProblem
  * 
  # >>>>>>                                           */
 return_t mpcDUNES_initLtiSb_xu(	mpcProblem_t* const mpcProblem,
-							const real_t* const Q,
-							const real_t* const R,
-							const real_t* const S,
-							const real_t* const P,
-							const real_t* const A,
-							const real_t* const B,
-							const real_t* const c, 
-							const real_t* const xLow,
-							const real_t* const xUpp,
-							const real_t* const uLow,
-							const real_t* const uUpp,
-							const real_t* const xRef,
-							const real_t* const uRef
-							)
+								const real_t* const Q,
+								const real_t* const R,
+								const real_t* const S,
+								const real_t* const P,
+								const real_t* const A,
+								const real_t* const B,
+								const real_t* const c,
+								const real_t* const xLow,
+								const real_t* const xUpp,
+								const real_t* const uLow,
+								const real_t* const uUpp,
+								const real_t* const xRef,
+								const real_t* const uRef
+								)
 {
 	int_t ii,jj,kk;
 	
@@ -153,10 +153,10 @@ return_t mpcDUNES_initLtiSb_xu(	mpcProblem_t* const mpcProblem,
 
 
 	qpData_t* qpData = &(mpcProblem->qpData);
-	int_t nI = qpData->nI;
-	int_t nZ = qpData->nZ;
-	int_t nX = qpData->nX;
-	int_t nU = qpData->nU;
+//	int_t nI = qpData->nI;
+//	int_t nZ = qpData->nZ;
+//	int_t nX = qpData->nX;
+//	int_t nU = qpData->nU;
 	
 	real_t* cMod = mpcProblem->xnTmp;	/* temporary variables for bound setup from workspace */
 	real_t* zLowMod = mpcProblem->zn1Tmp;
@@ -184,25 +184,25 @@ return_t mpcDUNES_initLtiSb_xu(	mpcProblem_t* const mpcProblem,
 	/** get data */
 
 	/* get reference */
-	for ( kk=0; kk<nI; ++kk ) {
+	for ( kk=0; kk<_NI_; ++kk ) {
 		if ( xRef != 0 ) {
-			for ( ii=0; ii<nX; ++ii ) {
-				mpcProblem->zRef[kk*nZ+ii] = xRef[kk*nX+ii];
+			for ( ii=0; ii<_NX_; ++ii ) {
+				mpcProblem->zRef[kk*_NZ_+ii] = xRef[kk*_NX_+ii];
 			}
 		}
 		else {
-			for ( ii=0; ii<nX; ++ii ) {
-				mpcProblem->zRef[kk*nZ+ii] = 0.;
+			for ( ii=0; ii<_NX_; ++ii ) {
+				mpcProblem->zRef[kk*_NZ_+ii] = 0.;
 			}
 		}
 		if ( uRef != 0 ) {
-			for ( ii=0; ii<nU; ++ii ) {
-				mpcProblem->zRef[kk*nZ+nX+ii] = uRef[kk*nU+ii];
+			for ( ii=0; ii<_NU_; ++ii ) {
+				mpcProblem->zRef[kk*_NZ_+_NX_+ii] = uRef[kk*_NU_+ii];
 			}
 		}
 		else {
-			for ( ii=0; ii<nU; ++ii ) {
-				mpcProblem->zRef[kk*nZ+nX+ii] = 0.;
+			for ( ii=0; ii<_NU_; ++ii ) {
+				mpcProblem->zRef[kk*_NZ_+_NX_+ii] = 0.;
 			}
 		}
 	}
@@ -211,25 +211,25 @@ return_t mpcDUNES_initLtiSb_xu(	mpcProblem_t* const mpcProblem,
 	/* translate variables to account for reference zQP := (z-zRef) */
 	/* account for variable substitution in dynamics: c += [A B] * [xRef' uRef']' */
 	if ( c != 0 ) {
-		for ( kk=0; kk<nI; ++kk ) {
-			for ( ii=0; ii<nX; ++ii )  cMod[kk*nX+ii] = c[ii];
+		for ( kk=0; kk<_NI_; ++kk ) {
+			for ( ii=0; ii<_NX_; ++ii )  cMod[kk*_NX_+ii] = c[ii];
 		}
 	}
 	else {
-		for ( ii=0; ii<nI*nX; ++ii )  cMod[ii] = 0.;
+		for ( ii=0; ii<_NI_*_NX_; ++ii )  cMod[ii] = 0.;
 	}
-	for ( kk=0; kk<nI; ++kk ) {
-		for ( ii=0; ii<nX; ++ii ) {
+	for ( kk=0; kk<_NI_; ++kk ) {
+		for ( ii=0; ii<_NX_; ++ii ) {
 			/* x part */
 			if ( xRef != 0 ) {
-				for ( jj=0; jj<nX; ++jj ) {
-					cMod[kk*nX+ii] += A[ii*nX + jj] * mpcProblem->zRef[kk*nZ+jj] - mpcProblem->zRef[(kk+1)*nZ+jj];
+				for ( jj=0; jj<_NX_; ++jj ) {
+					cMod[kk*_NX_+ii] += A[ii*_NX_ + jj] * mpcProblem->zRef[kk*_NZ_+jj] - mpcProblem->zRef[(kk+1)*_NZ_+jj];
 				}
 			}
 			/* u part */
 			if ( uRef != 0 ) {
-				for ( jj=0; jj<nU; ++jj ) {
-					cMod[kk*nX+ii] += B[ii*nU + jj] * mpcProblem->zRef[kk*nZ+nX+jj];
+				for ( jj=0; jj<_NU_; ++jj ) {
+					cMod[kk*_NX_+ii] += B[ii*_NU_ + jj] * mpcProblem->zRef[kk*_NZ_+_NX_+jj];
 				}
 			}
 		}
@@ -239,93 +239,93 @@ return_t mpcDUNES_initLtiSb_xu(	mpcProblem_t* const mpcProblem,
 	/* WARNING: currently no support for general constraint matrices! */
 	/* lower bounds */
 	/* first nI intervals */
-	for ( kk=0; kk<nI; ++kk ) {
+	for ( kk=0; kk<_NI_; ++kk ) {
 		/* x part */
 		if ( xLow != 0 ) {
-			for ( ii=0; ii<nX; ++ii )  zLowMod[kk*nZ+ii] = xLow[kk*nX+ii] - mpcProblem->zRef[kk*nZ+ii];
+			for ( ii=0; ii<_NX_; ++ii )  zLowMod[kk*_NZ_+ii] = xLow[kk*_NX_+ii] - mpcProblem->zRef[kk*_NZ_+ii];
 		}
 		else {
-			for ( ii=0; ii<nX; ++ii )  zLowMod[kk*nZ+ii] = -qpData->options.QPDUNES_INFTY;
+			for ( ii=0; ii<_NX_; ++ii )  zLowMod[kk*_NZ_+ii] = -qpData->options.QPDUNES_INFTY;
 		}
 		/* u part */
 		if ( uLow != 0 ) {
-			for ( ii=0; ii<nU; ++ii )  zLowMod[kk*nZ+nX+ii] = uLow[kk*nU+ii] - mpcProblem->zRef[kk*nZ+nX+ii];
+			for ( ii=0; ii<_NU_; ++ii )  zLowMod[kk*_NZ_+_NX_+ii] = uLow[kk*_NU_+ii] - mpcProblem->zRef[kk*_NZ_+_NX_+ii];
 		}
 		else {
-			for ( ii=0; ii<nU; ++ii )  zLowMod[kk*nZ+nX+ii] = -qpData->options.QPDUNES_INFTY;
+			for ( ii=0; ii<_NU_; ++ii )  zLowMod[kk*_NZ_+_NX_+ii] = -qpData->options.QPDUNES_INFTY;
 		}
 	}
 	/* last interval */
 	if ( xLow != 0 ) {
-		for ( ii=0; ii<nX; ++ii )  zLowMod[nI*nZ+ii] = xLow[nI*nX+ii] - mpcProblem->zRef[nI*nZ+ii];
+		for ( ii=0; ii<_NX_; ++ii )  zLowMod[_NI_*_NZ_+ii] = xLow[_NI_*_NX_+ii] - mpcProblem->zRef[_NI_*_NZ_+ii];
 	}
 	else {
-		for ( ii=0; ii<nX; ++ii )  zLowMod[nI*nZ+ii] = -qpData->options.QPDUNES_INFTY;
+		for ( ii=0; ii<_NX_; ++ii )  zLowMod[_NI_*_NZ_+ii] = -qpData->options.QPDUNES_INFTY;
 	}
 
 	/* upper bounds */
 	/* first nI intervals */
-	for ( kk=0; kk<nI; ++kk ) {
+	for ( kk=0; kk<_NI_; ++kk ) {
 		/* x part */
 		if ( xUpp != 0 ) {
-			for ( ii=0; ii<nX; ++ii )  zUppMod[kk*nZ+ii] = xUpp[kk*nX+ii] - mpcProblem->zRef[kk*nZ+ii];
+			for ( ii=0; ii<_NX_; ++ii )  zUppMod[kk*_NZ_+ii] = xUpp[kk*_NX_+ii] - mpcProblem->zRef[kk*_NZ_+ii];
 		}
 		else {
-			for ( ii=0; ii<nX; ++ii )  zUppMod[kk*nZ+ii] = qpData->options.QPDUNES_INFTY;
+			for ( ii=0; ii<_NX_; ++ii )  zUppMod[kk*_NZ_+ii] = qpData->options.QPDUNES_INFTY;
 		}
 		/* u part */
 		if ( uUpp != 0 ) {
-			for ( ii=0; ii<nU; ++ii )  zUppMod[kk*nZ+nX+ii] = uUpp[kk*nU+ii] - mpcProblem->zRef[kk*nZ+nX+ii];
+			for ( ii=0; ii<_NU_; ++ii )  zUppMod[kk*_NZ_+_NX_+ii] = uUpp[kk*_NU_+ii] - mpcProblem->zRef[kk*_NZ_+_NX_+ii];
 		}
 		else {
-			for ( ii=0; ii<nU; ++ii )  zUppMod[kk*nZ+nX+ii] = qpData->options.QPDUNES_INFTY;
+			for ( ii=0; ii<_NU_; ++ii )  zUppMod[kk*_NZ_+_NX_+ii] = qpData->options.QPDUNES_INFTY;
 		}
 	}
 	/* last interval */
 	if ( xUpp != 0 ) {
-		for ( ii=0; ii<nX; ++ii )  zUppMod[nI*nZ+ii] = xUpp[nI*nX+ii] - mpcProblem->zRef[nI*nZ+ii];
+		for ( ii=0; ii<_NX_; ++ii )  zUppMod[_NI_*_NZ_+ii] = xUpp[_NI_*_NX_+ii] - mpcProblem->zRef[_NI_*_NZ_+ii];
 	}
 	else {
-		for ( ii=0; ii<nX; ++ii )  zUppMod[nI*nZ+ii] = qpData->options.QPDUNES_INFTY;
+		for ( ii=0; ii<_NX_; ++ii )  zUppMod[_NI_*_NZ_+ii] = qpData->options.QPDUNES_INFTY;
 	}
 	
 	
 	/* setup regular intervals */
-	for( kk=0; kk<nI; ++kk )
+	for( kk=0; kk<_NI_; ++kk )
 	{
 		/* TODO: do this more efficiently, let qp solver know that intervals are identical... factorizations, etc. */
 		statusFlag = qpDUNES_setupRegularInterval( qpData, qpData->intervals[kk],
 												0, Q, R, S, 0,
-												0, A, B, &(cMod[kk*nX]),
-												&(zLowMod[kk*nZ]), &(zUppMod[kk*nZ]), 0,0,0,0,
+												0, A, B, &(cMod[kk*_NX_]),
+												&(zLowMod[kk*_NZ_]), &(zUppMod[kk*_NZ_]), 0,0,0,0,
 												0,0,0 );
 		if (statusFlag != QPDUNES_OK) {
-			qpDUNES_printError(qpData, __FILE__, __LINE__, "Setup of interval %d of %d failed. Bailing out.", kk, nI );
+			qpDUNES_printError(qpData, __FILE__, __LINE__, "Setup of interval %d of %d failed. Bailing out.", kk, _NI_ );
 			return statusFlag;
 		}
 	}
 	/* set up final interval */
 	if ( P != 0 ) {
-		statusFlag = qpDUNES_setupFinalInterval( qpData, qpData->intervals[nI],
+		statusFlag = qpDUNES_setupFinalInterval( qpData, qpData->intervals[_NI_],
 											  P, 0,
-											  &(zLowMod[nI*nZ]), &(zUppMod[nI*nZ]),
+											  &(zLowMod[_NI_*_NZ_]), &(zUppMod[_NI_*_NZ_]),
 											  0,0,0 );
 	}
 	else {
-		statusFlag = qpDUNES_setupFinalInterval( qpData, qpData->intervals[nI],
+		statusFlag = qpDUNES_setupFinalInterval( qpData, qpData->intervals[_NI_],
 											  Q, 0,
-											  &(zLowMod[nI*nZ]), &(zUppMod[nI*nZ]),
+											  &(zLowMod[_NI_*_NZ_]), &(zUppMod[_NI_*_NZ_]),
 											  0,0,0 );
 	}
 	if (statusFlag != QPDUNES_OK) {
-		qpDUNES_printError(qpData, __FILE__, __LINE__, "Setup of interval %d of %d failed. Bailing out.", nI, nI );
+		qpDUNES_printError(qpData, __FILE__, __LINE__, "Setup of interval %d of %d failed. Bailing out.", _NI_, _NI_ );
 		return statusFlag;
 	}
 	
 	/* determine local QP solvers and set up auxiliary data */
 	statusFlag = qpDUNES_setupAllLocalQPs( qpData, mpcProblem->isLTI );
 	if (statusFlag != QPDUNES_OK) {
-		qpDUNES_printError(qpData, __FILE__, __LINE__, "Local QP setup failed. Bailing out.", kk, nI );
+		qpDUNES_printError(qpData, __FILE__, __LINE__, "Local QP setup failed. Bailing out.", kk, _NI_ );
 		return statusFlag;
 	}
 
@@ -358,9 +358,9 @@ return_t mpcDUNES_initLtiSb(	mpcProblem_t* const mpcProblem,
 
 
 	qpData_t* qpData = &(mpcProblem->qpData);
-	int_t nI = qpData->nI;
-	int_t nZ = qpData->nZ;
-	int_t nX = qpData->nX;
+//	int_t nI = qpData->nI;
+//	int_t _NZ_ = qpData->_NZ_;
+//	int_t _NX_ = qpData->_NX_;
 
 	real_t* cMod = mpcProblem->xnTmp;	/* temporary variables for bound setup from workspace */
 	real_t* zLowMod = mpcProblem->zn1Tmp;
@@ -381,12 +381,12 @@ return_t mpcDUNES_initLtiSb(	mpcProblem_t* const mpcProblem,
 
 	/** (2a) get reference */
 	if ( zRef_ != 0 ) {
-		for ( ii=0; ii<nI*nZ+nX; ++ii ) {
+		for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii ) {
 			mpcProblem->zRef[ii] = zRef_[ii];
 		}
 	}
 	else {
-		for ( ii=0; ii<nI*nZ+nX; ++ii ) {
+		for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii ) {
 			mpcProblem->zRef[ii] = 0.;
 		}
 	}
@@ -394,20 +394,20 @@ return_t mpcDUNES_initLtiSb(	mpcProblem_t* const mpcProblem,
 	/* translate variables to account for reference zQP := (z-zRef) */
 	/** (2b) account for variable substitution in dynamics: c += [A B] * [xRef' uRef']' */
 	if ( c_ != 0 )	{
-		for ( kk=0; kk<nI; ++kk ) {
-			for ( ii=0; ii<nX; ++ii ) {
-				cMod[kk*nX+ii] = c_[ii];
+		for ( kk=0; kk<_NI_; ++kk ) {
+			for ( ii=0; ii<_NX_; ++ii ) {
+				cMod[kk*_NX_+ii] = c_[ii];
 			}
 		}
 	}
 	else {
-		for ( ii=0; ii<nI*nX; ++ii )  cMod[ii] = 0.;
+		for ( ii=0; ii<_NI_*_NX_; ++ii )  cMod[ii] = 0.;
 	}
 	if ( zRef_ != 0 ) {
-		for ( kk=0; kk<nI; ++kk ) {
-			for ( ii=0; ii<nX; ++ii ) {
-				for ( jj=0; jj<nZ; ++jj ) {
-					cMod[kk*nX+ii] += C_[ii*nZ + jj] * zRef_[kk*nZ+jj] - zRef_[(kk+1)*nZ+ii];
+		for ( kk=0; kk<_NI_; ++kk ) {
+			for ( ii=0; ii<_NX_; ++ii ) {
+				for ( jj=0; jj<_NZ_; ++jj ) {
+					cMod[kk*_NX_+ii] += C_[ii*_NZ_ + jj] * zRef_[kk*_NZ_+jj] - zRef_[(kk+1)*_NZ_+ii];
 				}
 			}
 		}
@@ -419,57 +419,57 @@ return_t mpcDUNES_initLtiSb(	mpcProblem_t* const mpcProblem,
 	 * to support this in general use z{l,u} -= D*zRef */
 	if ( zLow_ != 0 ) {
 		if ( zRef_ != 0 ) {
-			for ( ii=0; ii<nI*nZ+nX; ++ii )  zLowMod[ii] = zLow_[ii] - zRef_[ii];
+			for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii )  zLowMod[ii] = zLow_[ii] - zRef_[ii];
 		}
 		else {
-			for ( ii=0; ii<nI*nZ+nX; ++ii )  zLowMod[ii] = zLow_[ii];
+			for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii )  zLowMod[ii] = zLow_[ii];
 		}
 	}
 	else {
-		for ( ii=0; ii<nI*nZ+nX; ++ii )  zLowMod[ii] = -qpData->options.QPDUNES_INFTY;
+		for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii )  zLowMod[ii] = -qpData->options.QPDUNES_INFTY;
 	}
 
 	if ( zUpp_ != 0 ) {
 		if ( zRef_ != 0 ) {
-			for ( ii=0; ii<nI*nZ+nX; ++ii )  zUppMod[ii] = zUpp_[ii] - zRef_[ii];
+			for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii )  zUppMod[ii] = zUpp_[ii] - zRef_[ii];
 		}
 		else {
-			for ( ii=0; ii<nI*nZ+nX; ++ii )  zUppMod[ii] = zUpp_[ii];
+			for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii )  zUppMod[ii] = zUpp_[ii];
 		}
 	}
 	else {
-		for ( ii=0; ii<nI*nZ+nX; ++ii )  zUppMod[ii] = qpData->options.QPDUNES_INFTY;
+		for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii )  zUppMod[ii] = qpData->options.QPDUNES_INFTY;
 	}
 
 
 	/** (3) setup regular intervals */
-	for( kk=0; kk<nI; ++kk )
+	for( kk=0; kk<_NI_; ++kk )
 	{
 		/* TODO: do this more efficiently, let qp solver know that intervals are identical... factorizations, etc. */
 		statusFlag = qpDUNES_setupRegularInterval( qpData, qpData->intervals[kk],
 												H_, 0, 0, 0, g_,
-												C_, 0, 0, &(cMod[kk*nX]),
-												&(zLowMod[kk*nZ]), &(zUppMod[kk*nZ]), 0,0,0,0,
+												C_, 0, 0, &(cMod[kk*_NX_]),
+												&(zLowMod[kk*_NZ_]), &(zUppMod[kk*_NZ_]), 0,0,0,0,
 												0, 0,0 );
 		if (statusFlag != QPDUNES_OK) {
-			qpDUNES_printError(qpData, __FILE__, __LINE__, "Setup of interval %d of %d failed. Bailing out.", kk, nI );
+			qpDUNES_printError(qpData, __FILE__, __LINE__, "Setup of interval %d of %d failed. Bailing out.", kk, _NI_ );
 			return statusFlag;
 		}
 	}
 	/* set up final interval */
-	statusFlag = qpDUNES_setupFinalInterval( qpData, qpData->intervals[nI],
+	statusFlag = qpDUNES_setupFinalInterval( qpData, qpData->intervals[_NI_],
 										  P_, g_,
-										  &(zLowMod[nI*nZ]), &(zUppMod[nI*nZ]),
+										  &(zLowMod[_NI_*_NZ_]), &(zUppMod[_NI_*_NZ_]),
 										  0, 0,0 );
 	if (statusFlag != QPDUNES_OK) {
-		qpDUNES_printError(qpData, __FILE__, __LINE__, "Setup of interval %d of %d failed. Bailing out.", nI, nI );
+		qpDUNES_printError(qpData, __FILE__, __LINE__, "Setup of interval %d of %d failed. Bailing out.", _NI_, _NI_ );
 		return statusFlag;
 	}
 
 	/* determine local QP solvers and set up auxiliary data */
 	statusFlag = qpDUNES_setupAllLocalQPs( qpData, mpcProblem->isLTI );
 	if (statusFlag != QPDUNES_OK) {
-		qpDUNES_printError(qpData, __FILE__, __LINE__, "Local QP setup failed. Bailing out.", kk, nI );
+		qpDUNES_printError(qpData, __FILE__, __LINE__, "Local QP setup failed. Bailing out.", kk, _NI_ );
 		return statusFlag;
 	}
 
@@ -500,9 +500,9 @@ return_t mpcDUNES_initLtvSb(	mpcProblem_t* const mpcProblem,
 	mpcProblem->isLTI = QPDUNES_FALSE;
 
 	qpData_t* qpData = &(mpcProblem->qpData);
-	int_t nI = qpData->nI;
-	int_t nZ = qpData->nZ;
-	int_t nX = qpData->nX;
+//	int_t nI = qpData->nI;
+//	int_t _NZ_ = qpData->_NZ_;
+//	int_t _NX_ = qpData->_NX_;
 
 	real_t* cMod = mpcProblem->xnTmp;	/* temporary variables for bound setup from workspace */
 	real_t* zLowMod = mpcProblem->zn1Tmp;
@@ -523,12 +523,12 @@ return_t mpcDUNES_initLtvSb(	mpcProblem_t* const mpcProblem,
 
 	/** (2a) get reference */
 	if ( zRef_ != 0 ) {
-		for ( ii=0; ii<nI*nZ+nX; ++ii ) {
+		for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii ) {
 			mpcProblem->zRef[ii] = zRef_[ii];
 		}
 	}
 	else {
-		for ( ii=0; ii<nI*nZ+nX; ++ii ) {
+		for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii ) {
 			mpcProblem->zRef[ii] = 0.;
 		}
 	}
@@ -536,17 +536,17 @@ return_t mpcDUNES_initLtvSb(	mpcProblem_t* const mpcProblem,
 	/* translate variables to account for reference zQP := (z-zRef) */
 	/** (2b) account for variable substitution in dynamics: c += [A B] * [xRef' uRef']' */
 	if ( c_ != 0 ) {
-		for ( ii=0; ii<nI*nX; ++ii )   cMod[ii] = c_[ii];
+		for ( ii=0; ii<_NI_*_NX_; ++ii )   cMod[ii] = c_[ii];
 	}
 	else {
-		for ( ii=0; ii<nI*nX; ++ii )  cMod[ii] = 0.;
+		for ( ii=0; ii<_NI_*_NX_; ++ii )  cMod[ii] = 0.;
 	}
 	if ( zRef_ != 0 ) {
-		for ( kk=0; kk<nI; ++kk ) {
-			for ( ii=0; ii<nX; ++ii ) {
-				for ( jj=0; jj<nZ; ++jj ) {
+		for ( kk=0; kk<_NI_; ++kk ) {
+			for ( ii=0; ii<_NX_; ++ii ) {
+				for ( jj=0; jj<_NZ_; ++jj ) {
 					/*                   blocks       rows    cols                  */
-					cMod[kk*nX+ii] += C_[kk*(nX*nZ) + ii*nZ + jj] * zRef_[kk*nZ+jj] - zRef_[(kk+1)*nZ+ii];
+					cMod[kk*_NX_+ii] += C_[kk*(_NX_*_NZ_) + ii*_NZ_ + jj] * zRef_[kk*_NZ_+jj] - zRef_[(kk+1)*_NZ_+ii];
 				}
 			}
 		}
@@ -558,53 +558,53 @@ return_t mpcDUNES_initLtvSb(	mpcProblem_t* const mpcProblem,
 	 * to support this in general use z{l,u} -= D*zRef */
 	if ( zLow_ != 0 ) {
 		if ( zRef_ != 0 ) {
-			for ( ii=0; ii<nI*nZ+nX; ++ii )  zLowMod[ii] = zLow_[ii] - zRef_[ii];
+			for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii )  zLowMod[ii] = zLow_[ii] - zRef_[ii];
 		}
 		else {
-			for ( ii=0; ii<nI*nZ+nX; ++ii )  zLowMod[ii] = zLow_[ii];
+			for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii )  zLowMod[ii] = zLow_[ii];
 //			zLowMod = zLow_;
 		}
 	}
 	else {
-		for ( ii=0; ii<nI*nZ+nX; ++ii )  zLowMod[ii] = -qpData->options.QPDUNES_INFTY;
+		for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii )  zLowMod[ii] = -qpData->options.QPDUNES_INFTY;
 	}
 
 	if ( zUpp_ != 0 ) {
 		if ( zRef_ != 0 ) {
-			for ( ii=0; ii<nI*nZ+nX; ++ii )  zUppMod[ii] = zUpp_[ii] - zRef_[ii];
+			for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii )  zUppMod[ii] = zUpp_[ii] - zRef_[ii];
 		}
 		else {
-			for ( ii=0; ii<nI*nZ+nX; ++ii )  zUppMod[ii] = zUpp_[ii];
+			for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii )  zUppMod[ii] = zUpp_[ii];
 //			zUppMod = zUpp_;
 		}
 	}
 	else {
-		for ( ii=0; ii<nI*nZ+nX; ++ii )  zUppMod[ii] = qpData->options.QPDUNES_INFTY;
+		for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii )  zUppMod[ii] = qpData->options.QPDUNES_INFTY;
 	}
 
 
 	/** (3) setup intervals */
 	/** (3a) setup regular intervals */
-	for( kk=0; kk<nI; ++kk )
+	for( kk=0; kk<_NI_; ++kk )
 	{
 		if (g_ != 0) {
 			qpDUNES_setupRegularInterval( qpData, qpData->intervals[kk],
-									   &(H_[kk*nZ*nZ]), 0, 0, 0, &(g_[kk*nZ]),
-									   &(C_[kk*nX*nZ]), 0, 0, &(cMod[kk*nX]),
-									   &(zLowMod[kk*nZ]), &(zUppMod[kk*nZ]), 0,0,0,0,
+									   &(H_[kk*_NZ_*_NZ_]), 0, 0, 0, &(g_[kk*_NZ_]),
+									   &(C_[kk*_NX_*_NZ_]), 0, 0, &(cMod[kk*_NX_]),
+									   &(zLowMod[kk*_NZ_]), &(zUppMod[kk*_NZ_]), 0,0,0,0,
 									   0, 0,0 );
 		}
 		else {
 			qpDUNES_setupRegularInterval( qpData, qpData->intervals[kk],
-									   &(H_[kk*nZ*nZ]), 0, 0, 0, 0,
-									   &(C_[kk*nX*nZ]), 0, 0, &(cMod[kk*nX]),
-									   &(zLowMod[kk*nZ]), &(zUppMod[kk*nZ]), 0,0,0,0,
+									   &(H_[kk*_NZ_*_NZ_]), 0, 0, 0, 0,
+									   &(C_[kk*_NX_*_NZ_]), 0, 0, &(cMod[kk*_NX_]),
+									   &(zLowMod[kk*_NZ_]), &(zUppMod[kk*_NZ_]), 0,0,0,0,
 									   0, 0,0 );
 		}
 	}
 	/** (3b) set up final interval */
-	if (g_ != 0)	qpDUNES_setupFinalInterval( qpData, qpData->intervals[nI], &(H_[nI*nZ*nZ]), &(g_[nI*nZ]), &(zLowMod[nI*nZ]), &(zUppMod[nI*nZ]), 0, 0,0 );
-	else			qpDUNES_setupFinalInterval( qpData, qpData->intervals[nI], &(H_[nI*nZ*nZ]), 0, &(zLowMod[nI*nZ]), &(zUppMod[nI*nZ]), 0, 0,0 );
+	if (g_ != 0)	qpDUNES_setupFinalInterval( qpData, qpData->intervals[_NI_], &(H_[_NI_*_NZ_*_NZ_]), &(g_[_NI_*_NZ_]), &(zLowMod[_NI_*_NZ_]), &(zUppMod[_NI_*_NZ_]), 0, 0,0 );
+	else			qpDUNES_setupFinalInterval( qpData, qpData->intervals[_NI_], &(H_[_NI_*_NZ_*_NZ_]), 0, &(zLowMod[_NI_*_NZ_]), &(zUppMod[_NI_*_NZ_]), 0, 0,0 );
 
 
 
@@ -645,10 +645,10 @@ return_t mpcDUNES_initLtv(	mpcProblem_t* const mpcProblem,
 	mpcProblem->isLTI = QPDUNES_FALSE;
 
 	qpData_t* qpData = &(mpcProblem->qpData);
-	int_t nI = qpData->nI;
-	int_t nZ = qpData->nZ;
-	int_t nX = qpData->nX;
-	int_t nVttl = nI*nZ + nX;
+//	int_t nI = qpData->nI;
+//	int_t _NZ_ = qpData->_NZ_;
+//	int_t _NX_ = qpData->_NX_;
+	int_t nVttl = _NI_*_NZ_ + _NX_;
 
 	int_t nDoffset;
 
@@ -674,12 +674,12 @@ return_t mpcDUNES_initLtv(	mpcProblem_t* const mpcProblem,
 
 	/** (2a) get reference */
 	if ( zRef_ != 0 ) {
-		for ( ii=0; ii<nI*nZ+nX; ++ii ) {
+		for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii ) {
 			mpcProblem->zRef[ii] = zRef_[ii];
 		}
 	}
 	else {
-		for ( ii=0; ii<nI*nZ+nX; ++ii ) {
+		for ( ii=0; ii<_NI_*_NZ_+_NX_; ++ii ) {
 			mpcProblem->zRef[ii] = 0.;
 		}
 	}
@@ -688,20 +688,20 @@ return_t mpcDUNES_initLtv(	mpcProblem_t* const mpcProblem,
 	 * .5 * (z-zRef)' * H * (z-zRef)  =  .5 * z' * H * z  +  (zRef' * H) * z  +  (zRef * H * zRef) */
 	/* get H*zRef */
 	if ( zRef_ != 0 ) {
-		for( kk=0; kk<nI; ++kk ) {
-			for( ii=0; ii<nZ; ++ii ) {
-				tmp_HzRef[kk*nZ+ii] = 0.;
-				for( jj = 0; jj < nZ; ++jj ) {
+		for( kk=0; kk<_NI_; ++kk ) {
+			for( ii=0; ii<_NZ_; ++ii ) {
+				tmp_HzRef[kk*_NZ_+ii] = 0.;
+				for( jj = 0; jj < _NZ_; ++jj ) {
 					/*                        blocks     rows    cols        blocks  rows */
-					tmp_HzRef[kk*nZ+ii] += H_[kk*nZ*nZ + ii*nZ + jj] * zRef_[kk*nZ + jj];
+					tmp_HzRef[kk*_NZ_+ii] += H_[kk*_NZ_*_NZ_ + ii*_NZ_ + jj] * zRef_[kk*_NZ_ + jj];
 				}
 			}
 		}
-		for( ii=0; ii<nZ; ++ii ) {
-			tmp_HzRef[nI*nZ+ii] = 0.;
-			for( jj=0; jj<nZ; ++jj ) {
+		for( ii=0; ii<_NZ_; ++ii ) {
+			tmp_HzRef[_NI_*_NZ_+ii] = 0.;
+			for( jj=0; jj<_NZ_; ++jj ) {
 				/*                        blocks     rows    cols        blocks  rows */
-				tmp_HzRef[nI*nZ+ii] += H_[nI*nZ*nZ + ii*nX + jj] * zRef_[nI*nZ + jj];
+				tmp_HzRef[_NI_*_NZ_+ii] += H_[_NI_*_NZ_*_NZ_ + ii*_NX_ + jj] * zRef_[_NI_*_NZ_ + jj];
 			}
 		}
 	}
@@ -735,7 +735,7 @@ return_t mpcDUNES_initLtv(	mpcProblem_t* const mpcProblem,
 	/** (3) setup intervals */
 	/** (3a) setup regular intervals */
 	nDoffset = 0;
-	for( kk=0; kk<nI; ++kk )
+	for( kk=0; kk<_NI_; ++kk )
 	{
 		if (qpData->intervals[kk]->nD > 0)	{
 			qpDUNES_setupRegularInterval( qpData, qpData->intervals[kk],
@@ -754,7 +754,7 @@ return_t mpcDUNES_initLtv(	mpcProblem_t* const mpcProblem,
 		}
 	}
 	/** (3b) set up final interval */
-	if (qpData->intervals[nI]->nD > 0)	{
+	if (qpData->intervals[_NI_]->nD > 0)	{
 		qpDUNES_setupFinalInterval( qpData, qpData->intervals[_NI_],
 									 offsetArray(H_, _NI_*_NZ_*_NZ_), offsetArray(gMod, _NI_*_NZ_),
 									 offsetArray(zLow_, _NI_*_NZ_), offsetArray(zUpp_, _NI_*_NZ_),

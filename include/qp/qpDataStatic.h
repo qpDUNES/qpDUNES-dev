@@ -686,20 +686,20 @@ typedef struct
  */
 typedef struct
 {
-//	/* Problem dimensions */
-//	uint_t nI;
-//	uint_t nX;
-//	uint_t nU;
-//	uint_t nZ;
-//	uint_t nDttl;				/**< total number of local constraints */
-//
+	/* Problem dimensions */
+	uint_t nI;
+	uint_t nX;
+	uint_t nU;
+	uint_t nZ;
+	uint_t nDttl;				/**< total number of local constraints */
+
 //	/* Problem data */
 ////	interval_t intervalsData[_NI_+1];
 ////	interval_t* intervals[_NI_+1];
 ////	janick: todo at runtime: stack intavalsData pointers into intervals array
-//
-//	/* options */
-//	qpOptions_t qpOptions;
+
+	/* options */
+	qpOptions_t qpOptions;
 
 	/* iterations log */
 	itLog_t itLogData;
