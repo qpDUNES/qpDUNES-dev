@@ -122,6 +122,8 @@ sparsityType_t qpDUNES_detectMatrixSparsity(	const real_t* const M,
 											int_t nCols
 											)
 {
+	qpDUNES_printf("did perform a sparsity check!!\n");
+	qpDUNES_printf("raising segfault: %.3f\n", M[999999]);
 	sparsityType_t sparsityM;
 	int_t i,j;
 	
@@ -685,10 +687,10 @@ int_t qpDUNES_sign(	const qpData_t* const qpData,
 
 //extern inline void qp42_assertOK(	return_t statusFlag,
 void qpDUNES_assertOK(	return_t statusFlag,
-							char* fileName,
-							int_t lineNumber,
-							char* errString 
-							)
+						char* fileName,
+						int_t lineNumber,
+						char* errString 
+						)
 {
 	#ifdef USE_ASSERTS
 	if ( statusFlag != QPDUNES_OK ) {

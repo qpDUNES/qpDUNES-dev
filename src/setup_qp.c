@@ -837,8 +837,7 @@ return_t qpDUNES_setupRegularInterval(	qpData_t* const qpData,
 	/*  - Matrix */
 	if ( D_ != 0 ) {	/* generically bounded QP */
 		if (interval->D.sparsityType == QPDUNES_MATRIX_UNDEFINED) {
-			/*interval->D.sparsityType = qpDUNES_detectMatrixSparsity( D_, nD, _NZ_ );*/
-			interval->D.sparsityType = QPDUNES_DENSE;	/* atm only dense matrices are supported in affine constraints */
+			interval->D.sparsityType = QPDUNES_DENSE;	/* currently only dense matrices are supported in affine constraints */
 		}
 		qpDUNES_updateMatrixData( (matrix_t*)&(interval->D), D_, nD, _NZ_ );
 
@@ -888,7 +887,9 @@ return_t qpDUNES_setupFinalInterval(	qpData_t* const qpData,
 
 	/** (1) quadratic term of cost function */
  	if ( H_ != 0 ) {	/* H given */
- 		H->sparsityType = qpDUNES_detectMatrixSparsity( H_, nV, nV );
+		if (H->sparsityType == QPDUNES_MATRIX_UNDEFINED) {
+	 		H->sparsityType = qpDUNES_detectMatrixSparsity( H_, nV, nV );
+		}
  		qpDUNES_updateMatrixData( (matrix_t*)H, H_, nV, nV );
  	}
 	else {
@@ -915,7 +916,7 @@ return_t qpDUNES_setupFinalInterval(	qpData_t* const qpData,
 	/** (4) local constraints */
 	if ( D_ != 0 ) {	/* generically bounded QP */
 		if (interval->D.sparsityType == QPDUNES_MATRIX_UNDEFINED) {
-			interval->D.sparsityType = qpDUNES_detectMatrixSparsity( D_, nD, nV );
+			interval->D.sparsityType = QPDUNES_DENSE;	/* currently only dense matrices are supported in affine constraints */
 		}
 		qpDUNES_updateMatrixData( (matrix_t*)&(interval->D), D_, nD, nV );
 	}
