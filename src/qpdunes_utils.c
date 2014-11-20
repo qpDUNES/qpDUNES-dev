@@ -122,8 +122,6 @@ sparsityType_t qpDUNES_detectMatrixSparsity(	const real_t* const M,
 											int_t nCols
 											)
 {
-	qpDUNES_printf("did perform a sparsity check!!\n");
-	qpDUNES_printf("raising segfault: %.3f\n", M[999999]);
 	sparsityType_t sparsityM;
 	int_t i,j;
 	
