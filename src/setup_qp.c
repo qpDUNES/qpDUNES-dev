@@ -38,12 +38,9 @@
  *
 #>>>>>>                                           */
 return_t qpDUNES_setupStatic(	qpData_t* const qpData,
-//						uint_t nI,
-//						uint_t nX,
-//						uint_t nU,
-						uint_t* nD,
-						qpOptions_t* options
-						)
+								uint_t* nD,
+								qpOptions_t* options
+								)
 {
 #ifdef __STATIC_MEMORY__
 	uint_t ii, kk;
@@ -56,21 +53,6 @@ return_t qpDUNES_setupStatic(	qpData_t* const qpData,
 	else {
 		qpData->options = qpDUNES_setupDefaultOptions();
 	}
-
-	/* set up dimensions */
-//	int_t nZ = nX+nU;
-//	int_t nDttl = 0;	/* total number of constraints */
-//	qpData->nI = nI;
-//	qpData->nX = nX;
-//	qpData->nU = nU;
-//	qpData->nZ = nZ;
-//	if (nD != 0) {
-//		for( kk=0; kk<nI+1; ++kk ) {
-//			nDttl += nD[kk];
-//		}
-//	}
-//	qpData->nDttl = nDttl;
-//	qpData->intervals = (interval_t**)calloc( nI+1,sizeof(interval_t*) );
 
 
 	/* normal intervals */
@@ -198,9 +180,6 @@ return_t qpDUNES_setup(	qpData_t* const qpData,
 	{
 		qpData->intervals[kk] = qpDUNES_allocInterval( qpData, nX, nU, nZ, ( (nD != 0) ? nD[kk] : 0 ) );
 		
-//		qpDUNES_printf("after alloc %d", kk);
-//		qpOASES_getNbrActConstr( &(qpData->intervals[kk]->qpSolverQpoases) );
-
 		qpData->intervals[kk]->id = kk;		/* give interval its initial stage index */
 
 		qpData->intervals[kk]->xVecTmp.data  = (real_t*)calloc( nX,sizeof(real_t) );
@@ -355,8 +334,6 @@ interval_t* qpDUNES_allocInterval(	qpData_t* const qpData,
 	interval->qpSolverClipping.dz.data = (real_t*)calloc( nV,sizeof(real_t) );
 
 	/* get memory for qpOASES QP solver */
-	/* TODO: do this only if needed later on in code generated / static memory version */
-	/* TODO: utilize special bound version of qpOASES later on for full Hessians, but box constraints */
 	interval->qpSolverQpoases.qpoasesObject = qpOASES_constructor( qpData, nV, nD );
 	interval->qpSolverQpoases.qFullStep.data  = (real_t*)calloc( nV,sizeof(real_t) );
 
@@ -730,11 +707,9 @@ return_t qpDUNES_setupSimpleBoundedInterval(	qpData_t* const qpData,
 {
 	if ( R != 0 ) {
 		return qpDUNES_setupRegularInterval( qpData, interval, 0, Q, R, S, 0, 0, A, B, c, 0, 0, xLow, xUpp, uLow, uUpp, 0, 0, 0 );
-// 		return qpDUNES_setupRegularInterval( qpData, interval, 0, Q, R, S, 0, A, B, c, 0, 0, 0, xLow, xUpp, uLow, uUpp, 0, xRef, uRef );
 	}
 	else {	/* final interval */
 		return qpDUNES_setupFinalInterval( qpData, interval, Q, 0, xLow, xUpp, 0, 0, 0 );
-// 		return qpDUNES_setupFinalInterval( qpData, interval, 0, Q, 0, 0, 0, xLow, xUpp, 0, xRef );
 	}
 }
 
@@ -949,10 +924,6 @@ return_t qpDUNES_setupRegularInterval(	qpData_t* const qpData,
 	/** (4) bounds */
 	qpDUNES_setupUniformVector( (abstractVector_t*)&(interval->zLow), -qpData->options.QPDUNES_INFTY, nV );
 	qpDUNES_updateSimpleBoundVector( qpData, (abstractVector_t*)&(interval->zLow), zLow_, xLow_, uLow_ );
-//	qpDUNES_printf("zUpp: %d", (int)(interval->zUpp.data));
-//	qpDUNES_printf("interval id: %d", interval->id);
-//	qpDUNES_printf("interval pointer %d", (int)interval);
-//	qpDUNES_printf("nV: %d", nV);
 	qpDUNES_setupUniformVector( (abstractVector_t*)&(interval->zUpp), qpData->options.QPDUNES_INFTY, nV );
 	qpDUNES_updateSimpleBoundVector( qpData, (abstractVector_t*)&(interval->zUpp), zUpp_, xUpp_, uUpp_ );
 
@@ -1132,8 +1103,6 @@ return_t qpDUNES_updateIntervalData(	qpData_t* const qpData,
 
 	qpDUNES_updateVector( (abstractVector_t*)&(interval->zLow), zLow_, nV );
 	qpDUNES_updateVector( (abstractVector_t*)&(interval->zUpp), zUpp_, nV );
-//	qpDUNES_printMatrixData( interval->zLow.data, 1, interval->nV, "i[%3d]: zLowReceived:", interval->id);
-//	qpDUNES_printMatrixData( interval->zUpp.data, 1, interval->nV, "i[%3d]: zUppReceived:", interval->id);
 
 	/* affine constraints */
 	qpDUNES_updateMatrixData( (abstractMatrix_t*)&(interval->D), D_, nD, nV );
@@ -1190,13 +1159,12 @@ return_t qpDUNES_updateIntervalData(	qpData_t* const qpData,
 			dLow_changed = ( dLow_ != 0 ) ? QPDUNES_TRUE : QPDUNES_FALSE;
 			dUpp_changed = ( dUpp_ != 0 ) ? QPDUNES_TRUE : QPDUNES_FALSE;
 
-//			if (interval->id == 0) 	qpDUNES_printMatrixData( interval->z.data, 1, interval->nV, "i[%3d]: z@resolve:", interval->id);
 
 			statusFlag = qpDUNES_updateQpoases( qpData, interval, H_changed, g_changed, zLow_changed, zUpp_changed, D_changed, dLow_changed, dUpp_changed, &nQpoasesIter );
-//			if (interval->id == 0) 	qpDUNES_printMatrixData( interval->z.data, 1, interval->nV, "i[%3d]: z@AfterResolve:", interval->id);
-			if (nQpoasesIter >= 1)	interval->rebuildHessianBlock = QPDUNES_TRUE;
-//			qpDUNES_printf("nQpoasesIter[%d] = %d", interval->id, nQpoasesIter);
-//			interval->rebuildHessianBlock = QPDUNES_TRUE;
+			if (nQpoasesIter >= 1)
+			{
+				interval->rebuildHessianBlock = QPDUNES_TRUE;
+			}
 			break;
 
 		default:
@@ -1382,11 +1350,6 @@ return_t qpDUNES_setupQpoases(	qpData_t* const qpData,
 //	/* try.... solve directly ... needed at all?? */
 //	statusFlag = qpOASES_doStep(qpData, interval->qpSolverQpoases.qpoasesObject, interval, 1, &(interval->z), &(interval->y), &(interval->q), &(interval->p));
 
-//	zz_matrix_t ZT;
-//	int_t nFree;
-//	qpOASES_getZT(qpData, interval->qpSolverQpoases.qpoasesObject, &nFree,	&ZT);
-//	if (interval->id == 2) qpDUNES_printMatrixData( ZT.data, _NZ_, _NZ_, "Z' [%d] here (nfree = %d)", interval->id, nFree );
-
 	return statusFlag;
 }
 /*<<< END OF qpDUNES_setupQpoases */
@@ -1492,23 +1455,6 @@ return_t qpDUNES_shiftIntervals(	qpData_t* const qpData
 	qpData->intervals[_NI_-1] = freeInterval;
 	qpData->intervals[_NI_-1]->id = _NI_-1;		/* correct stage index */
 	qpData->intervals[_NI_-1]->rebuildHessianBlock = QPDUNES_TRUE;
-
-
-
-	// not needed: checks for AS changes are redundant, since blocks get rebuilt anyways
-
-//	/** (2) keep old AS statuses (through multipliers) for Hessian rebuilding checks	 */
-//	/*  save status and multipliers of last interval */
-//	rebuildHessianBlock_NI1 = qpData->intervals[_NI_-1]->rebuildHessianBlock;
-//	yPrev_NI1 = qpData->intervals[_NI_-1]->yPrev.data;
-//	/*  shift all statuses and multiplies (except the one from first interval) back again */
-//	for (kk=_NI_-1; kk>0; --kk) {
-//		qpData->intervals[kk]->rebuildHessianBlock = qpData->intervals[kk-1]->rebuildHessianBlock;
-//		qpData->intervals[kk]->yPrev.data = qpData->intervals[kk-1]->yPrev.data;
-//	}
-//	/*  correct dual Hessian update for first interval */
-//	qpData->intervals[0]->rebuildHessianBlock = rebuildHessianBlock_NI1;
-//	qpData->intervals[0]->yPrev.data = yPrev_NI1;
 
 	return QPDUNES_OK;
 }
