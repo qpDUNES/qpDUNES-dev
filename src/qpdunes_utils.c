@@ -464,10 +464,10 @@ return_t qpDUNES_copyMatrix(	matrix_t* const to,
 
 
 /** ... */
-return_t qpDUNES_makeMatrixDense( matrix_t* const M_ptr, 
-								int_t dim0,
-								int_t dim1
-								)
+return_t qpDUNES_makeMatrixDense(	matrix_t* const M_ptr,
+									int_t dim0,
+									int_t dim1
+									)
 {
 	int_t ii, jj;
 	
