@@ -50,7 +50,7 @@ void qpDUNES_free(	real_t** data
 		*data = 0;
 	}
 }
-/*<<< END OF qp42_free */
+/*<<< END OF qpDUNES_free */
 
 
 /* ----------------------------------------------
@@ -66,7 +66,7 @@ void qpDUNES_intFree(	int_t** data
 		*data = 0;
 	}
 }
-/*<<< END OF qp42_intFree */
+/*<<< END OF qpDUNES_intFree */
 
 
 
@@ -75,14 +75,13 @@ void qpDUNES_intFree(	int_t** data
  * pointer offsetting
  *
 >>>>>>                                            */
-//inline real_t* offsetArray(	real_t* data,
 real_t const* offsetArray(	const real_t* const data,
 							int_t offset
 							)
 {
 	return (data != 0) ? &(data[offset]) : 0;
 }
-/*<<< offsetArray */
+/*<<< END OF offsetArray */
 
 
 /* ----------------------------------------------
@@ -90,17 +89,20 @@ real_t const* offsetArray(	const real_t* const data,
  * avoids NULL pointer offsetting
  *
 >>>>>>                                            */
-//inline int_t* offsetArray(	int_t* data,
 const int_t* offsetIntArray(	const int_t* const data,
 								int_t offset
 								)
 {
 	return (data != 0) ? &(data[offset]) : 0;
 }
-/*<<< offsetIntArray */
+/*<<< END OF offsetIntArray */
 
 
 
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 void qpDUNES_copyRealArray( int_t n,
 						 real_t* const to,
 						 const real_t* const from
@@ -114,13 +116,18 @@ void qpDUNES_copyRealArray( int_t n,
 			to[i] = from[i];
 	}
 }
+/*<<< END OF qpDUNES_copyRealArray */
 
 
-//return_t qp42_setupMatrix(	matrix_t* const to,
+
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 sparsityType_t qpDUNES_detectMatrixSparsity(	const real_t* const M,
-											int_t nRows,
-											int_t nCols
-											)
+												int_t nRows,
+												int_t nCols
+												)
 {
 	sparsityType_t sparsityM;
 	int_t i,j;
@@ -166,12 +173,15 @@ sparsityType_t qpDUNES_detectMatrixSparsity(	const real_t* const M,
 	}
 	
 	return sparsityM;
-	
-//	/* copy data */
-//	return qp42_updateMatrix( to, from, nRows,nCols );
 }
+/*<<< END OF qpDUNES_detectMatrixSparsity */
 
 
+
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 return_t qpDUNES_updateMatrixData(	matrix_t* const to,
 									const real_t* const from,
 									int_t nRows,
@@ -207,8 +217,14 @@ return_t qpDUNES_updateMatrixData(	matrix_t* const to,
 	
 	return QPDUNES_OK;
 }
+/*<<< END OF qpDUNES_updateMatrixData */
 
 
+
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 return_t qpDUNES_setupZeroMatrix(	int_t nRows,
 								int_t nCols,
 								matrix_t* to
@@ -223,8 +239,14 @@ return_t qpDUNES_setupZeroMatrix(	int_t nRows,
 	
 	return QPDUNES_OK;
 }
+/*<<< END OF qpDUNES_setupZeroMatrix */
 
 
+
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 return_t qpDUNES_setMatrixNull(	matrix_t* const matrix
 								)
 {
@@ -233,8 +255,14 @@ return_t qpDUNES_setMatrixNull(	matrix_t* const matrix
 	
 	return QPDUNES_OK;
 }
+/*<<< END OF qpDUNES_setMatrixNull */
 
 
+
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 return_t qpDUNES_existsMatrix(	matrix_t* matrix
 							)
 {
@@ -245,8 +273,14 @@ return_t qpDUNES_existsMatrix(	matrix_t* matrix
 		return QPDUNES_TRUE;
 	}
 }
+/*<<< END OF qpDUNES_existsMatrix */
 
 
+
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 return_t qpDUNES_existsVector(	vector_t* vector
 							)
 {
@@ -257,8 +291,14 @@ return_t qpDUNES_existsVector(	vector_t* vector
 		return QPDUNES_TRUE;
 	}
 }
+/*<<< END OF qpDUNES_existsVector */
 
 
+
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 return_t qpDUNES_setupIdentityMatrix(	matrix_t* to
 									)
 {
@@ -266,8 +306,14 @@ return_t qpDUNES_setupIdentityMatrix(	matrix_t* to
 
 	return QPDUNES_OK;
 }
+/*<<< END OF qpDUNES_setupIdentityMatrix */
 
 
+
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 return_t qpDUNES_setupScaledIdentityMatrix(	int_t nRows,
 											real_t scalar,
 											matrix_t* to
@@ -284,9 +330,14 @@ return_t qpDUNES_setupScaledIdentityMatrix(	int_t nRows,
 
 	return QPDUNES_OK;
 }
+/*<<< END OF qpDUNES_setupScaledIdentityMatrix */
 
 
 
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 return_t qpDUNES_setupVector(	vector_t* const to,
 							const real_t* const from,
 							int_t n
@@ -294,8 +345,14 @@ return_t qpDUNES_setupVector(	vector_t* const to,
 {
 	return qpDUNES_updateVector( to,from,n );
 }
+/*<<< END OF qpDUNES_setupVector */
 
 
+
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 return_t qpDUNES_updateVector(	vector_t* const to,
 							const real_t* const from,
 							int_t n
@@ -316,8 +373,14 @@ return_t qpDUNES_updateVector(	vector_t* const to,
 
 	return QPDUNES_OK;
 }
+/*<<< END OF qpDUNES_updateVector */
 
 
+
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 return_t qpDUNES_updateSimpleBoundVector(	qpData_t* qpData,
 										vector_t* const to,
 										const real_t* const dBnd,
@@ -347,8 +410,14 @@ return_t qpDUNES_updateSimpleBoundVector(	qpData_t* qpData,
 
 	return QPDUNES_OK;
 }
+/*<<< END OF qpDUNES_updateSimpleBoundVector */
 
 
+
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 return_t qpDUNES_updateConstraintVector( 	vector_t* const to,
 										const real_t* const dBnd,
 										int_t nD
@@ -367,8 +436,14 @@ return_t qpDUNES_updateConstraintVector( 	vector_t* const to,
 
 	return QPDUNES_OK;
 }
+/*<<< END OF qpDUNES_updateConstraintVector */
 
 
+
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 return_t qpDUNES_setupZeroVector(	vector_t* const to,
 								int_t n
 								)
@@ -380,12 +455,18 @@ return_t qpDUNES_setupZeroVector(	vector_t* const to,
 
 	return QPDUNES_OK;
 }
+/*<<< END OF qpDUNES_setupZeroVector */
 
 
+
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 return_t qpDUNES_setupUniformVector(	vector_t* const to,
-									real_t value,
-									int_t n
-									)
+										real_t value,
+										int_t n
+										)
 {
 	int_t i;
 	
@@ -395,12 +476,18 @@ return_t qpDUNES_setupUniformVector(	vector_t* const to,
 
 	return QPDUNES_OK;
 }
+/*<<< END OF qpDUNES_setupUniformVector */
 
 
+
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 return_t qpDUNES_copyVector(	vector_t* const to,
-							const vector_t* const from,
-							int_t n
-							)
+								const vector_t* const from,
+								int_t n
+								)
 {
 	int_t ii;
 	
@@ -409,28 +496,19 @@ return_t qpDUNES_copyVector(	vector_t* const to,
 
 	return QPDUNES_OK;
 }
+/*<<< END OF qpDUNES_copyVector */
 
 
-//return_t qp42_copyIntVector(	intVector_t* const to,
-//								const intVector_t* const from,
-//								int_t n
-//								)
-//{
-//	int_t ii;
-//
-//	for( ii=0; ii<n; ++ii )
-//		to->data[ii] = from->data[ii];
-//
-//	return QPDUNES_OK;
-//}
 
-
-/** deep matrix copy */
+/* ----------------------------------------------
+ * deep matrix copy
+ *
+ >>>>>                                            */
 return_t qpDUNES_copyMatrix(	matrix_t* const to,
-							const matrix_t* const from,
-							int_t dim0,
-							int_t dim1
-							)
+								const matrix_t* const from,
+								int_t dim0,
+								int_t dim1
+								)
 {
 	int_t ii;
 	
@@ -460,14 +538,17 @@ return_t qpDUNES_copyMatrix(	matrix_t* const to,
 	
 	return QPDUNES_OK;
 }
-/*<<<< END OF qp42_copyMatrix */
+/*<<<< END OF qpDUNES_copyMatrix */
 
 
-/** ... */
-return_t qpDUNES_makeMatrixDense( matrix_t* const M_ptr, 
-								int_t dim0,
-								int_t dim1
-								)
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
+return_t qpDUNES_makeMatrixDense( 	matrix_t* const M_ptr, 
+									int_t dim0,
+									int_t dim1
+									)
 {
 	int_t ii, jj;
 	
@@ -479,7 +560,7 @@ return_t qpDUNES_makeMatrixDense( matrix_t* const M_ptr,
 			break;
 		
 		case QPDUNES_SPARSE	:
-//			qp42_printWarning( __FILE__, __LINE__, "Sparse to dense Matrix conversion not implemented. Assuming matrix is already dense." );
+			//qpDUNES_printWarning( __FILE__, __LINE__, "Sparse to dense Matrix conversion not implemented. Assuming matrix is already dense." );
 			M_ptr->sparsityType = QPDUNES_DENSE;
 			break;
 		
@@ -516,10 +597,14 @@ return_t qpDUNES_makeMatrixDense( matrix_t* const M_ptr,
 	
 	return QPDUNES_OK;
 }
-/*<<<< END OF qp42_makeMatrixDense */
+/*<<<< END OF qpDUNES_makeMatrixDense */
 
 
-/** transpose matrix (deep copy) */
+
+/* ----------------------------------------------
+ * transpose matrix (deep copy)
+ *
+ >>>>>                                            */
 return_t qpDUNES_transposeMatrix(	matrix_t* const to,
 								const matrix_t* const from,
 								int_t dim0,
@@ -541,7 +626,7 @@ return_t qpDUNES_transposeMatrix(	matrix_t* const to,
 			break;
 		
 		case QPDUNES_SPARSE	:
-//			qp42_printWarning( __FILE__, __LINE__, "Sparse tranposeMatrix not implemented. Copying densely instead." );
+			//qpDUNES_printWarning( __FILE__, __LINE__, "Sparse tranposeMatrix not implemented. Copying densely instead." );
 			to->sparsityType = QPDUNES_DENSE;
 			for( ii=0; ii < dim1; ++ii ) {	/* go by columns of from matrix */
 				for( jj=0; jj < dim0; ++jj ) {
@@ -563,11 +648,14 @@ return_t qpDUNES_transposeMatrix(	matrix_t* const to,
 	
 	return QPDUNES_OK;
 }
-/*<<<< END OF qp42_transposeMatrix */
+/*<<<< END OF qpDUNES_transposeMatrix */
 
 
 
-/** selftranspose a square matrix */
+/* ----------------------------------------------
+ * selftranspose a square matrix
+ *
+ >>>>>                                            */
 return_t qpDUNES_selftransposeMatrix(	matrix_t* const Mptr,
 									int_t dim			/**< leading and secondary dimension of M */
 									)
@@ -602,10 +690,14 @@ return_t qpDUNES_selftransposeMatrix(	matrix_t* const Mptr,
 
 	return QPDUNES_OK;
 }
-/*<<<< END OF qp42_selftransposeMatrix */
+/*<<<< END OF qpDUNES_selftransposeMatrix */
 
 
 
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 return_t qpDUNES_copyArray(	real_t* const to,
 							const real_t* const from,
 							int_t n
@@ -618,72 +710,83 @@ return_t qpDUNES_copyArray(	real_t* const to,
 	
 	return QPDUNES_OK;
 }
+/*<<< END OF qpDUNES_copyArray */
 
 
+
+/* TODO: move code of inline functions to header file, only leave extern here */
 /* ----------------------------------------------
  * max routine
+ * 
  >>>>>                                            */
-/* TODO: move code of inline functions to header file, only leave extern here */
-//extern inline int_t qp42_max(	int_t a,
+//extern inline int_t qpDUNES_max(	int_t a,
 int_t qpDUNES_max(	int_t a,
 						int_t b )
 {
 	return (a > b) ? a : b;
 }
-/*<<< END OF qp42_max */
+/*<<< END OF qpDUNES_max */
+
 
 
 /* ----------------------------------------------
  * min routine
  >>>>>                                            */
-//extern inline int_t qp42_min(	int_t a,
+//extern inline int_t qpDUNES_min(	int_t a,
 int_t qpDUNES_min(	int_t a,
 						int_t b )
 {
 	return (a < b) ? a : b;
 }
-/*<<< END OF qp42_min */
+/*<<< END OF qpDUNES_min */
+
 
 
 /* ----------------------------------------------
  * max routine
  >>>>>                                            */
-//extern inline real_t qp42_fmax(	real_t a,
+//extern inline real_t qpDUNES_fmax(	real_t a,
 real_t qpDUNES_fmax(	real_t a,
 							real_t b )
 {
 	return (a > b) ? a : b;
 }
-/*<<< END OF qp42_fmax */
+/*<<< END OF qpDUNES_fmax */
+
 
 
 /* ----------------------------------------------
  * min routine
  >>>>>                                            */
-//extern inline real_t qp42_fmin(	real_t a,
+//extern inline real_t qpDUNES_fmin(	real_t a,
 real_t qpDUNES_fmin(	real_t a,
-							real_t b )
+						real_t b )
 {
 	return (a < b) ? a : b;
 }
-/*<<< END OF qp42_fmin */
+/*<<< END OF qpDUNES_fmin */
+
 
 
 /* ----------------------------------------------
  * sign routine
  >>>>>                                            */
-//extern inline int_t qp42_sign(	const qpData_t* const qpData,
+//extern inline int_t qpDUNES_sign(	const qpData_t* const qpData,
 int_t qpDUNES_sign(	const qpData_t* const qpData,
 					real_t a
 					)
 {
 	return (a < -qpData->options.equalityTolerance) ? -1 : ( (a > qpData->options.equalityTolerance) ? 1 : 0 );
 }
-/*<<< END OF qp42_sign */
+/*<<< END OF qpDUNES_sign */
 
 
 
-//extern inline void qp42_assertOK(	return_t statusFlag,
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
+//extern inline void qpDUNES_assertOK(	return_t statusFlag,
 void qpDUNES_assertOK(	return_t statusFlag,
 						char* fileName,
 						int_t lineNumber,
@@ -696,26 +799,14 @@ void qpDUNES_assertOK(	return_t statusFlag,
 	}
 	#endif
 }
+/*<<< END OF qpDUNES_assertOK */
 
 
-// /* prepare results struct */
-// void qp42_getSolution( 	qpData_t qpData, 
-// 						qpResults_t results 
-// 						)
-// {
-// 	real_t* xOpt;
-// 	real_t* uOpt;
-// 	real_t* lambdaOpt;
-// 	
-// 	real_t optObjVal;
-// 	
-// 	boolean_t isHessianRegularized;
-// 	
-// 	int_t numIter;
-// 	return_t exitFlag;
-// }
 
-
+/* ----------------------------------------------
+ * ...
+ *
+ >>>>>                                            */
 real_t getTime(  ){
 	#ifdef __MEASURE_TIMINGS__
 		real_t current_time = 0.0;
@@ -727,6 +818,8 @@ real_t getTime(  ){
 		return 0.0;
 	#endif
 }
+/*<<< END OF getTime */
+
 
 
 /* -------------------------------------------------------------
@@ -738,8 +831,8 @@ real_t getTime(  ){
  * low-level printing routine
  >>>>>                                            */
 void qpDUNES_printStrArgs(	const char* const string,
-						...
-						)
+							...
+							)
 {
 	#ifndef __SUPPRESS_ALL_OUTPUT__
 	/* get printf arguments list */
@@ -760,16 +853,17 @@ void qpDUNES_printStrArgs(	const char* const string,
 	
 	#endif /* __SUPPRESS_ALL_OUTPUT__ */
 }
-/*<<< END OF qp42_printStrArgs */
+/*<<< END OF qpDUNES_printStrArgs */
+
 
 
 /* ----------------------------------------------
  * print to file (low level)
  >>>>>                                            */
 void qpDUNES_printStrArgsToFile(	FILE* filePtr,
-								const char* const string,
-								...
-								)
+									const char* const string,
+									...
+									)
 {
 	#ifndef __SUPPRESS_ALL_OUTPUT__
 	va_list printArgs;
@@ -780,7 +874,7 @@ void qpDUNES_printStrArgsToFile(	FILE* filePtr,
 	va_end( printArgs );	/* close arguments */
 	#endif /* __SUPPRESS_ALL_OUTPUT__ */
 }
-/*<<< END OF qp42_printStrArgsToFile */
+/*<<< END OF qpDUNES_printStrArgsToFile */
 
 
 
@@ -808,19 +902,21 @@ void qpDUNES_printStrArgsList(	const char* const string,
 /*<<< END OF qpDUNES_printStrArgsList */
 
 
+
 /* ----------------------------------------------
  * print to file (low level)
  >>>>>                                            */
 void qpDUNES_printStrArgsListToFile(	FILE* filePtr,
-									const char* const string,
-									va_list printArgs
-									)
+										const char* const string,
+										va_list printArgs
+										)
 {
 	#ifndef __SUPPRESS_ALL_OUTPUT__
 	vfprintf( filePtr, string, printArgs );	/* print output */
 	#endif /* __SUPPRESS_ALL_OUTPUT__ */
 }
 /*<<< END OF qpDUNES_printStrArgsListToFile */
+
 
 
 /* ----------------------------------------------
@@ -843,12 +939,13 @@ void qpDUNES_printf(	const char* const string,
 /*<<< END OF qpDUNES_printf */
 
 
+
 /* ----------------------------------------------
  * customizable printing routine without "\n" at the end
  >>>>>                                            */
 void qpDUNES_printf_noNewLine(	const char* const string,
-							...
-							)
+								...
+								)
 {
 	/* get printf arguments list */
 	va_list printArgs;
@@ -859,18 +956,17 @@ void qpDUNES_printf_noNewLine(	const char* const string,
 
 	va_end( printArgs );
 }
-/*<<< END OF qp42_printf */
-
+/*<<< END OF qpDUNES_printf */
 
 
 
 /* ----------------------------------------------
  * ...
  >>>>>                                            */
-void qpDUNES_printSuccess( const qpData_t* const qpData,
-						const char* const string,
-						...
-						)
+void qpDUNES_printSuccess( 	const qpData_t* const qpData,
+							const char* const string,
+							...
+							)
 {
 	/* get printf arguments list */
 	va_list printArgs;
@@ -885,7 +981,8 @@ void qpDUNES_printSuccess( const qpData_t* const qpData,
 
 	va_end( printArgs );
 }
-/*<<< END OF qp42_printSuccess */
+/*<<< END OF qpDUNES_printSuccess */
+
 
 
 /* ----------------------------------------------
@@ -893,9 +990,9 @@ void qpDUNES_printSuccess( const qpData_t* const qpData,
  * 
  > >>>>                                            */
 void qpDUNES_printWarning(	const qpData_t* const qpData,
-						const char* const fileName,
-						const int_t lineNumber,
-						const char* const string )
+							const char* const fileName,
+							const int_t lineNumber,
+							const char* const string )
 {
 	#if !(defined __SUPPRESS_ALL_WARNINGS__)
 	if( qpData->options.printLevel >= 2 ) {
@@ -905,7 +1002,8 @@ void qpDUNES_printWarning(	const qpData_t* const qpData,
 	}
 	#endif
 }
-/*<<< END OF qp42_printWarning */
+/*<<< END OF qpDUNES_printWarning */
+
 
 
 /* ----------------------------------------------
@@ -913,11 +1011,11 @@ void qpDUNES_printWarning(	const qpData_t* const qpData,
  * 
  >>>>>                                            */
 void qpDUNES_printError(	const qpData_t* const qpData,
-						const char* const fileName,
-						const int_t lineNumber,
-						const char* const errString,
-						...
-						)
+							const char* const fileName,
+							const int_t lineNumber,
+							const char* const errString,
+							...
+							)
 {
 	/* get printf arguments list */
 	va_list printArgs;
@@ -933,7 +1031,7 @@ void qpDUNES_printError(	const qpData_t* const qpData,
 	
 	va_end( printArgs );
 }
-/*<<< END OF qp42_printError */
+/*<<< END OF qpDUNES_printError */
 
 
 
@@ -945,7 +1043,7 @@ void qpDUNES_printDebugInfo( const char* const string )
 {
 	qpDUNES_printf( string );
 }
-/*<<< END OF qp42_printDebugInfo */
+/*<<< END OF qpDUNES_printDebugInfo */
 
 
 
@@ -954,11 +1052,11 @@ void qpDUNES_printDebugInfo( const char* const string )
  * 
  >>>>>                                            */
 void qpDUNES_printMatrixData(	const real_t* const M,
-							const int_t dim0,
-							const int_t dim1,
-							const char* const string,
-							...
-							)
+								const int_t dim0,
+								const int_t dim1,
+								const char* const string,
+								...
+								)
 {
 	int_t ii, jj;
 	
@@ -985,7 +1083,8 @@ void qpDUNES_printMatrixData(	const real_t* const M,
 	
 	va_end( printArgs );
 }
-/*<<< END OF qp42_printMatrix */
+/*<<< END OF qpDUNES_printMatrix */
+
 
 
 /* ----------------------------------------------
@@ -1024,7 +1123,7 @@ void qpDUNES_printIntMatrixData(	const int_t* const M,
 
 	va_end( printArgs );
 }
-/*<<< END OF qp42_printMatrix */
+/*<<< END OF qpDUNES_printMatrix */
 
 
 
@@ -1068,7 +1167,8 @@ void qpDUNES_printMatrixDataToFile(	const real_t* const M,
 	fclose(filePtr);		/* close file */
 	va_end( printArgs );
 }
-/*<<< END OF qp42_printMatrixDataToFile */
+/*<<< END OF qpDUNES_printMatrixDataToFile */
+
 
 
 /* ----------------------------------------------
@@ -1076,10 +1176,10 @@ void qpDUNES_printMatrixDataToFile(	const real_t* const M,
  * 
  > >>>>                          *                  */
 void qpDUNES_printVectorData(	const real_t* const x,
-							const int_t dim0,
-							const char* const string,
-							... 
-							)
+								const int_t dim0,
+								const char* const string,
+								... 
+								)
 {
 	int_t ii;
 	
@@ -1099,7 +1199,8 @@ void qpDUNES_printVectorData(	const real_t* const x,
 	
 	va_end( printArgs );
 }
-/*<<< END OF qp42_printMatrix */
+/*<<< END OF qpDUNES_printMatrix */
+
 
 
 /* ----------------------------------------------
@@ -1108,10 +1209,11 @@ void qpDUNES_printVectorData(	const real_t* const x,
  >>>>>                                            */
 void qpDUNES_printVector( const char* const string )
 {
-//	qp42_printWarning( __FILE__, __LINE__, "qp42_printVector not yet implemented. Doing nothing." );
-	qpDUNES_printf( "qp42_printVector not yet implemented. Doing nothing." );
+//	qpDUNES_printWarning( __FILE__, __LINE__, "qpDUNES_printVector not yet implemented. Doing nothing." );
+	qpDUNES_printf( "qpDUNES_printVector not yet implemented. Doing nothing." );
 }
-/*<<< END OF qp42_printVector */
+/*<<< END OF qpDUNES_printVector */
+
 
 
 /* ----------------------------------------------
@@ -1119,8 +1221,8 @@ void qpDUNES_printVector( const char* const string )
  *
  >>>>>                                            */
 void qpDUNES_printNewtonHessian(	const qpData_t* const qpData,
-								const xn2x_matrix_t* const hessian
-								)
+									const xn2x_matrix_t* const hessian
+									)
 {
 	int_t ii, jj, kk;
 
@@ -1151,7 +1253,7 @@ void qpDUNES_printNewtonHessian(	const qpData_t* const qpData,
 
 	qpDUNES_printStrArgs( "]\n\n" );
 }
-/*<<< END OF qp42_printNewtonHessian */
+/*<<< END OF qpDUNES_printNewtonHessian */
 
 
 
@@ -1160,11 +1262,11 @@ void qpDUNES_printNewtonHessian(	const qpData_t* const qpData,
  *
  >>>>>                                            */
 void qpDUNES_printNewtonHessianToFile(	const qpData_t* const qpData,
-									const xn2x_matrix_t* const hessian,
-									const char* const fileName,
-									const char* const variableName,
-									...
-									)
+										const xn2x_matrix_t* const hessian,
+										const char* const fileName,
+										const char* const variableName,
+										...
+										)
 {
 	int_t ii, jj, kk;
 
@@ -1206,7 +1308,8 @@ void qpDUNES_printNewtonHessianToFile(	const qpData_t* const qpData,
 
 	fclose(filePtr);		/* close file */
 }
-/*<<< END OF qp42_printNewtonHessianToFile */
+/*<<< END OF qpDUNES_printNewtonHessianToFile */
+
 
 
 /* ----------------------------------------------
@@ -1214,8 +1317,8 @@ void qpDUNES_printNewtonHessianToFile(	const qpData_t* const qpData,
  *
  >>>>>                                            */
 void qpDUNES_printCholNewtonHessian(	const qpData_t* const qpData,
-									const xn2x_matrix_t* const cholHessian
-									)
+										const xn2x_matrix_t* const cholHessian
+										)
 {
 	int_t ii, jj, kk;
 
@@ -1244,6 +1347,7 @@ void qpDUNES_printCholNewtonHessian(	const qpData_t* const qpData,
 	qpDUNES_printStrArgs( "]\n\n" );
 }
 /*<<< END OF qpDUNES_printCholNewtonHessian */
+
 
 
 /* ----------------------------------------------
