@@ -93,9 +93,9 @@ return_t multiplyInvRu(	qpData_t* const qpData,
  * 
  >>>>>                                            */
 real_t multiplyzHz( qpData_t* const qpData,
-					 const vv_matrix_t* const H,
-					 const v_vector_t* const z,
-					 const int_t nV	)
+					const vv_matrix_t* const H,
+					const v_vector_t* const z,
+					const int_t nV	)
 {
 	return multiplyVectorMatrixVector( (matrix_t*)H, (vector_t*)z, nV );
 }
@@ -152,8 +152,6 @@ return_t multiplyBu(	qpData_t* const qpData,
 return_t multiplyCz(	qpData_t* const qpData,
 						x_vector_t* const res,
 						const xz_matrix_t* const C,
-//						const xx_matrix_t* const A,
-//						const xu_matrix_t* const B,
 						const z_vector_t* const z 	)
 {
 	/** only dense multiplication */
@@ -251,8 +249,8 @@ return_t multiplyCTy(	qpData_t* const qpData,
 /** TODO: check whether this routine is still needed! */
 return_t multiplyAInvQ(	qpData_t* const qpData,
 						xx_matrix_t* const res,
-						const xx_matrix_t* const C,
-						const xx_matrix_t* const cholH
+						const xz_matrix_t* const C,
+						const vv_matrix_t* const cholH
 						)
 {
 	int_t ii,jj;
@@ -1372,7 +1370,7 @@ return_t backsolveRT_ZTET(	qpData_t* const qpData,
 return_t backsolveRT_ZTCT(	qpData_t* const qpData,
 							zx_matrix_t* const res,
 							const zz_matrix_t* const RT,
-							const zz_matrix_t* const ZTCT,
+							const zx_matrix_t* const ZTCT,
 							x_vector_t* const sums,
 							int_t dim0, /* number of physical rows and columns in RT (storage) */
 							int_t dim1 	/* number of (well-defined) rows in ZTCT (same as ZT) */

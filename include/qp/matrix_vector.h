@@ -70,8 +70,8 @@ return_t multiplyInvRu(	qpData_t* const qpData,
 
 real_t multiplyzHz(	qpData_t* const qpData,
 					const vv_matrix_t* const H,
-					const z_vector_t* const z,
-					 const int_t nV 	);
+					const v_vector_t* const z,
+					const int_t nV 	);
 
 
 return_t multiplyInvHz(	qpData_t* const qpData,
@@ -81,50 +81,22 @@ return_t multiplyInvHz(	qpData_t* const qpData,
 						const int_t nV 	);
 
 
-//return_t multiplyAx(	qpData_t* const qpData,
-//						x_vector_t* const res,
-//						const xx_matrix_t* const A,
-//						const x_vector_t* const x 	);
-//
-//
-//return_t multiplyBu(	qpData_t* const qpData,
-//						u_vector_t* const res,
-//						const xu_matrix_t* const B,
-//						const u_vector_t* const u 	);
-
-
 return_t multiplyCz(	qpData_t* const qpData,
 						x_vector_t* const res,
 						const xz_matrix_t* const C,
-//						const xx_matrix_t* const A,
-//						const xu_matrix_t* const B,
 						const z_vector_t* const z 	);
-
-
-//return_t multiplyATy(	qpData_t* const qpData,
-//						x_vector_t* const res,
-//						const xx_matrix_t* const A,
-//						const x_vector_t* const y 	);
-
-
-//return_t multiplyBTy(	qpData_t* const qpData,
-//						u_vector_t* const res,
-//						const xu_matrix_t* const B,
-//						const x_vector_t* const y 	);
 
 
 return_t multiplyCTy(	qpData_t* const qpData,
 						z_vector_t* const res,
 						const xz_matrix_t* const C,
-//						const xx_matrix_t* const A,
-//						const xu_matrix_t* const B,
 						const x_vector_t* const y 	);
 
 
-/** Inverse matrix times matrix product res = Q^-1 * A */
+/** Inverse matrix times matrix product res = A * Q^-1 */
 return_t multiplyAInvQ(	qpData_t* const qpData,
 						xx_matrix_t* const res,
-						const xx_matrix_t* const C,
+						const xz_matrix_t* const C,
 						const vv_matrix_t* const cholH
 						);
 
@@ -138,7 +110,7 @@ return_t multiplyInvQAT(	qpData_t* const qpData,
 
 return_t getInvQ(	qpData_t* const qpData,
 					xx_matrix_t* const res,
-					const xx_matrix_t* const cholM1,
+					const vv_matrix_t* const cholM1,
 					int_t nV
 					);
 
@@ -565,7 +537,7 @@ return_t backsolveRT_ZTET(	qpData_t* const qpData,
 return_t backsolveRT_ZTCT(	qpData_t* const qpData,
 							zx_matrix_t* const res,
 							const zz_matrix_t* const RT,
-							const zz_matrix_t* const ZTCT,
+							const zx_matrix_t* const ZTCT,
 							x_vector_t* const sums,
 							int_t dim0,						/* number of physical rows and columns in RT (storage) */
 							int_t dim1						/* number of (well-defined) rows in ZTCT (same as ZT) */

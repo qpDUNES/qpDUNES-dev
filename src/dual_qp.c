@@ -622,13 +622,13 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
 	xx_matrix_t* xxMatTmp2 = &(qpData->xxMatTmp2);
 	ux_matrix_t* uxMatTmp = &(qpData->uxMatTmp);
 	zx_matrix_t* zxMatTmp = &(qpData->zxMatTmp);
-	zx_matrix_t* zxMatTmp2 = &(qpData->xzMatTmp);
+	zx_matrix_t* zxMatTmp2 = (zx_matrix_t*)&(qpData->xzMatTmp);		/* temporary matrices of same size, so we can cast */
 
-	// get Matrices for reduced Hessian and for projection matrix
-	zz_matrix_t ZT;
+	/* get Matrices for reduced Hessian and for projection matrix */
+	matrix_t ZT;	// WARNING: ZT is an abstract matrix type, so still uses dynamic (or foreignly allocated) memory
 	ZT.data = 0;
 	ZT.sparsityType = QPDUNES_DENSE;
-	zz_matrix_t cholProjHess;
+	matrix_t cholProjHess;
 	cholProjHess.data = 0;
 	cholProjHess.sparsityType = QPDUNES_DENSE;
 	int_t nFree; /* number of active constraints of stage QP */
@@ -671,32 +671,26 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
 				for (ii=0; ii<_NX_*_NX_; ++ii)	{
 					xxMatTmp->data[ii] = 0;	/* wipe out matrices for safety */
 				}
-				qpOASES_getZT(qpData, intervals[kk + 1]->qpSolverQpoases.qpoasesObject, &nFree,	&ZT);
-				qpOASES_getCholZTHZ(qpData, intervals[kk + 1]->qpSolverQpoases.qpoasesObject, &cholProjHess);
-				backsolveRT_ZTET(qpData, zxMatTmp2, &cholProjHess, &ZT, xVecTmp, intervals[kk + 1]->nV, nFree);
+				qpOASES_getZT( qpData, intervals[kk + 1]->qpSolverQpoases.qpoasesObject, &nFree, (zz_matrix_t*)&ZT );
+				qpOASES_getCholZTHZ( qpData, intervals[kk + 1]->qpSolverQpoases.qpoasesObject, (zz_matrix_t*)&cholProjHess );
+				backsolveRT_ZTET( qpData, zxMatTmp2, (zz_matrix_t*)&cholProjHess, (zz_matrix_t*)&ZT, xVecTmp, intervals[kk + 1]->nV, nFree );
 				boolean_t addToRes = QPDUNES_FALSE;
 				multiplyMatrixTMatrixDenseDense(xxMatTmp->data, zxMatTmp2->data, zxMatTmp2->data, nFree, _NX_, _NX_, addToRes);
-//				if (kk == 1) qpDUNES_printMatrixData( ZT.data, _NZ_, _NZ_, "EE: Z' [%d] (nfree = %d)", kk, nFree );
-//				if (kk == 1) qpDUNES_printMatrixData( cholProjHess.data, _NZ_, _NZ_, "EE: cholProjHess [%d] (nfree = %d)", kk, nFree );
-//				if (kk == 1) qpDUNES_printMatrixData( zxMatTmp2->data, _NZ_, _NX_, "EE: EPE sqrt[%d]", kk );
-//				if (kk == 1) qpDUNES_printMatrixData( xxMatTmp->data, _NX_, _NX_, "EE: EPE[%d] (with nFree = %d)", kk, nFree );
 			}
 			else { /* clipping QP solver */
 
 				getInvQ(qpData, xxMatTmp, &(intervals[kk + 1]->cholH), intervals[kk + 1]->nV); /* getInvQ not supported with matrices other than diagonal... is this even possible? */
 
 				/* Annihilate columns in invQ; note: this can only be applied for diagonal matrices */
-				qpDUNES_makeMatrixDense(xxMatTmp, _NX_, _NX_);
+				qpDUNES_makeMatrixDense( (matrix_t*)xxMatTmp, _NX_, _NX_ );
 				for (ii = 0; ii < _NX_; ++ii) {
 					if ((intervals[kk + 1]->y->data[2 * ii] >= qpData->options.equalityTolerance) ||		// check if local constraint lb_x is active
 						(intervals[kk + 1]->y->data[2 * ii + 1] >= qpData->options.equalityTolerance))	// check if local constraint ub_x is active		// WARNING: weakly active constraints are excluded here!
 					/* check if a bound is active. WARNING: WEAKLY ACTIVE CONSTRAINTS ARE EXCLUDED HERE! */
-//					if ( intervals[kk + 1]->y->data[2 * ii] * intervals[kk + 1]->y->data[2 * ii + 1] <= -qpData->options.activenessTolerance )
 					{
 						xxMatTmp->data[ii * _NX_ + ii] = 0.;
 					}
 				}
-//				if (kk == 1) qpDUNES_printMatrixData( xxMatTmp->data, _NX_, _NX_, "clipping: EPE part[%d]", kk );
 			}
 
 			/* add CPC part */
@@ -707,24 +701,19 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
 					zxMatTmp->data[ii] = 0;	/* wipe out matrices for safety */
 				}
 				/* get data from qpOASES */
-				qpOASES_getZT(qpData, intervals[kk]->qpSolverQpoases.qpoasesObject,	&nFree, &ZT);
-				qpOASES_getCholZTHZ(qpData,	intervals[kk]->qpSolverQpoases.qpoasesObject, &cholProjHess);
+				qpOASES_getZT( qpData, intervals[kk]->qpSolverQpoases.qpoasesObject, &nFree, (zz_matrix_t*)&ZT );
+				qpOASES_getCholZTHZ(qpData,	intervals[kk]->qpSolverQpoases.qpoasesObject, (zz_matrix_t*)&cholProjHess);
 				/* computer Z.T * C.T */
 				zx_matrix_t* ZTCT = zxMatTmp;
 				multiplyMatrixMatrixTDenseDense(ZTCT->data, ZT.data, intervals[kk]->C.data, nFree, _NZ_, _NX_);
 				/* compute "squareroot" of C_{k} P_{k} C_{k}' */
-				backsolveRT_ZTCT(qpData, zxMatTmp2, &cholProjHess, ZTCT, xVecTmp, intervals[kk]->nV, nFree);
+				backsolveRT_ZTCT( qpData, zxMatTmp2, (zz_matrix_t*)&cholProjHess, ZTCT, xVecTmp, intervals[kk]->nV, nFree );
 				/* compute C_{k} P_{k} C_{k}' contribution */
 				boolean_t addToRes = QPDUNES_TRUE;
-				multiplyMatrixTMatrixDenseDense(xxMatTmp->data, zxMatTmp2->data, zxMatTmp2->data, nFree, _NX_, _NX_, addToRes);
-//				if (kk == 1) qpDUNES_printMatrixData( ZT.data, _NZ_, _NZ_, "Z' [%d] (nfree = %d)", kk, nFree );
-//				if (kk == 1) qpDUNES_printMatrixData( ZTCT->data, _NZ_, _NX_, "ZTCT [%d] (nfree = %d)", kk, nFree );
-//				if (kk == 1) qpDUNES_printMatrixData( zxMatTmp2->data, _NZ_, _NX_, "CPC sqrt[%d]", kk );
-//				if (kk == 1) qpDUNES_printMatrixData( xxMatTmp->data, _NX_, _NX_, "EPE+CPC[%d]", kk );
+				multiplyMatrixTMatrixDenseDense( xxMatTmp->data, zxMatTmp2->data, zxMatTmp2->data, nFree, _NX_, _NX_, addToRes );
 			}
 			else { /* clipping QP solver */
-				addCInvHCT(qpData, xxMatTmp, &(intervals[kk]->cholH), &(intervals[kk]->C), &(intervals[kk]->y), xxMatTmp2, uxMatTmp, zxMatTmp);
-//				if (kk == 1) qpDUNES_printMatrixData( xxMatTmp->data, _NX_, _NX_, "clipping: CPC+ EPE part[%d]", kk );
+				addCInvHCT( qpData, xxMatTmp, &(intervals[kk]->cholH), &(intervals[kk]->C), intervals[kk]->y, xxMatTmp2, uxMatTmp, zxMatTmp );
 			}
 
 			/* write Hessian part */
@@ -751,16 +740,16 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
 			#endif
 			if (intervals[kk]->qpSolverSpecification == QPDUNES_STAGE_QP_SOLVER_QPOASES) {
 				/* get data from qpOASES */
-				qpOASES_getZT(qpData, intervals[kk]->qpSolverQpoases.qpoasesObject,	&nFree, &ZT);
-				qpOASES_getCholZTHZ(qpData,	intervals[kk]->qpSolverQpoases.qpoasesObject, &cholProjHess);
+				qpOASES_getZT(qpData, intervals[kk]->qpSolverQpoases.qpoasesObject,	&nFree, (zz_matrix_t*)&ZT);
+				qpOASES_getCholZTHZ(qpData,	intervals[kk]->qpSolverQpoases.qpoasesObject, (zz_matrix_t*)&cholProjHess);
 
 				/* compute "squareroot" of C_{k} P_{k} C_{k}' */
 				/* computer Z.T * C.T */
-				multiplyMatrixMatrixTDenseDense(zxMatTmp->data, ZT.data, intervals[kk]->C.data, nFree, _NZ_, _NX_);
-				backsolveRT_ZTCT(qpData, zxMatTmp2, &cholProjHess, zxMatTmp, xVecTmp, intervals[kk]->nV, nFree);
+				multiplyMatrixMatrixTDenseDense( zxMatTmp->data, ZT.data, intervals[kk]->C.data, nFree, _NZ_, _NX_ );
+				backsolveRT_ZTCT( qpData, zxMatTmp2, (zz_matrix_t*)&cholProjHess, zxMatTmp, xVecTmp, intervals[kk]->nV, nFree );
 
 				/* compute "squareroot" of E_{k} P_{k} E_{k}' */
-				backsolveRT_ZTET(qpData, zxMatTmp, &cholProjHess, &ZT, xVecTmp, intervals[kk]->nV, nFree);
+				backsolveRT_ZTET(qpData, zxMatTmp, (zz_matrix_t*)&cholProjHess, (zz_matrix_t*)&ZT, xVecTmp, intervals[kk]->nV, nFree);
 
 				/* compute C_{k} P_{k} E_{k}' contribution */
 				boolean_t addToRes = QPDUNES_FALSE;
@@ -802,6 +791,7 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
 }
 /*<<< END OF qpDUNES_setupNewtonSystem */
 
+
 /* ----------------------------------------------
  * ...
  *
@@ -825,14 +815,11 @@ return_t qpDUNES_setupCholDefaultHessian(	qpData_t* const qpData	)
 	/*    E_{k+1} H_{k+1}^-1 E_{k+1}' + C_{k} P_{k} C_{k}'  for projected Hessian  P = Z (Z'HZ)^-1 Z'  */
 	for (kk = 0; kk < _NI_; ++kk) {
 
-		getInvQ(qpData, xxMatTmp, &(intervals[kk + 1]->cholH), intervals[kk + 1]->nV); /* getInvQ not supported with matrices other than diagonal... is this even possible? */
-
-//		if (kk == 1) qpDUNES_printMatrixData( xxMatTmp->data, _NX_, _NX_, "clipping: EPE part[%d]", kk );
+		getInvQ( qpData, xxMatTmp, &(intervals[kk + 1]->cholH), intervals[kk + 1]->nV ); /* getInvQ not supported with matrices other than diagonal... is this even possible? */
 
 		/* add CPC part */
 		/* call addCInvHCT with zero pointer instead of interval->y */
 		addCInvHCT(qpData, xxMatTmp, &(intervals[kk]->cholH), &(intervals[kk]->C), 0, xxMatTmp2, uxMatTmp, zxMatTmp);
-//		if (kk == 1) qpDUNES_printMatrixData( xxMatTmp->data, _NX_, _NX_, "clipping: CPC+ EPE part[%d]", kk );
 
 		/* write Hessian part */
 		for (ii = 0; ii < _NX_; ++ii) {
@@ -856,8 +843,6 @@ return_t qpDUNES_setupCholDefaultHessian(	qpData_t* const qpData	)
 		}
 	}	/* END OF sub-diagonal block for loop */
 
-//	qpDUNES_printMatrixData( qpData->hessian.data, _NI_*_NX_, 2*_NX_, "H = ");
-
 
 	return qpDUNES_factorNewtonSystem(qpData, &(qpData->cholDefaultHessian), &(qpData->cholDefaultHessian), &isHessianRegularized, -1);
 }
@@ -880,9 +865,8 @@ return_t qpDUNES_computeNewtonGradient(	qpData_t* const qpData,
 
 	/* d/(d lambda_ii) for kk=0.._NI_-1 */
 	for (kk = 0; kk < _NI_; ++kk) {
-//		if ( (kk >= _NI_-4) || (kk == 0) )	qpDUNES_printMatrixData( intervals[kk+1]->z.data, 1, intervals[kk+1]->nV, "z[%3d]:", kk+1);
 		/* ( C_kk*z_kk^opt + c_kk ) - x_(kk+1)^opt */
-		multiplyCz(qpData, gradPiece, &(intervals[kk]->C), &(intervals[kk]->z));
+		multiplyCz( qpData, gradPiece, &(intervals[kk]->C), (z_vector_t*)&(intervals[kk]->z) );
 		addToVector( (vector_t*)gradPiece, (vector_t*)&(intervals[kk]->c), _NX_);
 
 		/* subtractFromVector( xVecTmp, &(intervals[kk+1]->x), _NX_ ); */
@@ -2148,7 +2132,6 @@ return_t qpDUNES_qpadApproxIntervalSearch(	qpData_t* const qpData,
 		alphaD = 0.5 * ((alphaL + alphaC) - sCL / sLR);
 		objValD = qpDUNES_computeParametricObjectiveValue(qpData, alphaD);
 		qpDUNES_printf("found aD = %.5e, oD = %.5e", alphaD, objValD);
-//        qpDUNES_printf("sCL = %.5e, sRC = %.5e", sCL, sRC );
 
 		/* check for stationarity in search direction */
 //		first in the cheap way, though gradient is not so much more expensive...
@@ -2164,7 +2147,7 @@ return_t qpDUNES_qpadApproxIntervalSearch(	qpData_t* const qpData,
 								   alphaD,
 								   (vector_t*)&(interval->qpSolverClipping.dz),
 								   interval->nV);
-			clippingQpSolver_saturateVector(qpData, zTry, interval->y, &(interval->zLow), &(interval->zUpp), &(interval->H), interval->nV);
+			clippingQpSolver_saturateVector( qpData, (v_vector_t*)zTry, interval->y, &(interval->zLow), &(interval->zUpp), &(interval->H), interval->nV );
 		}
 
 		/* manual gradient computation; TODO: use function, but watch out with z, dz, zTry, etc. */
@@ -2600,19 +2583,11 @@ real_t qpDUNES_computeObjectiveValue(qpData_t* const qpData) {
 		interval = qpData->intervals[kk];
 
 		/* quadratic objective part */
-		interval->optObjVal = 0.5
-				* multiplyzHz(qpData, &(interval->H), &(interval->z),
-						interval->nV);
+		interval->optObjVal = 0.5 * multiplyzHz( qpData, &(interval->H), &(interval->z), interval->nV );
 		/* linear objective part */
 		interval->optObjVal += scalarProd( (vector_t*)&(interval->q), (vector_t*)&(interval->z), interval->nV );
 		/* constant objective part */
 		interval->optObjVal += interval->p;
-
-//		qpDUNES_printMatrixData( interval->dLow.data, 1, interval->nV, "dLow[%d]",kk );
-//		qpDUNES_printMatrixData( interval->dUpp.data, 1, interval->nV, "dUpp[%d]",kk );
-//		qpDUNES_printMatrixData( interval->z.data, 1, interval->nV, "z[%d]",kk );
-//		qpDUNES_printMatrixData( interval->q.data, 1, _NZ_, "q[%d]",kk );
-//		qpDUNES_printf( "p[%d] = %.10e", kk, interval->p );
 
 		/* sum up */
 		objVal += interval->optObjVal;
