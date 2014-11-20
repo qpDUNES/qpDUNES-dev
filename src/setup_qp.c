@@ -770,7 +770,7 @@ return_t qpDUNES_setupRegularInterval(	qpData_t* const qpData,
 		if (H->sparsityType == QPDUNES_MATRIX_UNDEFINED) {
 			H->sparsityType = qpDUNES_detectMatrixSparsity( H_, _NZ_, _NZ_ );
 		}
-		qpDUNES_updateMatrixData( (matrix_t*)H, H_, _NZ_, _NZ_ );
+		qpDUNES_updateMatrixData( (abstractMatrix_t*)H, H_, _NZ_, _NZ_ );
 	}
 	else {	/* assemble Hessian */
 		/* TODO: move Q, R out to MPC module */
@@ -893,10 +893,10 @@ return_t qpDUNES_setupRegularInterval(	qpData_t* const qpData,
 
 	/** (2) linear term of cost function */
 	if ( g_ != 0 ) {
-		qpDUNES_setupVector( (vector_t*)&(interval->g), g_, nV );
+		qpDUNES_setupVector( (abstractVector_t*)&(interval->g), g_, nV );
 	}
 	else {
-		qpDUNES_setupZeroVector( (vector_t*)&(interval->g), nV );
+		qpDUNES_setupZeroVector( (abstractVector_t*)&(interval->g), nV );
 	}
 
 
@@ -906,7 +906,7 @@ return_t qpDUNES_setupRegularInterval(	qpData_t* const qpData,
 	}
 	if ( C_ != 0 ) {
 		/* set up C directly */
-		qpDUNES_updateMatrixData( (matrix_t*)C, C_, _NX_, _NZ_ );
+		qpDUNES_updateMatrixData( (abstractMatrix_t*)C, C_, _NX_, _NZ_ );
 	}
 	else {
 		/* TODO: move assembly out to MPC interface */
@@ -928,22 +928,22 @@ return_t qpDUNES_setupRegularInterval(	qpData_t* const qpData,
 	}
 	
 	if ( c_ != 0 ) {
-		qpDUNES_setupVector( (vector_t*)&(interval->c), c_, _NX_ );
+		qpDUNES_setupVector( (abstractVector_t*)&(interval->c), c_, _NX_ );
 	}
 	else {
-		qpDUNES_setupZeroVector( (vector_t*)&(interval->c), _NX_ );
+		qpDUNES_setupZeroVector( (abstractVector_t*)&(interval->c), _NX_ );
 	}
 	
 	
 	/** (4) bounds */
-	qpDUNES_setupUniformVector( (vector_t*)&(interval->zLow), -qpData->options.QPDUNES_INFTY, nV );
-	qpDUNES_updateSimpleBoundVector( qpData, (vector_t*)&(interval->zLow), zLow_, xLow_, uLow_ );
+	qpDUNES_setupUniformVector( (abstractVector_t*)&(interval->zLow), -qpData->options.QPDUNES_INFTY, nV );
+	qpDUNES_updateSimpleBoundVector( qpData, (abstractVector_t*)&(interval->zLow), zLow_, xLow_, uLow_ );
 //	qpDUNES_printf("zUpp: %d", (int)(interval->zUpp.data));
 //	qpDUNES_printf("interval id: %d", interval->id);
 //	qpDUNES_printf("interval pointer %d", (int)interval);
 //	qpDUNES_printf("nV: %d", nV);
-	qpDUNES_setupUniformVector( (vector_t*)&(interval->zUpp), qpData->options.QPDUNES_INFTY, nV );
-	qpDUNES_updateSimpleBoundVector( qpData, (vector_t*)&(interval->zUpp), zUpp_, xUpp_, uUpp_ );
+	qpDUNES_setupUniformVector( (abstractVector_t*)&(interval->zUpp), qpData->options.QPDUNES_INFTY, nV );
+	qpDUNES_updateSimpleBoundVector( qpData, (abstractVector_t*)&(interval->zUpp), zUpp_, xUpp_, uUpp_ );
 
 
 	/** (5) constraints */
@@ -952,16 +952,16 @@ return_t qpDUNES_setupRegularInterval(	qpData_t* const qpData,
 		if (interval->D.sparsityType == QPDUNES_MATRIX_UNDEFINED) {
 			interval->D.sparsityType = QPDUNES_DENSE;	/* currently only dense matrices are supported in affine constraints */
 		}
-		qpDUNES_updateMatrixData( (matrix_t*)&(interval->D), D_, nD, _NZ_ );
+		qpDUNES_updateMatrixData( (abstractMatrix_t*)&(interval->D), D_, nD, _NZ_ );
 
 	}
 	else {	/* simply bounded QP */
-		qpDUNES_setMatrixNull( (matrix_t*)&(interval->D) );
+		qpDUNES_setMatrixNull( (abstractMatrix_t*)&(interval->D) );
 	}
 	
 	/*  - Vectors */
-	qpDUNES_updateVector( (vector_t*)&(interval->dLow), dLow_, nD );
-	qpDUNES_updateVector( (vector_t*)&(interval->dUpp), dUpp_, nD );
+	qpDUNES_updateVector( (abstractVector_t*)&(interval->dLow), dLow_, nD );
+	qpDUNES_updateVector( (abstractVector_t*)&(interval->dUpp), dUpp_, nD );
 
 	
 	/* reset current active set to force Hessian refactorization
@@ -1003,27 +1003,27 @@ return_t qpDUNES_setupFinalInterval(	qpData_t* const qpData,
 		if (H->sparsityType == QPDUNES_MATRIX_UNDEFINED) {
 	 		H->sparsityType = qpDUNES_detectMatrixSparsity( H_, nV, nV );
 		}
- 		qpDUNES_updateMatrixData( (matrix_t*)H, H_, nV, nV );
+ 		qpDUNES_updateMatrixData( (abstractMatrix_t*)H, H_, nV, nV );
  	}
 	else {
-		qpDUNES_setupScaledIdentityMatrix( _NX_, qpData->options.regParam, (matrix_t*)H );
+		qpDUNES_setupScaledIdentityMatrix( _NX_, qpData->options.regParam, (abstractMatrix_t*)H );
 	}
 
 
  	/** (2) linear term of cost function */
 	if ( g_ != 0 ) {
-		qpDUNES_setupVector( (vector_t*)&(interval->g), g_, nV );
+		qpDUNES_setupVector( (abstractVector_t*)&(interval->g), g_, nV );
 	}
 	else {
-		qpDUNES_setupZeroVector( (vector_t*)&(interval->g), nV );
+		qpDUNES_setupZeroVector( (abstractVector_t*)&(interval->g), nV );
 	}
 
 
 	/** (3) local bounds */
-	qpDUNES_setupUniformVector( (vector_t*)&(interval->zLow), -qpData->options.QPDUNES_INFTY, nV );
-	qpDUNES_updateVector( (vector_t*)&(interval->zLow), zLow_, nV );
-	qpDUNES_setupUniformVector( (vector_t*)&(interval->zUpp), qpData->options.QPDUNES_INFTY, nV );
-	qpDUNES_updateVector( (vector_t*)&(interval->zUpp), zUpp_, nV );
+	qpDUNES_setupUniformVector( (abstractVector_t*)&(interval->zLow), -qpData->options.QPDUNES_INFTY, nV );
+	qpDUNES_updateVector( (abstractVector_t*)&(interval->zLow), zLow_, nV );
+	qpDUNES_setupUniformVector( (abstractVector_t*)&(interval->zUpp), qpData->options.QPDUNES_INFTY, nV );
+	qpDUNES_updateVector( (abstractVector_t*)&(interval->zUpp), zUpp_, nV );
 
 
 	/** (4) local constraints */
@@ -1031,14 +1031,14 @@ return_t qpDUNES_setupFinalInterval(	qpData_t* const qpData,
 		if (interval->D.sparsityType == QPDUNES_MATRIX_UNDEFINED) {
 			interval->D.sparsityType = QPDUNES_DENSE;	/* currently only dense matrices are supported in affine constraints */
 		}
-		qpDUNES_updateMatrixData( (matrix_t*)&(interval->D), D_, nD, nV );
+		qpDUNES_updateMatrixData( (abstractMatrix_t*)&(interval->D), D_, nD, nV );
 	}
 	else {	/* simply bounded QP */
-		qpDUNES_setMatrixNull( (matrix_t*)&(interval->D) );
+		qpDUNES_setMatrixNull( (abstractMatrix_t*)&(interval->D) );
 	}
 	
-	qpDUNES_updateVector( (vector_t*)&(interval->dLow), dLow_, nD );
-	qpDUNES_updateVector( (vector_t*)&(interval->dUpp), dUpp_, nD );
+	qpDUNES_updateVector( (abstractVector_t*)&(interval->dLow), dLow_, nD );
+	qpDUNES_updateVector( (abstractVector_t*)&(interval->dUpp), dUpp_, nD );
 
 
 	/* reset current active set to force Hessian refactorization
@@ -1113,21 +1113,21 @@ return_t qpDUNES_updateIntervalData(	qpData_t* const qpData,
 
 
 	/** copy data */
-	qpDUNES_updateMatrixData( (matrix_t*)&(interval->H), H_, nV, nV );
-	qpDUNES_updateVector( (vector_t*)&(interval->g), g_, nV );
+	qpDUNES_updateMatrixData( (abstractMatrix_t*)&(interval->H), H_, nV, nV );
+	qpDUNES_updateVector( (abstractVector_t*)&(interval->g), g_, nV );
 
-	qpDUNES_updateMatrixData( (matrix_t*)&(interval->C), C_, _NX_, _NZ_ );
-	qpDUNES_updateVector( (vector_t*)&(interval->c), c_, _NX_ );
+	qpDUNES_updateMatrixData( (abstractMatrix_t*)&(interval->C), C_, _NX_, _NZ_ );
+	qpDUNES_updateVector( (abstractVector_t*)&(interval->c), c_, _NX_ );
 
-	qpDUNES_updateVector( (vector_t*)&(interval->zLow), zLow_, nV );
-	qpDUNES_updateVector( (vector_t*)&(interval->zUpp), zUpp_, nV );
+	qpDUNES_updateVector( (abstractVector_t*)&(interval->zLow), zLow_, nV );
+	qpDUNES_updateVector( (abstractVector_t*)&(interval->zUpp), zUpp_, nV );
 //	qpDUNES_printMatrixData( interval->zLow.data, 1, interval->nV, "i[%3d]: zLowReceived:", interval->id);
 //	qpDUNES_printMatrixData( interval->zUpp.data, 1, interval->nV, "i[%3d]: zUppReceived:", interval->id);
 
 	/* affine constraints */
-	qpDUNES_updateMatrixData( (matrix_t*)&(interval->D), D_, nD, nV );
-	qpDUNES_updateVector( (vector_t*)&(interval->dLow), dLow_, nD );
-	qpDUNES_updateVector( (vector_t*)&(interval->dUpp), dUpp_, nD );
+	qpDUNES_updateMatrixData( (abstractMatrix_t*)&(interval->D), D_, nD, nV );
+	qpDUNES_updateVector( (abstractVector_t*)&(interval->dLow), dLow_, nD );
+	qpDUNES_updateVector( (abstractVector_t*)&(interval->dUpp), dUpp_, nD );
 
 
 	/* reset current active set to force Hessian refactorization
@@ -1144,7 +1144,7 @@ return_t qpDUNES_updateIntervalData(	qpData_t* const qpData,
 			/* check if Hessian needs to be refactored */
 			if ( H_ != 0 ) {
 				if (cholH != 0) {	/* factorization provided */
-					qpDUNES_copyMatrix( (matrix_t*)&(interval->cholH), (matrix_t*)cholH, nV, nV );
+					qpDUNES_copyMatrix( (abstractMatrix_t*)&(interval->cholH), (abstractMatrix_t*)cholH, nV, nV );
 				}
 				else {				/* no factorization provided */
 					refactorHessian = QPDUNES_TRUE;
@@ -1227,12 +1227,12 @@ return_t qpDUNES_setupAllLocalQPs(	qpData_t* const qpData,
 
 
 	/* (1) set up initial lambda guess */
-	qpDUNES_updateVector( (vector_t*)&(qpData->intervals[0]->lambdaK1), &(qpData->lambda.data[0]), _NX_ );
+	qpDUNES_updateVector( (abstractVector_t*)&(qpData->intervals[0]->lambdaK1), &(qpData->lambda.data[0]), _NX_ );
 	for( kk=1; kk<_NI_; ++kk ) {
-		qpDUNES_updateVector( (vector_t*)&(qpData->intervals[kk]->lambdaK), &(qpData->lambda.data[(kk-1)*_NX_]), _NX_ );
-		qpDUNES_updateVector( (vector_t*)&(qpData->intervals[kk]->lambdaK1), &(qpData->lambda.data[kk*_NX_]), _NX_ );
+		qpDUNES_updateVector( (abstractVector_t*)&(qpData->intervals[kk]->lambdaK), &(qpData->lambda.data[(kk-1)*_NX_]), _NX_ );
+		qpDUNES_updateVector( (abstractVector_t*)&(qpData->intervals[kk]->lambdaK1), &(qpData->lambda.data[kk*_NX_]), _NX_ );
 	}
-	qpDUNES_updateVector( (vector_t*)&(qpData->intervals[_NI_]->lambdaK), &(qpData->lambda.data[(_NI_-1)*_NX_]), _NX_ );
+	qpDUNES_updateVector( (abstractVector_t*)&(qpData->intervals[_NI_]->lambdaK), &(qpData->lambda.data[(_NI_-1)*_NX_]), _NX_ );
 
 
 	/* (2) decide which QP solver to use and set up */
@@ -1328,17 +1328,17 @@ return_t qpDUNES_setupClippingSolver(	qpData_t* const qpData,
 	/* (c) solve unconstrained local QP for g and initial lambda guess: */
 	/*	   - get (possibly updated) lambda guess */
 	if (interval->id > 0) {		/* lambdaK exists */
-		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
+		qpDUNES_updateVector( (abstractVector_t*)&(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
 	}
 	if (interval->id < _NI_) {		/* lambdaK1 exists */
-		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
+		qpDUNES_updateVector( (abstractVector_t*)&(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
 	}
 
 	/*     - update first order term */
 	/*       reset q; qStep is added in directQpSolver_doStep, when bounds are known */
 	qpDUNES_setupZeroVector( &(interval->q), interval->nV );
 	clippingQpSolver_updateDualGuess( qpData, interval, &(interval->lambdaK), &(interval->lambdaK1) );
-	addToVector( (vector_t*)&(interval->qpSolverClipping.qStep), (vector_t*)&(interval->g), interval->nV );	/* Note: qStep is rewritten in line before */
+	addToVector( (abstractVector_t*)&(interval->qpSolverClipping.qStep), (abstractVector_t*)&(interval->g), interval->nV );	/* Note: qStep is rewritten in line before */
 	/*     - solve */
 	statusFlag = clippingQpSolver_solveUnconstrained( qpData, interval, &(interval->qpSolverClipping.qStep) );
 	if ( statusFlag != QPDUNES_OK ) {
@@ -1385,10 +1385,10 @@ return_t qpDUNES_setupQpoases(	qpData_t* const qpData,
 	qpDUNES_copyVector( &(interval->q), &(interval->g), interval->nV );
 	/*	   - get (possibly updated) lambda guess */
 	if (interval->id > 0) {		/* lambdaK exists */
-		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
+		qpDUNES_updateVector( (abstractVector_t*)&(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
 	}
 	if (interval->id < _NI_) {		/* lambdaK1 exists */
-		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
+		qpDUNES_updateVector( (abstractVector_t*)&(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
 	}
 	qpOASES_updateDualGuess( qpData, interval, &(interval->lambdaK), &(interval->lambdaK1) );
 
@@ -1435,10 +1435,10 @@ return_t qpDUNES_updateQpoases(	qpData_t* const qpData,
 	qpDUNES_copyVector( &(interval->q), &(interval->g), interval->nV );
 	/*	   - get (possibly updated) lambda guess */
 	if (interval->id > 0) {		/* lambdaK exists */
-		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
+		qpDUNES_updateVector( (abstractVector_t*)&(interval->lambdaK), &(qpData->lambda.data[((interval->id)-1)*_NX_]), _NX_ );
 	}
 	if (interval->id < _NI_) {		/* lambdaK1 exists */
-		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
+		qpDUNES_updateVector( (abstractVector_t*)&(interval->lambdaK1), &(qpData->lambda.data[(interval->id)*_NX_]), _NX_ );
 	}
 	qpOASES_updateDualGuess( qpData, interval, &(interval->lambdaK), &(interval->lambdaK1) );
 

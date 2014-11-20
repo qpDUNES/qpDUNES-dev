@@ -99,7 +99,7 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 
 			/** (1Ab) do gradient step */
 			tNwtnSolveStart = getTime();
-			qpDUNES_copyVector( (vector_t*)&(qpData->deltaLambda), (vector_t*)&(qpData->gradient), _NI_*_NX_ );
+			qpDUNES_copyVector( (abstractVector_t*)&(qpData->deltaLambda), (abstractVector_t*)&(qpData->gradient), _NI_*_NX_ );
 			statusFlag = QPDUNES_OK;
 			tNwtnSolveEnd = getTime();
 		}
@@ -138,7 +138,7 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 				case QPDUNES_OK:
 					break;
 				case QPDUNES_SUCC_OPTIMAL_SOLUTION_FOUND: /* zero gradient norm detected */
-					qpDUNES_printSuccess( qpData, "Optimal solution found: gradient norm %.1e",	vectorNorm( (vector_t*)&(qpData->gradient), _NI_*_NX_ ) );
+					qpDUNES_printSuccess( qpData, "Optimal solution found: gradient norm %.1e",	vectorNorm( (abstractVector_t*)&(qpData->gradient), _NI_*_NX_ ) );
 					if (qpData->options.logLevel >= QPDUNES_LOG_ITERATIONS)  qpDUNES_logIteration(qpData, itLogPtr, objValIncumbent, hessRefactorIdx);
 					/* save the final active set (the one where the solution lies).
 					 *   Even if the hessian is not yet updated according to the last
@@ -363,7 +363,7 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 
 	if ( qpData->options.allowSuboptimalTermination == QPDUNES_TRUE )	{
 		qpDUNES_computeNewtonGradient(qpData, &(qpData->gradient), &(qpData->xVecTmp) );
-		qpDUNES_printSuccess(qpData, "Early termination due to iteration limit.\n          Dual suboptimal with remaining ascent slope %.1e",	vectorNorm( (vector_t*)&(qpData->gradient), _NI_*_NX_ ) );
+		qpDUNES_printSuccess(qpData, "Early termination due to iteration limit.\n          Dual suboptimal with remaining ascent slope %.1e",	vectorNorm( (abstractVector_t*)&(qpData->gradient), _NI_*_NX_ ) );
 		/* save the final active set (the one where the solution lies).
 		 *   Even if the hessian is not yet updated according to the last
 		 *   active set changes, the corresponding blocks are already flagged
@@ -408,10 +408,10 @@ void qpDUNES_logIteration(	qpData_t* qpData,
 {
 	int_t kk, ii;
 
-	itLogPtr->gradNorm = vectorNorm( (vector_t*)&(qpData->gradient), _NI_ * _NX_ );
-	itLogPtr->stepNorm = vectorNorm( (vector_t*)&(qpData->deltaLambda), _NI_ * _NX_ );
+	itLogPtr->gradNorm = vectorNorm( (abstractVector_t*)&(qpData->gradient), _NI_ * _NX_ );
+	itLogPtr->stepNorm = vectorNorm( (abstractVector_t*)&(qpData->deltaLambda), _NI_ * _NX_ );
 	itLogPtr->stepSize = qpData->alpha;
-	itLogPtr->lambdaNorm = vectorNorm( (vector_t*)&(qpData->lambda), _NI_ * _NX_ );
+	itLogPtr->lambdaNorm = vectorNorm( (abstractVector_t*)&(qpData->lambda), _NI_ * _NX_ );
 	itLogPtr->objVal = objValIncumbent;
 	itLogPtr->hessRefactorIdx = hessRefactorIdx;
 
@@ -419,8 +419,8 @@ void qpDUNES_logIteration(	qpData_t* qpData,
 #ifndef __STATIC_MEMORY__
 	if (qpData->options.logLevel == QPDUNES_LOG_ALL_DATA) {
 		/* - dual variables */
-		qpDUNES_copyVector( (vector_t*)&(itLogPtr->lambda), (vector_t*)&(qpData->lambda), _NI_ * _NX_);
-		qpDUNES_copyVector( (vector_t*)&(itLogPtr->deltaLambda), (vector_t*)&(qpData->deltaLambda),
+		qpDUNES_copyVector( (abstractVector_t*)&(itLogPtr->lambda), (abstractVector_t*)&(qpData->lambda), _NI_ * _NX_);
+		qpDUNES_copyVector( (abstractVector_t*)&(itLogPtr->deltaLambda), (abstractVector_t*)&(qpData->deltaLambda),
 				_NI_ * _NX_);
 		/* - Newton system */
 		for (ii = 0; ii < _NI_ * _NX_ * 2 * _NX_; ++ii) {
@@ -494,16 +494,16 @@ return_t qpDUNES_updateAllLocalQPs(	qpData_t* const qpData,
 
 	/* first interval: */
 	interval = qpData->intervals[0];
-	qpDUNES_updateVector( (vector_t*)&(interval->lambdaK1), &(lambda->data[0]), _NX_ );
+	qpDUNES_updateVector( (abstractVector_t*)&(interval->lambdaK1), &(lambda->data[0]), _NX_ );
 	/* intermediate intervals: */
 	for (kk = 1; kk < _NI_; ++kk) {
 		interval = qpData->intervals[kk];
-		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK), &(lambda->data[(kk - 1) * _NX_]), _NX_ );
-		qpDUNES_updateVector( (vector_t*)&(interval->lambdaK1), &(lambda->data[kk * _NX_]), _NX_ );
+		qpDUNES_updateVector( (abstractVector_t*)&(interval->lambdaK), &(lambda->data[(kk - 1) * _NX_]), _NX_ );
+		qpDUNES_updateVector( (abstractVector_t*)&(interval->lambdaK1), &(lambda->data[kk * _NX_]), _NX_ );
 	}
 	/* last interval: */
 	interval = qpData->intervals[_NI_];
-	qpDUNES_updateVector( (vector_t*)&(interval->lambdaK), &(lambda->data[(_NI_ - 1) * _NX_]), _NX_ );
+	qpDUNES_updateVector( (abstractVector_t*)&(interval->lambdaK), &(lambda->data[(_NI_ - 1) * _NX_]), _NX_ );
 
 	for (kk = 0; kk < _NI_ + 1; ++kk) {
 		interval = qpData->intervals[kk];
@@ -607,6 +607,7 @@ return_t qpDUNES_solveLocalQP(	qpData_t* const qpData,
 /*<<< END OF qpDUNES_solveLocalQP */
 
 
+
 /* ----------------------------------------------
  * ...
  * 
@@ -625,10 +626,10 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
 	zx_matrix_t* zxMatTmp2 = (zx_matrix_t*)&(qpData->xzMatTmp);		/* temporary matrices of same size, so we can cast */
 
 	/* get Matrices for reduced Hessian and for projection matrix */
-	matrix_t ZT;	// WARNING: ZT is an abstract matrix type, so still uses dynamic (or foreignly allocated) memory
+	abstractMatrix_t ZT;	// WARNING: ZT is an abstract matrix type, so still uses dynamic (or foreignly allocated) memory
 	ZT.data = 0;
 	ZT.sparsityType = QPDUNES_DENSE;
-	matrix_t cholProjHess;
+	abstractMatrix_t cholProjHess;
 	cholProjHess.data = 0;
 	cholProjHess.sparsityType = QPDUNES_DENSE;
 	int_t nFree; /* number of active constraints of stage QP */
@@ -639,7 +640,7 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
 
 	/** calculate gradient and check gradient norm for convergence */
 	qpDUNES_computeNewtonGradient(qpData, &(qpData->gradient), xVecTmp);
-	if ( (vectorNorm( (vector_t*)&(qpData->gradient), _NX_ * _NI_ ) < qpData->options.stationarityTolerance) ) {
+	if ( (vectorNorm( (abstractVector_t*)&(qpData->gradient), _NX_ * _NI_ ) < qpData->options.stationarityTolerance) ) {
 		return QPDUNES_SUCC_OPTIMAL_SOLUTION_FOUND;
 	}
 
@@ -671,8 +672,8 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
 				for (ii=0; ii<_NX_*_NX_; ++ii)	{
 					xxMatTmp->data[ii] = 0;	/* wipe out matrices for safety */
 				}
-				qpOASES_getZT( qpData, intervals[kk + 1]->qpSolverQpoases.qpoasesObject, &nFree, (zz_matrix_t*)&ZT );
-				qpOASES_getCholZTHZ( qpData, intervals[kk + 1]->qpSolverQpoases.qpoasesObject, (zz_matrix_t*)&cholProjHess );
+				qpOASES_getZT( qpData, intervals[kk + 1]->qpSolverQpoases.qpoasesObject, &nFree, &ZT );
+				qpOASES_getCholZTHZ( qpData, intervals[kk + 1]->qpSolverQpoases.qpoasesObject, &cholProjHess );
 				backsolveRT_ZTET( qpData, zxMatTmp2, (zz_matrix_t*)&cholProjHess, (zz_matrix_t*)&ZT, xVecTmp, intervals[kk + 1]->nV, nFree );
 				boolean_t addToRes = QPDUNES_FALSE;
 				multiplyMatrixTMatrixDenseDense(xxMatTmp->data, zxMatTmp2->data, zxMatTmp2->data, nFree, _NX_, _NX_, addToRes);
@@ -682,7 +683,7 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
 				getInvQ(qpData, xxMatTmp, &(intervals[kk + 1]->cholH), intervals[kk + 1]->nV); /* getInvQ not supported with matrices other than diagonal... is this even possible? */
 
 				/* Annihilate columns in invQ; note: this can only be applied for diagonal matrices */
-				qpDUNES_makeMatrixDense( (matrix_t*)xxMatTmp, _NX_, _NX_ );
+				qpDUNES_makeMatrixDense( (abstractMatrix_t*)xxMatTmp, _NX_, _NX_ );
 				for (ii = 0; ii < _NX_; ++ii) {
 					if ((intervals[kk + 1]->y->data[2 * ii] >= qpData->options.equalityTolerance) ||		// check if local constraint lb_x is active
 						(intervals[kk + 1]->y->data[2 * ii + 1] >= qpData->options.equalityTolerance))	// check if local constraint ub_x is active		// WARNING: weakly active constraints are excluded here!
@@ -701,8 +702,8 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
 					zxMatTmp->data[ii] = 0;	/* wipe out matrices for safety */
 				}
 				/* get data from qpOASES */
-				qpOASES_getZT( qpData, intervals[kk]->qpSolverQpoases.qpoasesObject, &nFree, (zz_matrix_t*)&ZT );
-				qpOASES_getCholZTHZ(qpData,	intervals[kk]->qpSolverQpoases.qpoasesObject, (zz_matrix_t*)&cholProjHess);
+				qpOASES_getZT( qpData, intervals[kk]->qpSolverQpoases.qpoasesObject, &nFree, &ZT );
+				qpOASES_getCholZTHZ(qpData,	intervals[kk]->qpSolverQpoases.qpoasesObject, &cholProjHess);
 				/* computer Z.T * C.T */
 				zx_matrix_t* ZTCT = zxMatTmp;
 				multiplyMatrixMatrixTDenseDense(ZTCT->data, ZT.data, intervals[kk]->C.data, nFree, _NZ_, _NX_);
@@ -740,8 +741,8 @@ return_t qpDUNES_setupNewtonSystem(	qpData_t* const qpData,
 			#endif
 			if (intervals[kk]->qpSolverSpecification == QPDUNES_STAGE_QP_SOLVER_QPOASES) {
 				/* get data from qpOASES */
-				qpOASES_getZT(qpData, intervals[kk]->qpSolverQpoases.qpoasesObject,	&nFree, (zz_matrix_t*)&ZT);
-				qpOASES_getCholZTHZ(qpData,	intervals[kk]->qpSolverQpoases.qpoasesObject, (zz_matrix_t*)&cholProjHess);
+				qpOASES_getZT(qpData, intervals[kk]->qpSolverQpoases.qpoasesObject,	&nFree, &ZT);
+				qpOASES_getCholZTHZ(qpData,	intervals[kk]->qpSolverQpoases.qpoasesObject, &cholProjHess);
 
 				/* compute "squareroot" of C_{k} P_{k} C_{k}' */
 				/* computer Z.T * C.T */
@@ -867,7 +868,7 @@ return_t qpDUNES_computeNewtonGradient(	qpData_t* const qpData,
 	for (kk = 0; kk < _NI_; ++kk) {
 		/* ( C_kk*z_kk^opt + c_kk ) - x_(kk+1)^opt */
 		multiplyCz( qpData, gradPiece, &(intervals[kk]->C), (z_vector_t*)&(intervals[kk]->z) );
-		addToVector( (vector_t*)gradPiece, (vector_t*)&(intervals[kk]->c), _NX_);
+		addToVector( (abstractVector_t*)gradPiece, (abstractVector_t*)&(intervals[kk]->c), _NX_);
 
 		/* subtractFromVector( xVecTmp, &(intervals[kk+1]->x), _NX_ ); */
 		for (ii = 0; ii < _NX_; ++ii) {
@@ -1545,7 +1546,7 @@ return_t qpDUNES_determineStepLength(	qpData_t* const qpData,
 	{
 		*alpha = 1.;
 
-		addVectorScaledVector( (vector_t*)lambda, (vector_t*)lambda, *alpha, (vector_t*)deltaLambdaFS, nV); /* temporary; TODO: move out to mother function */
+		addVectorScaledVector( (abstractVector_t*)lambda, (abstractVector_t*)lambda, *alpha, (abstractVector_t*)deltaLambdaFS, nV); /* temporary; TODO: move out to mother function */
 		for (kk = 0; kk < _NI_ + 1; ++kk) {
 			interval = qpData->intervals[kk];
 			/* update primal, dual, and internal QP solver variables */
@@ -1708,7 +1709,7 @@ return_t qpDUNES_backTrackingLineSearch(	qpData_t* const qpData,
 	real_t objVal;
 
 	real_t minimumProgress = qpData->options.lineSearchMinRelProgress * fabs(objValIncumbent) + qpData->options.lineSearchMinAbsProgress;
-	real_t normDeltaLambda = vectorNorm( (vector_t*)deltaLambdaFS, nV );
+	real_t normDeltaLambda = vectorNorm( (abstractVector_t*)deltaLambdaFS, nV );
 
 	*alpha = alphaMax;
 
@@ -1777,7 +1778,7 @@ return_t qpDUNES_reductionLineSearchWithASChange(	qpData_t* const qpData,
 			(*itCntr) < qpData->options.maxNumLineSearchRefinementIterations;
 			++(*itCntr)) {
 		*alpha = 0.5 * (alphaMin + alphaMax);
-		addVectorScaledVector( (vector_t*)lambdaTry, (vector_t*)lambda, *alpha, (vector_t*)deltaLambdaFS, nV);
+		addVectorScaledVector( (abstractVector_t*)lambdaTry, (abstractVector_t*)lambda, *alpha, (abstractVector_t*)deltaLambdaFS, nV);
 		qpDUNES_solveAllLocalQPs(qpData, lambdaTry, 0);
 		objVal = qpDUNES_computeObjectiveValue(qpData);
 
@@ -1828,19 +1829,19 @@ return_t qpDUNES_goldenSectionIntervalSearch(	qpData_t* const qpData,
 	real_t goldSec = 0.6180339887; /**< golden section ratio for interval line search (sqrt(5)-1)/2 */
 
 	aLL = alphaMin;
-	addVectorScaledVector( (vector_t*)lambdaTry, (vector_t*)lambda, aLL, (vector_t*)deltaLambdaFS, nV);
+	addVectorScaledVector( (abstractVector_t*)lambdaTry, (abstractVector_t*)lambda, aLL, (abstractVector_t*)deltaLambdaFS, nV);
 	qpDUNES_solveAllLocalQPs(qpData, lambdaTry, 0);
 	objValLL = qpDUNES_computeObjectiveValue(qpData);
 
 	aRR = alphaMax;
-	addVectorScaledVector( (vector_t*)lambdaTry, (vector_t*)lambda, aRR, (vector_t*)deltaLambdaFS, nV);
+	addVectorScaledVector( (abstractVector_t*)lambdaTry, (abstractVector_t*)lambda, aRR, (abstractVector_t*)deltaLambdaFS, nV);
 	qpDUNES_solveAllLocalQPs(qpData, lambdaTry, 0);
 	objValRR = qpDUNES_computeObjectiveValue(qpData);
 
 	/** (1) ensure that L, R have bigger objective Values than LL and RR, respectively */
 	for ( /*continuous itCntr*/; (*itCntr) < qpData->options.maxNumLineSearchRefinementIterations; ++(*itCntr)) {
 		aL = aRR - goldSec * (aRR);
-		addVectorScaledVector( (vector_t*)lambdaTry, (vector_t*)lambda, aL, (vector_t*)deltaLambdaFS, nV);
+		addVectorScaledVector( (abstractVector_t*)lambdaTry, (abstractVector_t*)lambda, aL, (abstractVector_t*)deltaLambdaFS, nV);
 		qpDUNES_solveAllLocalQPs(qpData, lambdaTry, 0);
 		objValL = qpDUNES_computeObjectiveValue(qpData);
 
@@ -1854,7 +1855,7 @@ return_t qpDUNES_goldenSectionIntervalSearch(	qpData_t* const qpData,
 	}
 	for ( /*continuous itCntr*/; (*itCntr) < qpData->options.maxNumLineSearchRefinementIterations; ++(*itCntr)) {
 		aR = aLL + goldSec * (aRR - aLL);
-		addVectorScaledVector( (vector_t*)lambdaTry, (vector_t*)lambda, aR, (vector_t*)deltaLambdaFS, nV);
+		addVectorScaledVector( (abstractVector_t*)lambdaTry, (abstractVector_t*)lambda, aR, (abstractVector_t*)deltaLambdaFS, nV);
 		qpDUNES_solveAllLocalQPs( qpData, lambdaTry, 0);
 		objValR = qpDUNES_computeObjectiveValue(qpData);
 
@@ -1890,7 +1891,7 @@ return_t qpDUNES_goldenSectionIntervalSearch(	qpData_t* const qpData,
 			objValR = objValL;
 
 			aL = aRR - goldSec * (aRR - aLL);
-			addVectorScaledVector( (vector_t*)lambdaTry, (vector_t*)lambda, aL, (vector_t*)deltaLambdaFS, nV);
+			addVectorScaledVector( (abstractVector_t*)lambdaTry, (abstractVector_t*)lambda, aL, (abstractVector_t*)deltaLambdaFS, nV);
 			qpDUNES_solveAllLocalQPs(qpData, lambdaTry, 0);
 			alphaCheckedLast = aL;
 			objValL = qpDUNES_computeObjectiveValue(qpData);
@@ -1901,7 +1902,7 @@ return_t qpDUNES_goldenSectionIntervalSearch(	qpData_t* const qpData,
 			objValL = objValR;
 
 			aR = aLL + goldSec * (aRR - aLL);
-			addVectorScaledVector( (vector_t*)lambdaTry, (vector_t*)lambda, aR, (vector_t*)deltaLambdaFS, nV);
+			addVectorScaledVector( (abstractVector_t*)lambdaTry, (abstractVector_t*)lambda, aR, (abstractVector_t*)deltaLambdaFS, nV);
 			qpDUNES_solveAllLocalQPs(qpData, lambdaTry, 0);
 			alphaCheckedLast = aR;
 			objValR = qpDUNES_computeObjectiveValue(qpData);
@@ -1933,7 +1934,7 @@ return_t qpDUNES_bisectionIntervalSearch(	qpData_t* const qpData,
 	real_t alphaC;
 
 	real_t alphaSlope;
-	real_t slopeNormalization = fmin( 1., vectorNorm( (vector_t*)deltaLambdaFS, nV ) ); 	/* demand more stationarity for smaller steps */
+	real_t slopeNormalization = fmin( 1., vectorNorm( (abstractVector_t*)deltaLambdaFS, nV ) ); 	/* demand more stationarity for smaller steps */
 	/* FIXME: is this meaningful? */
 
 	/* todo: get memory passed on from determine step length */
@@ -1951,7 +1952,7 @@ return_t qpDUNES_bisectionIntervalSearch(	qpData_t* const qpData,
 			interval = qpData->intervals[kk];
 			z_vector_t* zTry = &(interval->zVecTmp);
 			/* get primal variables for trial step length */
-			addVectorScaledVector( (vector_t*)zTry,	(vector_t*)&(interval->qpSolverClipping.zUnconstrained), alphaMax,	(vector_t*)&(interval->qpSolverClipping.dz), interval->nV);
+			addVectorScaledVector( (abstractVector_t*)zTry,	(abstractVector_t*)&(interval->qpSolverClipping.zUnconstrained), alphaMax,	(abstractVector_t*)&(interval->qpSolverClipping.dz), interval->nV);
 			clippingQpSolver_saturateVector( qpData,
 											 (v_vector_t*)zTry,
 											 interval->y,
@@ -1965,7 +1966,7 @@ return_t qpDUNES_bisectionIntervalSearch(	qpData_t* const qpData,
 		for (kk = 0; kk < _NI_; ++kk) {
 			/* ( A_kk*x_kk^opt + B_kk*u_kk^opt + c_kk ) - x_(kk+1)^opt */
 			multiplyCz( qpData, &(qpData->xVecTmp), &(qpData->intervals[kk]->C), &(qpData->intervals[kk]->zVecTmp) );
-			addToVector( (vector_t*)&(qpData->xVecTmp), (vector_t*)&(qpData->intervals[kk]->c), _NX_); /* TODO: avoid using global memory!!! */
+			addToVector( (abstractVector_t*)&(qpData->xVecTmp), (abstractVector_t*)&(qpData->intervals[kk]->c), _NX_); /* TODO: avoid using global memory!!! */
 
 			/* subtractFromVector( xVecTmp, &(intervals[kk+1]->x), _NX_ ); */
 			for (ii = 0; ii < _NX_; ++ii) {
@@ -1978,7 +1979,7 @@ return_t qpDUNES_bisectionIntervalSearch(	qpData_t* const qpData,
 			}
 		}
 //		computeNewtonGradient( qpData, gradientTry, &(qpData->xVecTmp) );	/* TODO: avoid to use own memory here! */
-		alphaSlope = scalarProd( (vector_t*)gradientTry, (vector_t*)deltaLambdaFS, nV);
+		alphaSlope = scalarProd( (abstractVector_t*)gradientTry, (abstractVector_t*)deltaLambdaFS, nV);
 
 		/* take full step if stationary */
 		if (fabs(alphaSlope / slopeNormalization) <= qpData->options.lineSearchStationarityTolerance)
@@ -2018,10 +2019,10 @@ return_t qpDUNES_bisectionIntervalSearch(	qpData_t* const qpData,
 			interval = qpData->intervals[kk];
 			z_vector_t* zTry = &(interval->zVecTmp);
 			/* get primal variables for trial step length */
-			addVectorScaledVector( (vector_t*)zTry,
-								   (vector_t*)&(interval->qpSolverClipping.zUnconstrained),
+			addVectorScaledVector( (abstractVector_t*)zTry,
+								   (abstractVector_t*)&(interval->qpSolverClipping.zUnconstrained),
 								   alphaC,
-								   (vector_t*)&(interval->qpSolverClipping.dz),
+								   (abstractVector_t*)&(interval->qpSolverClipping.dz),
 								   interval->nV );
 			clippingQpSolver_saturateVector( qpData,
 											 (v_vector_t*)zTry,
@@ -2036,7 +2037,7 @@ return_t qpDUNES_bisectionIntervalSearch(	qpData_t* const qpData,
 		for (kk = 0; kk < _NI_; ++kk) {
 			/* ( A_kk*x_kk^opt + B_kk*u_kk^opt + c_kk ) - x_(kk+1)^opt */
 			multiplyCz( qpData, &(qpData->xVecTmp), &(qpData->intervals[kk]->C), &(qpData->intervals[kk]->zVecTmp) );
-			addToVector( (vector_t*)&(qpData->xVecTmp), (vector_t*)&(qpData->intervals[kk]->c), _NX_ );
+			addToVector( (abstractVector_t*)&(qpData->xVecTmp), (abstractVector_t*)&(qpData->intervals[kk]->c), _NX_ );
 
 			/* subtractFromVector( xVecTmp, &(intervals[kk+1]->x), _NX_ ); */
 			for (ii = 0; ii < _NX_; ++ii) {
@@ -2049,7 +2050,7 @@ return_t qpDUNES_bisectionIntervalSearch(	qpData_t* const qpData,
 			}
 		}
 //		computeNewtonGradient( qpData, gradientTry, &(qpData->xVecTmp) );	/* TODO: avoid to use own memory here! */
-		alphaSlope = scalarProd( (vector_t*)gradientTry, (vector_t*)deltaLambdaFS, nV );
+		alphaSlope = scalarProd( (abstractVector_t*)gradientTry, (abstractVector_t*)deltaLambdaFS, nV );
 
 		/* check for stationarity in search direction */
 //		qpDUNES_printf("AlphaC = %.15e is tried, alphaSlope = %.15e, normalization = %.15e", alphaC, alphaSlope, slopeNormalization );
@@ -2142,10 +2143,10 @@ return_t qpDUNES_qpadApproxIntervalSearch(	qpData_t* const qpData,
 			interval = qpData->intervals[kk];
 			z_vector_t* zTry = &(interval->zVecTmp);
 			/* get primal variables for trial step length */
-			addVectorScaledVector( (vector_t*)zTry,
-								   (vector_t*)&(interval->qpSolverClipping.zUnconstrained),
+			addVectorScaledVector( (abstractVector_t*)zTry,
+								   (abstractVector_t*)&(interval->qpSolverClipping.zUnconstrained),
 								   alphaD,
-								   (vector_t*)&(interval->qpSolverClipping.dz),
+								   (abstractVector_t*)&(interval->qpSolverClipping.dz),
 								   interval->nV);
 			clippingQpSolver_saturateVector( qpData, (v_vector_t*)zTry, interval->y, &(interval->zLow), &(interval->zUpp), &(interval->H), interval->nV );
 		}
@@ -2154,7 +2155,7 @@ return_t qpDUNES_qpadApproxIntervalSearch(	qpData_t* const qpData,
 		for (kk = 0; kk < _NI_; ++kk) {
 			/* ( A_kk*x_kk^opt + B_kk*u_kk^opt + c_kk ) - x_(kk+1)^opt */
 			multiplyCz(qpData, &(qpData->xVecTmp), &(qpData->intervals[kk]->C), &(qpData->intervals[kk]->zVecTmp));
-			addToVector( (vector_t*)&(qpData->xVecTmp), (vector_t*)&(qpData->intervals[kk]->c), _NX_);
+			addToVector( (abstractVector_t*)&(qpData->xVecTmp), (abstractVector_t*)&(qpData->intervals[kk]->c), _NX_);
 
 			/* subtractFromVector( xVecTmp, &(intervals[kk+1]->x), _NX_ ); */
 			for (ii = 0; ii < _NX_; ++ii) {
@@ -2166,7 +2167,7 @@ return_t qpDUNES_qpadApproxIntervalSearch(	qpData_t* const qpData,
 				gradientTry->data[kk * _NX_ + ii] = qpData->xVecTmp.data[ii];
 			}
 		}
-		alphaSlope = fabs(scalarProd( (vector_t*)gradientTry, (vector_t*)deltaLambdaFS, nV ));
+		alphaSlope = fabs(scalarProd( (abstractVector_t*)gradientTry, (abstractVector_t*)deltaLambdaFS, nV ));
 //		end of cleaner...
 
 		qpDUNES_printf("alphaSlope is %.5e", alphaSlope);
@@ -2491,7 +2492,7 @@ return_t qpDUNES_infeasibilityCheck(	qpData_t* qpData
 //	qpDUNES_printMatrixData( qpData->hessian.data, _NI_*_NX_, 2*_NX_, "hess");
 //	qpDUNES_printMatrixData( qpData->deltaLambda.data, 1, _NI_*_NX_, "step");
 //	qpDUNES_printMatrixData( hessianStepProduct->data, 1, _NI_*_NX_, "hess step product");
-	ascentCurvature = vectorNorm( (vector_t*)hessianStepProduct, _NI_ * _NX_ );
+	ascentCurvature = vectorNorm( (abstractVector_t*)hessianStepProduct, _NI_ * _NX_ );
 //	qpDUNES_printf( "Curvature in Newton Step direction: %.3e", ascentCurvature );
 //	assert(1==0);
 	#ifdef __DEBUG__
@@ -2585,7 +2586,7 @@ real_t qpDUNES_computeObjectiveValue(qpData_t* const qpData) {
 		/* quadratic objective part */
 		interval->optObjVal = 0.5 * multiplyzHz( qpData, &(interval->H), &(interval->z), interval->nV );
 		/* linear objective part */
-		interval->optObjVal += scalarProd( (vector_t*)&(interval->q), (vector_t*)&(interval->z), interval->nV );
+		interval->optObjVal += scalarProd( (abstractVector_t*)&(interval->q), (abstractVector_t*)&(interval->z), interval->nV );
 		/* constant objective part */
 		interval->optObjVal += interval->p;
 
@@ -2652,7 +2653,7 @@ real_t qpDUNES_computeParametricObjectiveValue(	qpData_t* const qpData,
 		/* quadratic objective part */
 		interval->optObjVal = 0.5 * multiplyzHz(qpData, &(interval->H), &(interval->z),	interval->nV);
 		/* linear objective part */
-		interval->optObjVal += scalarProd( (vector_t*)qTry, (vector_t*)&(interval->z), interval->nV );
+		interval->optObjVal += scalarProd( (abstractVector_t*)qTry, (abstractVector_t*)&(interval->z), interval->nV );
 		/* constant objective part */
 		interval->optObjVal += pTry;
 

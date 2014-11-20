@@ -75,9 +75,9 @@ real_t multiplyzHz(	qpData_t* const qpData,
 
 
 return_t multiplyInvHz(	qpData_t* const qpData,
-						z_vector_t* const res,
+						v_vector_t* const res,
 						const vv_matrix_t* const cholH,
-						const z_vector_t* const z,
+						const v_vector_t* const z,
 						const int_t nV 	);
 
 
@@ -138,30 +138,30 @@ return_t addScaledLambdaStep(	qpData_t* const qpData,
 								const xn_vector_t* const deltaLambda	);
 
 
-return_t copyScaleVector(	vector_t* const res,
+return_t copyScaleVector(	abstractVector_t* const res,
 							real_t scalingFactor,
-							const vector_t* const vec,
+							const abstractVector_t* const vec,
 							int_t len
 							);
 
 
-return_t scaleVector(	vector_t* const res,
+return_t scaleVector(	abstractVector_t* const res,
 						real_t scalingFactor,
 						int_t len
 						);
 
 
-return_t addScaledVector(	xn_vector_t* const res,
+return_t addScaledVector(	abstractVector_t* const res,
 							real_t scalingFactor,
-							const xn_vector_t* const update,
+							const abstractVector_t* const update,
 							int_t len
 							);
 
 
-return_t addVectorScaledVector(	vector_t* const res,
-								const vector_t* const x,
+return_t addVectorScaledVector(	abstractVector_t* const res,
+								const abstractVector_t* const x,
 								real_t scalingFactor,
-								const vector_t* const y,
+								const abstractVector_t* const y,
 								int_t len
 								);
 
@@ -278,75 +278,75 @@ return_t backsolveMatrixTDiagonalDense( qpData_t* const qpData,
 										int_t dim1 );
 
 
-return_t multiplyMatrixVector( vector_t* const res,
-								const matrix_t* const M,
-								const vector_t* const x,
+return_t multiplyMatrixVector( abstractVector_t* const res,
+								const abstractMatrix_t* const M,
+								const abstractVector_t* const x,
 								int_t dim0,
 								int_t dim1 	);
 
 
-real_t multiplyVectorMatrixVector(	const matrix_t* const M,
-							   	   	const vector_t* const x,
+real_t multiplyVectorMatrixVector(	const abstractMatrix_t* const M,
+							   	   	const abstractVector_t* const x,
 							   	   	int_t dim0	);
 
 
-return_t multiplyBlockDiagMatrixVector( vector_t* const res,
-										const matrix_t* const M1,
-										const matrix_t* const M2,
-										const vector_t* const x,
+return_t multiplyBlockDiagMatrixVector( abstractVector_t* const res,
+										const abstractMatrix_t* const M1,
+										const abstractMatrix_t* const M2,
+										const abstractVector_t* const x,
 										int_t dimM1,			/**< dimensions of M1 */
 										int_t dimM2 			/**< dimensions of M2 */
 										);
 
 
-real_t multiplyBlockDiagVectorMatrixVector( const matrix_t* const M1,
-											const matrix_t* const M2,
-											const vector_t* const x,
+real_t multiplyBlockDiagVectorMatrixVector( const abstractMatrix_t* const M1,
+											const abstractMatrix_t* const M2,
+											const abstractVector_t* const x,
 											int_t dimM1,			/**< dimensions of M1 */
 											int_t dimM2 			/**< dimensions of M2 */
 											);
 
 
-return_t multiplyMatrixTVector(	vector_t* const res,
-								const matrix_t* const M,
-								const vector_t* const x,
+return_t multiplyMatrixTVector(	abstractVector_t* const res,
+								const abstractMatrix_t* const M,
+								const abstractVector_t* const x,
 								int_t dim0,
 								int_t dim1 	);
 
 
 return_t multiplyInvMatrixVector(	qpData_t* const qpData,
-									vector_t* const res,
-									const matrix_t* const cholH,
-									const vector_t* const x,
+									abstractVector_t* const res,
+									const abstractMatrix_t* const cholH,
+									const abstractVector_t* const x,
 									int_t dim0						/**< dimension of symmetric matrix */
 									);
 
 
 return_t multiplyInvBlockDiagMatrixVector(	qpData_t* const qpData,
-											vector_t* const res,
-											const matrix_t* const cholM1,
-											const matrix_t* const cholM2,
-											const vector_t* const x,
+											abstractVector_t* const res,
+											const abstractMatrix_t* const cholM1,
+											const abstractMatrix_t* const cholM2,
+											const abstractVector_t* const x,
 											int_t dimM1,					/**< dimensions of M1 */
 											int_t dimM2 					/**< dimensions of M2 */
 											);
 
 
 return_t multiplyInvMatrixMatrix(	qpData_t* const qpData,
-									matrix_t* const res,
-								  const matrix_t* const cholM1,
-								  const matrix_t* const M2,
-								  vector_t* const vecTmp,
+									abstractMatrix_t* const res,
+								  const abstractMatrix_t* const cholM1,
+								  const abstractMatrix_t* const M2,
+								  abstractVector_t* const vecTmp,
 								  int_t dim0,				/**< leading dimension of A == secondary dimension of A == leading dimension of M2 */
 								  int_t dim1				/**< secondary dimension of M2 */
 									);
 
 
 return_t multiplyInvMatrixMatrixT(	qpData_t* const qpData,
-									matrix_t* const res,
-								  const matrix_t* const cholM1,
-								  matrix_t* const M2,
-								  vector_t* const vecTmp,
+									abstractMatrix_t* const res,
+								  const abstractMatrix_t* const cholM1,
+								  abstractMatrix_t* const M2,
+								  abstractVector_t* const vecTmp,
 								  int_t dim0,				/**< leading dimension of A == secondary dimension of A == leading dimension of M2 */
 								  int_t dim1				/**< secondary dimension of M2 */
 									);
@@ -398,9 +398,9 @@ return_t multiplyMatrixTVectorSparse(	real_t* const res,
 										int_t dim1		);
 
 
-return_t multiplyInvMatrixMatrixDense(	matrix_t* const res,
-									const matrix_t* const M1,
-									const matrix_t* const M2,
+return_t multiplyInvMatrixMatrixDense(	abstractMatrix_t* const res,
+									const abstractMatrix_t* const M1,
+									const abstractMatrix_t* const M2,
 									int_t dim0,						/**< leading dimension of M1 */
 									int_t dim1,						/**< secondary dimension of M1 == leading dimension of M2 */
 									int_t dim2						/**< secondary dimension of M2 */
@@ -436,44 +436,44 @@ void multiplyMatrixMatrixTDenseDense( real_t* const res,
 
 
 /** Low-level scalar product */
-real_t scalarProd(	const vector_t* const x,
-					const vector_t* const y,
+real_t scalarProd(	const abstractVector_t* const x,
+					const abstractVector_t* const y,
 					int_t len 	);
 
 
-return_t addVectors(	vector_t* const res,
-						const vector_t* const x,
-						const vector_t* const y,
+return_t addVectors(	abstractVector_t* const res,
+						const abstractVector_t* const x,
+						const abstractVector_t* const y,
 						int_t len
 						);
 
 
-return_t addToVector(	vector_t* const res,
-						const vector_t* const update,
+return_t addToVector(	abstractVector_t* const res,
+						const abstractVector_t* const update,
 						int_t len
 						);
 
 
-return_t subtractVectors(	vector_t* const res,
-							const vector_t* const x,
-							const vector_t* const y,
+return_t subtractVectors(	abstractVector_t* const res,
+							const abstractVector_t* const x,
+							const abstractVector_t* const y,
 							int_t len
 							);
 
 
-return_t subtractFromVector(	vector_t* const res,
-							const vector_t* const update,
+return_t subtractFromVector(	abstractVector_t* const res,
+							const abstractVector_t* const update,
 							int_t len
 							);
 
 
-return_t negateVector(	vector_t* const res,
+return_t negateVector(	abstractVector_t* const res,
 						int_t len
 						);
 
 
-return_t addMatrix(	matrix_t* const res,
-					const matrix_t* const update,
+return_t addMatrix(	abstractMatrix_t* const res,
+					const abstractMatrix_t* const update,
 					int_t dim0,
 					int_t dim1
 					);
@@ -487,7 +487,7 @@ return_t addMatrix(	matrix_t* const res,
  *	\version 1.0beta
  *	\date 2012
  */
-real_t vectorNorm(	const vector_t* const vec,
+real_t vectorNorm(	const abstractVector_t* const vec,
 					int_t len
 					);
 
@@ -502,8 +502,8 @@ real_t vectorNorm(	const vector_t* const vec,
  *	\date 2012
  */
 return_t factorizePosDefMatrix( 	qpData_t* const qpData,
-									matrix_t* const cholM,
-									const matrix_t* const M,
+									abstractMatrix_t* const cholM,
+									const abstractMatrix_t* const M,
 									int_t dim0
 									);
 
@@ -518,8 +518,8 @@ return_t factorizePosDefMatrix( 	qpData_t* const qpData,
  *	\date 2012
  */
 return_t denseCholeskyFactorization(	qpData_t* const qpData,
-										matrix_t* const cholM,
-										const matrix_t* const M,
+										abstractMatrix_t* const cholM,
+										const abstractMatrix_t* const M,
 										int_t dim0
 										);
 
@@ -559,12 +559,12 @@ return_t addCInvHCT(	qpData_t* const qpData,
 
 
 return_t addMultiplyMatrixInvMatrixMatrixT(	qpData_t* const qpData,
-											matrix_t* const res,
-											const matrix_t* const cholM1,
-											const matrix_t* const M2,
+											abstractMatrix_t* const res,
+											const abstractMatrix_t* const cholM1,
+											const abstractMatrix_t* const M2,
 											const real_t* const y,			/**< vector containing non-zeros for columns of M2 to be eliminated */
-											matrix_t* const Ztmp,			/**< temporary matrix of shape dim1 x dim0 */
-											vector_t* const vecTmp,
+											abstractMatrix_t* const Ztmp,			/**< temporary matrix of shape dim1 x dim0 */
+											abstractVector_t* const vecTmp,
 											int_t dim0,						/**< dimensions of M2 */
 											int_t dim1
 											);

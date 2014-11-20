@@ -74,15 +74,15 @@ return_t clippingQpSolver_getMinStepsize( 	const qpData_t* const qpData,
 
 
 /** ... */
-return_t clippingQpSolver_doStep( qpData_t* const qpData,
-								interval_t* const interval,
-								const v_vector_t* const stepDir,
-								real_t alpha,
-								v_vector_t* const zUnconstrained,
-								v_vector_t* const z,
-								y_vector_t* const mu,
-								v_vector_t* const q,
-								real_t* const p				);
+return_t clippingQpSolver_doStep( 	qpData_t* const qpData,
+									interval_t* const interval,
+									const v_vector_t* const stepDir,
+									real_t alpha,
+									v_vector_t* const zUnconstrained,
+									v_vector_t* const z,
+									y_vector_t* const mu,
+									v_vector_t* const q,
+									real_t* const p				);
 
 
 /** ... */

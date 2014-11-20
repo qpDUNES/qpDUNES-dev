@@ -54,17 +54,17 @@ typedef struct
 
 	/** matrix data array */
 	real_t* data;
-} matrix_t;
+} abstractMatrix_t;
 
-typedef matrix_t xx_matrix_t;
-typedef matrix_t xu_matrix_t;
-typedef matrix_t xz_matrix_t;
-typedef matrix_t ux_matrix_t;
-typedef matrix_t uu_matrix_t;
-typedef matrix_t zx_matrix_t;
-typedef matrix_t zz_matrix_t;
-typedef matrix_t vv_matrix_t;
-typedef matrix_t dz_matrix_t;
+typedef abstractMatrix_t xx_matrix_t;
+typedef abstractMatrix_t xu_matrix_t;
+typedef abstractMatrix_t xz_matrix_t;
+typedef abstractMatrix_t ux_matrix_t;
+typedef abstractMatrix_t uu_matrix_t;
+typedef abstractMatrix_t zx_matrix_t;
+typedef abstractMatrix_t zz_matrix_t;
+typedef abstractMatrix_t vv_matrix_t;
+typedef abstractMatrix_t dz_matrix_t;
 
 /**
  * Special Newton hessian storage format:
@@ -84,9 +84,9 @@ typedef matrix_t dz_matrix_t;
  * 		[ L D ]
  *
  */
-typedef matrix_t xn2x_matrix_t;
+typedef abstractMatrix_t xn2x_matrix_t;
 
-typedef matrix_t xnxn_matrix_t;
+typedef abstractMatrix_t xnxn_matrix_t;
 
 
 /**
@@ -127,19 +127,19 @@ typedef struct
 
 	/** vector data array */
 	real_t* data;
-} vector_t;
+} abstractVector_t;
 
-typedef vector_t x_vector_t;
-typedef vector_t u_vector_t;
-typedef vector_t z_vector_t;
-typedef vector_t v_vector_t;
-typedef vector_t d_vector_t;
-typedef vector_t y_vector_t;
-typedef vector_t d2n1_vector_t;
-typedef vector_t xn_vector_t;
-typedef vector_t zn_vector_t;
-typedef vector_t zn1_vector_t;
-typedef vector_t homotopyLog_vector_t;
+typedef abstractVector_t x_vector_t;
+typedef abstractVector_t u_vector_t;
+typedef abstractVector_t z_vector_t;
+typedef abstractVector_t v_vector_t;
+typedef abstractVector_t d_vector_t;
+typedef abstractVector_t y_vector_t;
+typedef abstractVector_t d2n1_vector_t;
+typedef abstractVector_t xn_vector_t;
+typedef abstractVector_t zn_vector_t;
+typedef abstractVector_t zn1_vector_t;
+typedef abstractVector_t homotopyLog_vector_t;
 
 
 

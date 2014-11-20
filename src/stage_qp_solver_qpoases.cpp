@@ -118,8 +118,8 @@ return_t qpOASES_setup( qpData_t* qpData,
 	qpOASES::returnValue qpOASES_statusFlag;
 
 	/* make matrix data dense */
-	qpDUNES_makeMatrixDense( (matrix_t*)&(interval->H), interval->nV, interval->nV );
-	qpDUNES_makeMatrixDense( (matrix_t*)&(interval->D), interval->nD, interval->nV );
+	qpDUNES_makeMatrixDense( (abstractMatrix_t*)&(interval->H), interval->nV, interval->nV );
+	qpDUNES_makeMatrixDense( (abstractMatrix_t*)&(interval->D), interval->nD, interval->nV );
 
 //	qpDUNES_printMatrixData( interval->D.data, interval->nD, interval->nV, "I am qpoases setup, D[%d] = ", interval->id );
 //	qpDUNES_printMatrixData( interval->dLow.data, interval->nD, 1, "I am qpoases setup, dLow[%d] = ", interval->id );
@@ -327,14 +327,14 @@ return_t qpOASES_updateDualGuess(	qpData_t* const qpData,
 
 	if ( interval->id < _NI_ ) {	/* lambdaK1 does not exist on last stage */
 		/* qFullStep = q + C.T*lambdaK1 */
-		multiplyCTy( qpData, &(interval->qpSolverQpoases.qFullStep), &(interval->C), lambdaK1 );
-		addToVector( (vector_t*)&(interval->qpSolverQpoases.qFullStep), (vector_t*)&(interval->q), interval->nV );
+		multiplyCTy( qpData, (z_vector_t*)&(interval->qpSolverQpoases.qFullStep), &(interval->C), lambdaK1 );
+		addToVector( (abstractVector_t*)&(interval->qpSolverQpoases.qFullStep), (abstractVector_t*)&(interval->q), interval->nV );
 		/* pStep = c*lambdaK1 */
-		interval->qpSolverQpoases.pFullStep = scalarProd( (vector_t*)lambdaK1, (vector_t*)&(interval->c), _NX_ );	/* constant objective term */
+		interval->qpSolverQpoases.pFullStep = scalarProd( (abstractVector_t*)lambdaK1, (abstractVector_t*)&(interval->c), _NX_ );	/* constant objective term */
 	}
 	else {
 		/* qFullStep = q */
-		qpDUNES_copyVector( (vector_t*)&(interval->qpSolverQpoases.qFullStep), (vector_t*)&(interval->q), interval->nV );
+		qpDUNES_copyVector( (abstractVector_t*)&(interval->qpSolverQpoases.qFullStep), (abstractVector_t*)&(interval->q), interval->nV );
 		/* pStep = 0 */
 		interval->qpSolverQpoases.pFullStep = 0.;	/* constant objective term */
 	}
@@ -539,7 +539,7 @@ return_t qpOASES_getDualSol( 	qpData_t* qpData,
 #>>>>>>                                           */
 return_t qpOASES_getCholZTHZ( 	qpData_t* qpData,
 								qpoasesObject_t* qpoasesObject,
-								zz_matrix_t* cholZTHZ 				)
+								abstractMatrix_t* cholZTHZ 				)
 {
 	qpOASES::real_t* qpOASES_Rptr = 0;
 	static_cast<qpOASES::LoggedSQProblem*>(qpoasesObject->qpoases)->getR( &qpOASES_Rptr );
@@ -558,7 +558,7 @@ return_t qpOASES_getCholZTHZ( 	qpData_t* qpData,
 return_t qpOASES_getZT( qpData_t* qpData,
 						qpoasesObject_t* qpoasesObject,
 						int_t* nFree,
-						zz_matrix_t* ZT 				)
+						abstractMatrix_t* ZT 				)
 {
 	qpOASES::real_t* qpOASES_Qptr = 0;
 	static_cast<qpOASES::LoggedSQProblem*>(qpoasesObject->qpoases)->getQT( &qpOASES_Qptr, nFree );
@@ -567,7 +567,7 @@ return_t qpOASES_getZT( qpData_t* qpData,
 
 	return QPDUNES_OK;
 }
-/*<<< END OF qp42_solveLocalQP */
+/*<<< END OF qpOASES_getZT */
 
 
 /* ----------------------------------------------
@@ -583,7 +583,7 @@ int_t qpOASES_getNbrActConstr( 	qpoasesObject_t* qpoasesObject
 	return -1000;
 //	return (int_t)(static_cast<qpOASES::SQProblem*>(qpoasesObject->qpoases)->getNAC()) + (int_t)(static_cast<qpOASES::SQProblem*>(qpoasesObject->qpoases)->getNFX());
 }
-/*<<< END OF qp42_solveLocalQP */
+/*<<< END OF qpOASES_getNbrActConstr */
 
 
 

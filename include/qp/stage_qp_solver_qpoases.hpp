@@ -116,7 +116,7 @@ return_t qpOASES_getDualSol( 	qpData_t* qpData,
 /** ... */
 return_t qpOASES_getCholZTHZ( 	qpData_t* qpData,
 								qpoasesObject_t* qpoasesObject,
-								zz_matrix_t* cholZTHZ 				);
+								abstractMatrix_t* cholZTHZ 				);
 
 
 /* ----------------------------------------------
@@ -126,7 +126,7 @@ return_t qpOASES_getCholZTHZ( 	qpData_t* qpData,
 return_t qpOASES_getZT( qpData_t* qpData,
 						qpoasesObject_t* qpoasesObject,
 						int_t* nFree,
-						zz_matrix_t* ZT 				);
+						abstractMatrix_t* ZT 				);
 
 
 return_t qpOASES_getPrimalDualVariables( qpData_t* qpData,

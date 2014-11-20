@@ -182,7 +182,7 @@ sparsityType_t qpDUNES_detectMatrixSparsity(	const real_t* const M,
  * ...
  *
  >>>>>                                            */
-return_t qpDUNES_updateMatrixData(	matrix_t* const to,
+return_t qpDUNES_updateMatrixData(	abstractMatrix_t* const to,
 									const real_t* const from,
 									int_t nRows,
 									int_t nCols
@@ -227,7 +227,7 @@ return_t qpDUNES_updateMatrixData(	matrix_t* const to,
  >>>>>                                            */
 return_t qpDUNES_setupZeroMatrix(	int_t nRows,
 								int_t nCols,
-								matrix_t* to
+								abstractMatrix_t* to
 								)
 {
 	int_t i;
@@ -247,7 +247,7 @@ return_t qpDUNES_setupZeroMatrix(	int_t nRows,
  * ...
  *
  >>>>>                                            */
-return_t qpDUNES_setMatrixNull(	matrix_t* const matrix
+return_t qpDUNES_setMatrixNull(	abstractMatrix_t* const matrix
 								)
 {
 	qpDUNES_free( &(matrix->data) );
@@ -263,7 +263,7 @@ return_t qpDUNES_setMatrixNull(	matrix_t* const matrix
  * ...
  *
  >>>>>                                            */
-return_t qpDUNES_existsMatrix(	matrix_t* matrix
+return_t qpDUNES_existsMatrix(	abstractMatrix_t* matrix
 							)
 {
 	if( matrix->data == 0 ) {
@@ -281,7 +281,7 @@ return_t qpDUNES_existsMatrix(	matrix_t* matrix
  * ...
  *
  >>>>>                                            */
-return_t qpDUNES_existsVector(	vector_t* vector
+return_t qpDUNES_existsVector(	abstractVector_t* vector
 							)
 {
 	if( vector->data == 0 ) {
@@ -299,7 +299,7 @@ return_t qpDUNES_existsVector(	vector_t* vector
  * ...
  *
  >>>>>                                            */
-return_t qpDUNES_setupIdentityMatrix(	matrix_t* to
+return_t qpDUNES_setupIdentityMatrix(	abstractMatrix_t* to
 									)
 {
 	to->sparsityType = QPDUNES_IDENTITY;
@@ -316,7 +316,7 @@ return_t qpDUNES_setupIdentityMatrix(	matrix_t* to
  >>>>>                                            */
 return_t qpDUNES_setupScaledIdentityMatrix(	int_t nRows,
 											real_t scalar,
-											matrix_t* to
+											abstractMatrix_t* to
 											)
 {
 	int_t i;
@@ -338,7 +338,7 @@ return_t qpDUNES_setupScaledIdentityMatrix(	int_t nRows,
  * ...
  *
  >>>>>                                            */
-return_t qpDUNES_setupVector(	vector_t* const to,
+return_t qpDUNES_setupVector(	abstractVector_t* const to,
 								const real_t* const from,
 								int_t n
 								)
@@ -353,7 +353,7 @@ return_t qpDUNES_setupVector(	vector_t* const to,
  * ...
  *
  >>>>>                                            */
-return_t qpDUNES_updateVector(	vector_t* const to,
+return_t qpDUNES_updateVector(	abstractVector_t* const to,
 							const real_t* const from,
 							int_t n
 							)
@@ -382,7 +382,7 @@ return_t qpDUNES_updateVector(	vector_t* const to,
  *
  >>>>>                                            */
 return_t qpDUNES_updateSimpleBoundVector(	qpData_t* qpData,
-										vector_t* const to,
+										abstractVector_t* const to,
 										const real_t* const dBnd,
 										const real_t* const xBnd,
 										const real_t* const uBnd
@@ -418,7 +418,7 @@ return_t qpDUNES_updateSimpleBoundVector(	qpData_t* qpData,
  * ...
  *
  >>>>>                                            */
-return_t qpDUNES_updateConstraintVector( 	vector_t* const to,
+return_t qpDUNES_updateConstraintVector( 	abstractVector_t* const to,
 										const real_t* const dBnd,
 										int_t nD
 										)
@@ -444,7 +444,7 @@ return_t qpDUNES_updateConstraintVector( 	vector_t* const to,
  * ...
  *
  >>>>>                                            */
-return_t qpDUNES_setupZeroVector(	vector_t* const to,
+return_t qpDUNES_setupZeroVector(	abstractVector_t* const to,
 								int_t n
 								)
 {
@@ -463,7 +463,7 @@ return_t qpDUNES_setupZeroVector(	vector_t* const to,
  * ...
  *
  >>>>>                                            */
-return_t qpDUNES_setupUniformVector(	vector_t* const to,
+return_t qpDUNES_setupUniformVector(	abstractVector_t* const to,
 										real_t value,
 										int_t n
 										)
@@ -484,8 +484,8 @@ return_t qpDUNES_setupUniformVector(	vector_t* const to,
  * ...
  *
  >>>>>                                            */
-return_t qpDUNES_copyVector(	vector_t* const to,
-								const vector_t* const from,
+return_t qpDUNES_copyVector(	abstractVector_t* const to,
+								const abstractVector_t* const from,
 								int_t n
 								)
 {
@@ -504,8 +504,8 @@ return_t qpDUNES_copyVector(	vector_t* const to,
  * deep matrix copy
  *
  >>>>>                                            */
-return_t qpDUNES_copyMatrix(	matrix_t* const to,
-								const matrix_t* const from,
+return_t qpDUNES_copyMatrix(	abstractMatrix_t* const to,
+								const abstractMatrix_t* const from,
 								int_t dim0,
 								int_t dim1
 								)
@@ -546,7 +546,7 @@ return_t qpDUNES_copyMatrix(	matrix_t* const to,
  * ...
  *
  >>>>>                                            */
-return_t qpDUNES_makeMatrixDense( 	matrix_t* const M_ptr, 
+return_t qpDUNES_makeMatrixDense( 	abstractMatrix_t* const M_ptr, 
 									int_t dim0,
 									int_t dim1
 									)
@@ -606,8 +606,8 @@ return_t qpDUNES_makeMatrixDense( 	matrix_t* const M_ptr,
  * transpose matrix (deep copy)
  *
  >>>>>                                            */
-return_t qpDUNES_transposeMatrix(	matrix_t* const to,
-								const matrix_t* const from,
+return_t qpDUNES_transposeMatrix(	abstractMatrix_t* const to,
+								const abstractMatrix_t* const from,
 								int_t dim0,
 								int_t dim1
 								)
@@ -657,7 +657,7 @@ return_t qpDUNES_transposeMatrix(	matrix_t* const to,
  * selftranspose a square matrix
  *
  >>>>>                                            */
-return_t qpDUNES_selftransposeMatrix(	matrix_t* const Mptr,
+return_t qpDUNES_selftransposeMatrix(	abstractMatrix_t* const Mptr,
 									int_t dim			/**< leading and secondary dimension of M */
 									)
 {

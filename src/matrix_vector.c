@@ -41,7 +41,7 @@ return_t multiplyQx( qpData_t* const qpData,
 					 const xx_matrix_t* const Q,
 					 const x_vector_t* const x 	)
 {
-	return multiplyMatrixVector( (vector_t*)res, (matrix_t*)Q, (vector_t*)x, _NX_, _NX_ );
+	return multiplyMatrixVector( (abstractVector_t*)res, (abstractMatrix_t*)Q, (abstractVector_t*)x, _NX_, _NX_ );
 }
 /*<<< END OF multiplyQx */
 
@@ -55,7 +55,7 @@ return_t multiplyInvQx(	qpData_t* const qpData,
 						const xx_matrix_t* const cholQ,
 						const x_vector_t* const y 	)
 {
-	return multiplyMatrixVector( (vector_t*)res, (matrix_t*)cholQ, (vector_t*)y, _NX_, _NX_ );
+	return multiplyMatrixVector( (abstractVector_t*)res, (abstractMatrix_t*)cholQ, (abstractVector_t*)y, _NX_, _NX_ );
 }
 /*<<< END OF multiplyQinvy */
 
@@ -69,7 +69,7 @@ return_t multiplyRu( qpData_t*const  qpData,
 					 const uu_matrix_t* const R,
 					 const u_vector_t* const u 	)
 {
-	return multiplyMatrixVector( (vector_t*)res, (matrix_t*)R, (vector_t*)u, _NU_, _NU_ );
+	return multiplyMatrixVector( (abstractVector_t*)res, (abstractMatrix_t*)R, (abstractVector_t*)u, _NU_, _NU_ );
 }
 /*<<< END OF multiplyRu */
 
@@ -83,7 +83,7 @@ return_t multiplyInvRu(	qpData_t* const qpData,
 						const uu_matrix_t* const cholR,
 						const u_vector_t* const y 	)
 {
-	return multiplyMatrixVector( (vector_t*)res, (matrix_t*)cholR, (vector_t*)y, _NU_, _NU_ );
+	return multiplyMatrixVector( (abstractVector_t*)res, (abstractMatrix_t*)cholR, (abstractVector_t*)y, _NU_, _NU_ );
 }
 /*<<< END OF multiplyRinvu */
 
@@ -97,7 +97,7 @@ real_t multiplyzHz( qpData_t* const qpData,
 					const v_vector_t* const z,
 					const int_t nV	)
 {
-	return multiplyVectorMatrixVector( (matrix_t*)H, (vector_t*)z, nV );
+	return multiplyVectorMatrixVector( (abstractMatrix_t*)H, (abstractVector_t*)z, nV );
 }
 /*<<< END OF multiplyzHz */
 
@@ -107,12 +107,12 @@ real_t multiplyzHz( qpData_t* const qpData,
  * 
  >>>>>                                            */
 return_t multiplyInvHz(	qpData_t* const qpData,
-						z_vector_t* const res,
+						v_vector_t* const res,
 						const vv_matrix_t* const cholH,
-						const z_vector_t* const z,
+						const v_vector_t* const z,
 						const int_t nV )
 {
-	return multiplyInvMatrixVector( qpData, (vector_t*)res, (matrix_t*)cholH, (vector_t*)z, nV );
+	return multiplyInvMatrixVector( qpData, (abstractVector_t*)res, (abstractMatrix_t*)cholH, (abstractVector_t*)z, nV );
 }
 /*<<< END OF multiplyInvHz */
 
@@ -126,7 +126,7 @@ return_t multiplyAx(	qpData_t* const qpData,
 						const xx_matrix_t* const A,
 						const x_vector_t* const x 	)
 {
-	return multiplyMatrixVector( (vector_t*)res, (matrix_t*)A, (vector_t*)x, _NX_, _NX_ );
+	return multiplyMatrixVector( (abstractVector_t*)res, (abstractMatrix_t*)A, (abstractVector_t*)x, _NX_, _NX_ );
 }
 /*<<< END OF multiplyAx */
 
@@ -140,7 +140,7 @@ return_t multiplyBu(	qpData_t* const qpData,
 						const xu_matrix_t* const B,
 						const u_vector_t* const u 	)
 {
-	return multiplyMatrixVector( (vector_t*)res, (matrix_t*)B, (vector_t*)u, _NX_, _NU_ );
+	return multiplyMatrixVector( (abstractVector_t*)res, (abstractMatrix_t*)B, (abstractVector_t*)u, _NX_, _NU_ );
 }
 /*<<< END OF multiplyBu */
 
@@ -168,33 +168,6 @@ return_t multiplyCz(	qpData_t* const qpData,
 }
 /*<<< END OF multiplyCz */
 
-
-///* ----------------------------------------------
-// * Matrix-vector product x = A.T*y
-// *
-// >>>>>                                            */
-//return_t multiplyATy( qpData_t* const qpData,
-//					  x_vector_t* const res,
-//					  const xx_matrix_t* const A,
-//					  const x_vector_t* const y 	)
-//{
-//	return multiplyMatrixTVector( (vector_t*)res, (matrix_t*)A, (vector_t*)y, _NX_, _NX_ );
-//}
-///*<<< END OF multiplyATy */
-//
-//
-///* ----------------------------------------------
-// * Matrix-vector product x = B.T*y
-// *
-// >>>>>                                            */
-//return_t multiplyBTy(	qpData_t* const qpData,
-//						u_vector_t* const res,
-//						const xu_matrix_t* const B,
-//						const x_vector_t* const y 	)
-//{
-//	return multiplyMatrixTVector( (vector_t*)res, (matrix_t*)B, (vector_t*)y, _NX_, _NU_ );
-//}
-///*<<< END OF multiplyBTy */
 
 
 /* ----------------------------------------------
@@ -225,21 +198,6 @@ return_t multiplyCTy(	qpData_t* const qpData,
 }
 /*<<< END OF multiplyCTy */
 
-
-///* ----------------------------------------------
-// * Inverse matrix times matrix product res = Q^-1 * A^T
-// *
-// >>>>>                                            */
-//return_t multiplyInvQAT(	qpData_t* const qpData,
-//						xx_matrix_t* const res,
-//						const xx_matrix_t* const cholQ,
-//						const xx_matrix_t* const A,
-//						x_vector_t* const vecTmp
-//						)
-//{
-//	return multiplyInvMatrixMatrixT(	qpData, (matrix_t*)res, (matrix_t*)cholQ, (matrix_t*)A, (vector_t*)vecTmp, _NX_, _NX_ );
-//}
-///*<<< END OF multiplyInvQA */
 
 
 /* ----------------------------------------------
@@ -307,6 +265,7 @@ return_t multiplyAInvQ(	qpData_t* const qpData,
 /*<<< END OF multiplyAInvQ */
 
 
+
 /* ----------------------------------------------
  * Inverse matrix times identity matrix product res = Q^-1 * I
  * 
@@ -343,6 +302,7 @@ return_t getInvQ(	qpData_t* const qpData,
 /*<<< END OF getInvQ */
 
 
+
 /* ----------------------------------------------
  * Compute a Cholesky factorization of Hessian H
  *
@@ -353,9 +313,10 @@ return_t factorizeH( 	qpData_t* const qpData,
 						int_t nV
 						)
 {
-	return factorizePosDefMatrix( qpData, (matrix_t*)cholH, (matrix_t*)H, nV );
+	return factorizePosDefMatrix( qpData, (abstractMatrix_t*)cholH, (abstractMatrix_t*)H, nV );
 }
 /*<<< END OF factorizeH */
+
 
 
 /* ----------------------------------------------
@@ -373,8 +334,8 @@ return_t addCInvHCT(	qpData_t* const qpData,
 						)
 {
 	/* TODO: summarize to one function */
-	return addMultiplyMatrixInvMatrixMatrixT(qpData, res, cholH, C, y->data,
-			zxMatTmp, &(qpData->xVecTmp), _NX_, _NZ_);
+	/* TODO: receive xVecTmp from outside! */
+	return addMultiplyMatrixInvMatrixMatrixT( qpData, (abstractMatrix_t*)res, (abstractMatrix_t*)cholH, (abstractMatrix_t*)C, y->data, (abstractMatrix_t*)zxMatTmp, (abstractVector_t*)&(qpData->xVecTmp), _NX_, _NZ_);
 
 	return QPDUNES_OK;
 }
@@ -391,7 +352,7 @@ return_t addScaledLambdaStep(	qpData_t* const qpData,
 								real_t scalingFactor,
 								const xn_vector_t* const deltaLambda 	)
 {
-	return addScaledVector( (vector_t*)res, scalingFactor, (vector_t*)deltaLambda, _NI_ * _NX_ );
+	return addScaledVector( (abstractVector_t*)res, scalingFactor, (abstractVector_t*)deltaLambda, _NI_ * _NX_ );
 }
 /*<<< END OF addScaledLambdaStep */
 
@@ -400,9 +361,9 @@ return_t addScaledLambdaStep(	qpData_t* const qpData,
  * ...
  * 
  >>>>>                                            */
-return_t copyScaleVector(	vector_t* const res,
+return_t copyScaleVector(	abstractVector_t* const res,
 							real_t scalingFactor,
-							const vector_t* const vec,
+							const abstractVector_t* const vec,
 							int_t len
 							)
 {
@@ -421,7 +382,7 @@ return_t copyScaleVector(	vector_t* const res,
  * ...
  *
  >>>>>                                            */
-return_t scaleVector(	vector_t* const res,
+return_t scaleVector(	abstractVector_t* const res,
 						real_t scalingFactor,
 						int_t len
 						)
@@ -441,9 +402,9 @@ return_t scaleVector(	vector_t* const res,
  * ...
  * 
  > >>>>                    *                        */
-return_t addScaledVector(	vector_t* const res,
+return_t addScaledVector(	abstractVector_t* const res,
 							real_t scalingFactor,
-							const vector_t* const update,
+							const abstractVector_t* const update,
 							int_t len
 							)
 {
@@ -462,10 +423,10 @@ return_t addScaledVector(	vector_t* const res,
  * res = x + a*y
  * 
  >>>>>                                            */
-return_t addVectorScaledVector(	vector_t* const res,
-								const vector_t* const x,
+return_t addVectorScaledVector(	abstractVector_t* const res,
+								const abstractVector_t* const x,
 								real_t scalingFactor,
-								const vector_t* const y,
+								const abstractVector_t* const y,
 								int_t len
 								)
 {
@@ -484,9 +445,9 @@ return_t addVectorScaledVector(	vector_t* const res,
  * ...
  *
  >>>>>                                            */
-return_t addVectors(	vector_t* const res,
-						const vector_t* const x,
-						const vector_t* const y,
+return_t addVectors(	abstractVector_t* const res,
+						const abstractVector_t* const x,
+						const abstractVector_t* const y,
 						int_t len
 						)
 {
@@ -505,8 +466,8 @@ return_t addVectors(	vector_t* const res,
  * ...
  *
  >>>>>                                            */
-return_t addToVector(	vector_t* const res,
-						const vector_t* const update,
+return_t addToVector(	abstractVector_t* const res,
+						const abstractVector_t* const update,
 						int_t len
 						)
 {
@@ -525,9 +486,9 @@ return_t addToVector(	vector_t* const res,
  * ...
  * 
  >>>>>                                            */
-return_t subtractVectors(	vector_t* const res,
-							const vector_t* const x,
-							const vector_t* const y,
+return_t subtractVectors(	abstractVector_t* const res,
+							const abstractVector_t* const x,
+							const abstractVector_t* const y,
 							int_t len
 							)
 {
@@ -546,8 +507,8 @@ return_t subtractVectors(	vector_t* const res,
  * ...
  *
  >>>>>                                            */
-return_t subtractFromVector(	vector_t* const res,
-							const vector_t* const update,
+return_t subtractFromVector(	abstractVector_t* const res,
+							const abstractVector_t* const update,
 							int_t len
 							)
 {
@@ -566,7 +527,7 @@ return_t subtractFromVector(	vector_t* const res,
  * ...
  * 
  >>>>>                                            */
-return_t negateVector(	vector_t* const res,
+return_t negateVector(	abstractVector_t* const res,
 						int_t len
 						)
 {
@@ -585,8 +546,8 @@ return_t negateVector(	vector_t* const res,
  * ...
  * 
  >>>>>                                            */
-return_t addMatrix(	matrix_t* const res,
-					const matrix_t* const update,
+return_t addMatrix(	abstractMatrix_t* const res,
+					const abstractMatrix_t* const update,
 					int_t dim0,
 					int_t dim1
 					)
@@ -788,7 +749,7 @@ real_t newtonGradientNorm(	const qpData_t* const qpData,
 							const xn_vector_t* const vec
 )	/* TODO: check whether this function is really needed! */
 {
-	return vectorNorm( (vector_t*)vec, _NI_ * _NX_ );
+	return vectorNorm( (abstractVector_t*)vec, _NI_ * _NX_ );
 }
 /*<<< END OF newtonGradientNorm */
 
@@ -1412,9 +1373,9 @@ return_t backsolveRT_ZTCT(	qpData_t* const qpData,
  * Generic matrix-vector product b = M*x
  * 
  >>>>>                                            */
-return_t multiplyMatrixVector( vector_t* const res,
-							   const matrix_t* const M,
-							   const vector_t* const x,
+return_t multiplyMatrixVector( abstractVector_t* const res,
+							   const abstractMatrix_t* const M,
+							   const abstractVector_t* const x,
 							   int_t dim0,
 							   int_t dim1		)
 {
@@ -1442,8 +1403,8 @@ return_t multiplyMatrixVector( vector_t* const res,
  *  - M has to be square matrix
  *
  >>>>>                                            */
-real_t multiplyVectorMatrixVector(	const matrix_t* const M,
-							   	   	const vector_t* const x,
+real_t multiplyVectorMatrixVector(	const abstractMatrix_t* const M,
+							   	   	const abstractVector_t* const x,
 							   	   	int_t dim0	)
 {
 	/** choose appropriate multiplication routine */
@@ -1473,10 +1434,10 @@ real_t multiplyVectorMatrixVector(	const matrix_t* const M,
  * 
  >>>>>                                            */
 /* TODO: check if this routine is still needed */
-return_t multiplyBlockDiagMatrixVector( vector_t* const res,
-										const matrix_t* const M1,
-										const matrix_t* const M2,
-										const vector_t* const x,
+return_t multiplyBlockDiagMatrixVector( abstractVector_t* const res,
+										const abstractMatrix_t* const M1,
+										const abstractMatrix_t* const M2,
+										const abstractVector_t* const x,
 										int_t dimM1,			/**< dimensions of M1 */
 										int_t dimM2 			/**< dimensions of M2 */
 										)
@@ -1551,9 +1512,9 @@ return_t multiplyBlockDiagMatrixVector( vector_t* const res,
  * for matrix M consisting of two blocks on diagonal: M1, M2
  *
  >>>>>                                            */
-real_t multiplyBlockDiagVectorMatrixVector( const matrix_t* const M1,
-											const matrix_t* const M2,
-											const vector_t* const x,
+real_t multiplyBlockDiagVectorMatrixVector( const abstractMatrix_t* const M1,
+											const abstractMatrix_t* const M2,
+											const abstractVector_t* const x,
 											int_t dimM1,			/**< dimensions of M1 */
 											int_t dimM2 			/**< dimensions of M2 */
 											)
@@ -1620,9 +1581,9 @@ real_t multiplyBlockDiagVectorMatrixVector( const matrix_t* const M1,
  * res = A.T*x
  * 
  >>>>>                              *              */
-return_t multiplyMatrixTVector(	vector_t* const res,
-								const matrix_t* const M,
-								const vector_t* const x,
+return_t multiplyMatrixTVector(	abstractVector_t* const res,
+								const abstractMatrix_t* const M,
+								const abstractVector_t* const x,
 								int_t dim0,			/* of untransposed matrix */
 								int_t dim1		)
 {
@@ -1654,9 +1615,9 @@ return_t multiplyMatrixTVector(	vector_t* const res,
  * 
  >>>>>                                            */
 return_t multiplyInvMatrixVector(	qpData_t* const qpData,
-									vector_t* const res,
-									const matrix_t* const cholH,
-									const vector_t* const x,
+									abstractVector_t* const res,
+									const abstractMatrix_t* const cholH,
+									const abstractVector_t* const x,
 									int_t dim0						/**< dimension of symmetric matrix */
 									)
 {
@@ -1704,10 +1665,10 @@ return_t multiplyInvMatrixVector(	qpData_t* const qpData,
  * 
  >>>>>                                            */
 return_t multiplyInvBlockDiagMatrixVector(	qpData_t* const qpData,
-									vector_t* const res,
-									const matrix_t* const cholM1,
-									const matrix_t* const cholM2,
-									const vector_t* const x,
+									abstractVector_t* const res,
+									const abstractMatrix_t* const cholM1,
+									const abstractMatrix_t* const cholM2,
+									const abstractVector_t* const x,
 									int_t dimM1,					/**< dimensions of M1 */
 									int_t dimM2 					/**< dimensions of M2 */
 									)
@@ -1794,10 +1755,10 @@ return_t multiplyInvBlockDiagMatrixVector(	qpData_t* const qpData,
  *
  >>>>>                                            */
 return_t multiplyInvMatrixMatrixT(	qpData_t* const qpData,
-									matrix_t* const res,
-									const matrix_t* const cholM1,
-									matrix_t* const M2,		/**< WARNING: M2 might be made dense during this routine */
-									vector_t* const vecTmp,
+									abstractMatrix_t* const res,
+									const abstractMatrix_t* const cholM1,
+									abstractMatrix_t* const M2,		/**< WARNING: M2 might be made dense during this routine */
+									abstractVector_t* const vecTmp,
 									int_t dim0,				/**< leading dimension of A == secondary dimension of A == leading dimension of M2 */
 									int_t dim1				/**< secondary dimension of M2 */
 									)
@@ -2111,12 +2072,12 @@ void multiplyMatrixMatrixTDenseDense(	real_t* const res,
  *
  * >>>>>>                                           */
 return_t addMultiplyMatrixInvMatrixMatrixT(	qpData_t* const qpData,
-											matrix_t* const res,
-											const matrix_t* const cholM1,
-											const matrix_t* const M2,
+											abstractMatrix_t* const res,
+											const abstractMatrix_t* const cholM1,
+											const abstractMatrix_t* const M2,
 											const real_t* const y, /**< vector containing non-zeros for columns of M2 to be eliminated */
-											matrix_t* const Ztmp, /**< temporary matrix of shape dim1 x dim0 */
-											vector_t* const vecTmp,
+											abstractMatrix_t* const Ztmp, /**< temporary matrix of shape dim1 x dim0 */
+											abstractVector_t* const vecTmp,
 											int_t dim0, /**< dimensions of M2 */
 											int_t dim1
 											)
@@ -2192,8 +2153,8 @@ return_t addMultiplyMatrixInvMatrixMatrixT(	qpData_t* const qpData,
  * Low level scalar product 
  * 
  >>>>>>                                           */
-real_t scalarProd(	const vector_t* const x,
-					const vector_t* const y,
+real_t scalarProd(	const abstractVector_t* const x,
+					const abstractVector_t* const y,
 					int_t len 	)
 {
 	int_t ii;
@@ -2212,7 +2173,7 @@ real_t scalarProd(	const vector_t* const x,
  * ...
  * 
  >>>>>>                                           */
-real_t vectorNorm(	const vector_t* const vec,
+real_t vectorNorm(	const abstractVector_t* const vec,
 					int_t len
 					)
 {
@@ -2226,8 +2187,8 @@ real_t vectorNorm(	const vector_t* const vec,
  * 
  >>>>>>                                           */
 return_t factorizePosDefMatrix( 	qpData_t* const qpData,
-									matrix_t* const cholM,
-									const matrix_t* const M,
+									abstractMatrix_t* const cholM,
+									const abstractMatrix_t* const M,
 									int_t dim0
 									)
 {
@@ -2256,8 +2217,8 @@ return_t factorizePosDefMatrix( 	qpData_t* const qpData,
  * 
 #>>>>>                                            */
 return_t denseCholeskyFactorization(	qpData_t* const qpData,
-										matrix_t* const cholM,
-										const matrix_t* const M,
+										abstractMatrix_t* const cholM,
+										const abstractMatrix_t* const M,
 										int_t dim0
 										)
 {

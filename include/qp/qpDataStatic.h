@@ -54,7 +54,7 @@ typedef struct
 
 	/** matrix data array */
 	real_t* data;
-} matrix_t;
+} abstractMatrix_t;
 
 
 /**
@@ -70,7 +70,7 @@ typedef struct
 {
 	/** vector data array */
 	real_t* data;
-} vector_t;
+} abstractVector_t;
 
 
 
