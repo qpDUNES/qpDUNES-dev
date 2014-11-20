@@ -305,12 +305,14 @@ return_t qpDUNES_setup(	qpData_t* const qpData,
  *
 #>>>>>>                                           */
 interval_t* qpDUNES_allocInterval(	qpData_t* const qpData,
-									uint_t nX,		/* FIXME: just use these temporary, work with nZ later on */
-									uint_t nU,		/* FIXME: just use these temporary, work with nZ later on */
+									uint_t nX,
+									uint_t nU,
 									uint_t nV,
 									uint_t nD
 									)
 {
+#ifndef __STATIC_MEMORY__
+
 	interval_t* interval = (interval_t*)calloc( 1,sizeof(interval_t) );
 
 	interval->nD = nD;
@@ -369,6 +371,13 @@ interval_t* qpDUNES_allocInterval(	qpData_t* const qpData,
 	interval->qpSolverSpecification = QPDUNES_STAGE_QP_SOLVER_UNDEFINED;
 
 	return interval;
+
+#else
+
+	qpDUNES_printError( qpData, __FILE__, __LINE__, "To use the dynamic memory version of qpDUNES, please compile with the __STATIC_MEMORY__ compiler flag disabled.");
+	return QPDUNES_ERR_INVALID_ARGUMENT;
+
+#endif
 }
 
 
@@ -380,6 +389,8 @@ interval_t* qpDUNES_allocInterval(	qpData_t* const qpData,
 return_t qpDUNES_cleanup(	qpData_t* const qpData
 						)
 {
+#ifndef __STATIC_MEMORY__
+
 	uint_t ii, kk;
 
 	/* free all normal intervals */
@@ -471,6 +482,13 @@ return_t qpDUNES_cleanup(	qpData_t* const qpData
 	qpData->log.itLog = 0;
 
 	return QPDUNES_OK;
+
+#else
+
+	qpDUNES_printError( qpData, __FILE__, __LINE__, "To use the dynamic memory version of qpDUNES, please compile with the __STATIC_MEMORY__ compiler flag disabled.");
+	return QPDUNES_ERR_INVALID_ARGUMENT;
+
+#endif
 }
 /*<<< END OF qpDUNES_cleanup */
 
