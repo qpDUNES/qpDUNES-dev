@@ -450,9 +450,6 @@ return_t qpDUNES_setupZeroVector(	abstractVector_t* const to,
 {
 	int_t i;
 	
-	qpDUNES_printf( "asking to set up zero vector of size %ld\n", n );
-	qpDUNES_printf( "address of g.data in steup: %ld\n", to->data );
-
 	for( i=0; i<n; ++i )
 		to->data[i] = 0.0;
 

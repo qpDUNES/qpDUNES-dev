@@ -294,10 +294,8 @@ interval_t* qpDUNES_allocInterval(	qpData_t* const qpData,
 
 	interval_t* interval = (interval_t*)calloc( 1,sizeof(interval_t) );
 
-	qpDUNES_printf("i was here and did alloc!!!!!!\n\n\n\n");
 	interval->nD = nD;
 	interval->nV = nV;
-	qpDUNES_printf("interval->nD = %d", interval->nD );
 
 	interval->H.data = (real_t*)calloc( nV*nV,sizeof(real_t) );
 	interval->H.sparsityType = QPDUNES_MATRIX_UNDEFINED;
@@ -743,8 +741,6 @@ return_t qpDUNES_setupRegularInterval(	qpData_t* const qpData,
 										)
 {
 	int_t ii, jj;
-	
-//	qpDUNES_printf("this is the interval pointer I received: %ld", interval);
 
 	int_t nD = interval->nD;	// TODO: enable ND static for full static memory!
 	int_t nV = interval->nV;
@@ -886,8 +882,6 @@ return_t qpDUNES_setupRegularInterval(	qpData_t* const qpData,
 		qpDUNES_setupVector( (abstractVector_t*)&(interval->g), g_, nV );
 	}
 	else {
-		qpDUNES_printf( "address of g: %ld\n", &(interval->g) );
-		qpDUNES_printf( "address of g.data: %ld\n", interval->g.data );
 		qpDUNES_setupZeroVector( (abstractVector_t*)&(interval->g), nV );
 	}
 
