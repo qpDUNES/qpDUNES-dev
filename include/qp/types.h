@@ -63,7 +63,7 @@
 #undef __DO_UNIT_TESTS__
 
 #define __STATIC_MEMORY__					/* include some unit tests */
-//#undef __STATIC_MEMORY__
+#undef __STATIC_MEMORY__
 
 #define PRINTING_PRECISION 14
 

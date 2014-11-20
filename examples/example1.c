@@ -1,25 +1,26 @@
 /*
- *	This file is part of qp42.
+ *	This file is part of qpDUNES.
  *
- *	qp42 -- An Implementation of qp solver on 42 intervals.
- *	Copyright (C) 2012 by Janick Frasch, Hans Joachim Ferreau et al. 
+ *	qpDUNES -- A DUal NEwton Strategy for convex quadratic programming.
+ *	Copyright (C) 2012 by Janick Frasch, Hans Joachim Ferreau et al.
  *	All rights reserved.
  *
- *	qp42 is free software; you can redistribute it and/or
+ *	qpDUNES is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU Lesser General Public
  *	License as published by the Free Software Foundation; either
  *	version 2.1 of the License, or (at your option) any later version.
  *
- *	qp5 is distributed in the hope that it will be useful,
+ *	qpDUNES is distributed in the hope that it will be useful,
  *	but WITHOUT ANY WARRANTY; without even the implied warranty of
  *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *	See the GNU Lesser General Public License for more details.
  *
  *	You should have received a copy of the GNU Lesser General Public
- *	License along with qp42; if not, write to the Free Software
+ *	License along with qpDUNES; if not, write to the Free Software
  *	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
+
 
 
 /**
@@ -28,7 +29,7 @@
  *	\version 1.0beta
  *	\date 2012
  *
- *	Very simple example for testing qp42.
+ *	Very simple example for testing qpDUNES.
  */
 
 
