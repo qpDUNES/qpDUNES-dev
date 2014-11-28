@@ -1376,9 +1376,7 @@ return_t qpDUNES_updateQpoases(	qpData_t* const qpData,
 
 	/* (a) prepare first order term: initial lambda guess and g */
 	/*	   - get primal first order term */
-//	if (g_changed == QPDUNES_TRUE) {
-		// we always need to get original g, since we add lambda completely!
-//	}
+	// we always need to get original g, since we add lambda completely!
 	qpDUNES_copyVector( (abstractVector_t*)&(interval->q), (abstractVector_t*)&(interval->g), interval->nV );
 	/*	   - get (possibly updated) lambda guess */
 	if (interval->id > 0) {		/* lambdaK exists */
