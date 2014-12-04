@@ -375,7 +375,7 @@ return_t addCInvHCT(	qpData_t* const qpData,
 						)
 {
 	/* TODO: summarize to one function */
-	return addMultiplyMatrixInvMatrixMatrixT(qpData, res, cholH, C, y->data,
+	return addMultiplyMatrixInvMatrixMatrixT(qpData, res, cholH, C, (y == 0 ? 0 : y->data),
 			zxMatTmp, &(qpData->xVecTmp), _NX_, _NZ_);
 
 	return QPDUNES_OK;
@@ -2116,7 +2116,7 @@ return_t addMultiplyMatrixInvMatrixMatrixT(	qpData_t* const qpData,
 											matrix_t* const res,
 											const matrix_t* const cholM1,
 											const matrix_t* const M2,
-											const real_t* const y, /**< vector containing non-zeros for columns of M2 to be eliminated */
+											const real_t* const y, /**< vector containing non-zeros for columns of M2 to be eliminated for unconstrained case */
 											matrix_t* const Ztmp, /**< temporary matrix of shape dim1 x dim0 */
 											vector_t* const vecTmp,
 											int_t dim0, /**< dimensions of M2 */
@@ -2154,8 +2154,9 @@ return_t addMultiplyMatrixInvMatrixMatrixT(	qpData_t* const qpData,
 		/* compute Z.T * Z as dyadic products */
 		for (ll = 0; ll < dim1; ++ll) {
 			/* only add columns of variables with inactive bounds */
-			if ((y[2 * ll] <= qpData->options.equalityTolerance) && /* lower bound inactive */
-			(y[2 * ll + 1] <= qpData->options.equalityTolerance)) /* upper bound inactive */
+			if ( y == 0 ||
+					((y[2 * ll] <= qpData->options.equalityTolerance) && /* lower bound inactive */
+					(y[2 * ll + 1] <= qpData->options.equalityTolerance))) /* upper bound inactive */
 //			if ( y[2 * ll] * y[2 * ll + 1] > -qpData->options.activenessTolerance )
 			{
 				for (ii = 0; ii < dim0; ++ii) {
@@ -2172,8 +2173,9 @@ return_t addMultiplyMatrixInvMatrixMatrixT(	qpData_t* const qpData,
 		/* compute M2 * Z as dyadic products */
 		for (ll = 0; ll < dim1; ++ll) {
 			/* only add columns of variables with inactive bounds */
-			if ((y[2 * ll] <= qpData->options.equalityTolerance) && /* lower bound inactive */
-			(y[2 * ll + 1] <= qpData->options.equalityTolerance)) /* upper bound inactive */
+			if (y == 0 ||
+					((y[2 * ll] <= qpData->options.equalityTolerance) && /* lower bound inactive */
+					(y[2 * ll + 1] <= qpData->options.equalityTolerance))) /* upper bound inactive */
 			{
 				for (ii = 0; ii < dim0; ++ii) {
 					for (jj = 0; jj < dim0; ++jj) {
