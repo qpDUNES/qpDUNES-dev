@@ -118,6 +118,12 @@ return_t qpDUNES_setup(	qpData_t* const qpData,
 	qpData->cholHessian.data  = (real_t*)calloc( (nX*2)*(nX*nI),sizeof(real_t) );
 	qpData->gradient.data = (real_t*)calloc( nX*nI,sizeof(real_t) );
 	
+	/* allocate unconstrained hessian if needed*/
+	if( qpData->options.regType == QPDUNES_REG_UNCONSTRAINED_HESSIAN ||
+			(qpData->options.nbrInitialGradientSteps > 0 && qpData->options.preconditionInitialGradientSteps))
+	{
+		qpData->cholUnconstrainedHessian.data = (real_t*)calloc( (nX*2)*(nX*nI), sizeof(real_t) );
+	}
 	
 	qpData->xVecTmp.data  = (real_t*)calloc( nX,sizeof(real_t) );
 	qpData->uVecTmp.data  = (real_t*)calloc( nU,sizeof(real_t) );
@@ -490,10 +496,11 @@ return_t qpDUNES_init(	qpData_t* const qpData,
 	qpDUNES_setupAllLocalQPs( qpData, isLTI );
 
 	/** setup unconstrained Hessian if required */
-	if( qpData->options.regType == QPDUNES_REG_UNCONSTRAINED_HESSIAN )
+	if( qpData->options.regType == QPDUNES_REG_UNCONSTRAINED_HESSIAN ||
+				(qpData->options.nbrInitialGradientSteps > 0 && qpData->options.preconditionInitialGradientSteps))
 	{
 		/** compute Cholesky factorization of default newton hessian */
-		qpDUNES_setupCholDefaultHessian(qpData);
+		qpDUNES_setupUnconstrainedNewtonSystem(qpData);
 	}
 
 	return QPDUNES_OK;
@@ -1571,6 +1578,7 @@ qpOptions_t qpDUNES_setupDefaultOptions( )
 	
 	/* additional options */
 	options.nbrInitialGradientSteps		= 0;
+	options.preconditionInitialGradientSteps = QPDUNES_FALSE;
 	options.checkForInfeasibility		= QPDUNES_FALSE;
 	options.allowSuboptimalTermination	= QPDUNES_FALSE;
 
