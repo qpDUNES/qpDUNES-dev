@@ -879,8 +879,8 @@ void solveMatlab( int nlhs, mxArray* plhs[], int nrhs, const mxArray* const prhs
 
 	/* VI) PASS DETAILED LOG INFORMATION ON TO MATLAB: */
 	if (qpDataGlobal->options.logLevel == QPDUNES_LOG_ALL_DATA ) {
-		if ( nlhs == 6 ) {
-			fullLogging( qpDataGlobal, &(plhs[5]) );
+		if ( nlhs == 7 ) {
+			fullLogging( qpDataGlobal, &(plhs[6]) );
 		}
 	}
 
