@@ -53,8 +53,10 @@ int main( )
 	
 
 	double H[nI*nZ*nZ + nX*nX];
+	for ( i = 0; i < nI*nZ*nZ + nX*nX; ++i )	H[i] = 0.0;		/* make sure H is initialized well */
 	double g[nI*nZ + nX];
 	double C[nI*nX*nZ];
+	for ( i = 0; i < nI*nX*nZ; ++i )	C[i] = 0.0;		/* make sure C is initialized well */
 	double c[nI*nX];
 	double zLow[nI*nZ + nX];
 	double zUpp[nI*nZ + nX];
