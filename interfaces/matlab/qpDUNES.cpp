@@ -101,7 +101,7 @@ void qpDUNES_setupMatlab( qpData_t** qpDataPtr,
 /*
  *	i n i t Q P
  */
-void initQP( int nrhs, const mxArray* const prhs[] )
+void initQP( int nlhs, mxArray* plhs[], int nrhs, const mxArray* const prhs[] )
 {
 	/* 0) VARIABLE DECLARATIONS: */
 	return_t statusFlag;
@@ -385,10 +385,30 @@ void initQP( int nrhs, const mxArray* const prhs[] )
 		mexPrintf( "Received QP problem of size [nI = %d, nX = %d, nU = %d]\n", nI, nX, nU );
 	}
 
-
+	/* PREPARE TIMING MEASUREMENTS */
+	#ifndef __WINDOWS__
+	real_t tic = 0.0;
+	real_t toc = 0.0;
+	struct timeval theclock;
+	gettimeofday( &theclock,0 );
+	tic = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
+	#endif
 	/* set up a QP problem */
-//	mexPrintf("I am passing those pointers:\n  D    = %d\n  dLow = %d\n  dUpp = %d", (unsigned long int)D, (unsigned long int)dLow, (unsigned long int)dUpp);
+	//	mexPrintf("I am passing those pointers:\n  D    = %d\n  dLow = %d\n  dUpp = %d", (unsigned long int)D, (unsigned long int)dLow, (unsigned long int)dUpp);
 	statusFlag = qpDUNES_init( qpDataGlobal, H, g, C, c, zLow,zUpp, D, dLow, dUpp );
+	#ifndef __WINDOWS__
+	gettimeofday( &theclock,0 );
+	toc = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec - tic;
+	#endif
+
+	if ( nlhs == 1 )
+	{
+		/* log timing */
+	    plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
+		double* timingPtr = mxGetPr( plhs[0] );
+		*timingPtr = toc;
+	}
+
 	if ( statusFlag != QPDUNES_OK ) {
 		mexPrintf( "Problem setup returned error code %d", statusFlag );
 		mexErrMsgTxt( "[qpDUNES] Error: Problem setup failed!" );
@@ -410,7 +430,7 @@ void initQP( int nrhs, const mxArray* const prhs[] )
 /*
  *	u p d a t e A l l I n t e r v a l s
  */
-void updateAllIntervals( qpData_t* qpData, int nrhs, const mxArray* const prhs[] )
+void updateAllIntervals( qpData_t* qpData, int nlhs, mxArray* plhs[], int nrhs, const mxArray* const prhs[] )
 {
 	/* 0) VARIABLE DECLARATIONS: */
 	return_t statusFlag;
@@ -608,8 +628,28 @@ void updateAllIntervals( qpData_t* qpData, int nrhs, const mxArray* const prhs[]
 		}
 	}
 
-
+	/* PREPARE TIMING MEASUREMENTS */
+	#ifndef __WINDOWS__
+	real_t tic = 0.0;
+	real_t toc = 0.0;
+	struct timeval theclock;
+	gettimeofday( &theclock,0 );
+	tic = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
+	#endif
 	statusFlag = qpDUNES_updateData( qpData, H, g, C, c, zLow, zUpp, D, dLow, dUpp );
+	#ifndef __WINDOWS__
+	gettimeofday( &theclock,0 );
+	toc = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec - tic;
+	#endif
+
+	if ( nlhs == 1 )
+	{
+		/* log timing */
+	    plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
+		double* timingPtr = mxGetPr( plhs[0] );
+		*timingPtr = toc;
+	}
+
 	if (statusFlag != QPDUNES_OK) {
 		mexErrMsgTxt( "QP data update failed." );
 		return;
@@ -649,7 +689,7 @@ void updateAllIntervals( qpData_t* qpData, int nrhs, const mxArray* const prhs[]
 /*
  *	u p d a t e S i n g l e I n t e r v a l
  */
-void updateSingleInterval( qpData_t* qpData, int nrhs, const mxArray* const prhs[] )
+void updateSingleInterval( qpData_t* qpData, int nlhs, mxArray* plhs[], int nrhs, const mxArray* const prhs[] )
 {
 	/* 0) VARIABLE DECLARATIONS: */
 	return_t statusFlag;
@@ -796,8 +836,29 @@ void updateSingleInterval( qpData_t* qpData, int nrhs, const mxArray* const prhs
 		convertFortranToC( D, D_F, nD, nV );
 	}
 
-
+	/* PREPARE TIMING MEASUREMENTS */
+	#ifndef __WINDOWS__
+	real_t tic = 0.0;
+	real_t toc = 0.0;
+	struct timeval theclock;
+	gettimeofday( &theclock,0 );
+	tic = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
+	#endif
 	statusFlag = qpDUNES_updateIntervalData( qpData, qpData->intervals[Iidx], H, g, C, c, zLow,zUpp, D,dLow,dUpp, 0 );
+	#ifndef __WINDOWS__
+	gettimeofday( &theclock,0 );
+	toc = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec - tic;
+	#endif
+
+	if ( nlhs == 1 )
+	{
+		/* log timing */
+	    plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
+		double* timingPtr = mxGetPr( plhs[0] );
+		*timingPtr = toc;
+	}
+
+
 	if (statusFlag != QPDUNES_OK) {
 		mexErrMsgTxt( "QP data update failed." );
 		return;
@@ -916,14 +977,14 @@ void mexFunction( int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[] )
 		 ( strcmp( typeString,"Init" ) == 0 ) ||
 		 ( strcmp( typeString,"INIT" ) == 0 ) )
 	{
-		if (nlhs > 0) {
+		if (nlhs > 1) {
 			mexErrMsgTxt( "[qpDUNES] Error: Too many output arguments for action 'init'.\n                 Type 'help qpDUNES' for further information.");
 		}
 
 		switch ( nrhs-1 ) {
 			case 11:
 			case 12:
-				initQP( nrhs-1, prhs+1 );	/* shift input pointers to begin of data */
+				initQP( nlhs, plhs, nrhs-1, prhs+1 );	/* shift input pointers to begin of data */
 				break;
 
 			default:
@@ -946,13 +1007,13 @@ void mexFunction( int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[] )
 		if( qpDataGlobal == 0 )
 			mexErrMsgTxt( "[qpDUNES] Error: QP data needs to initialized at least once before action 'update' can be performed.\n                 Type 'help qpDUNES' for further information." );
 
-		if (nlhs > 0) {
+		if (nlhs > 1) {
 			mexErrMsgTxt( "[qpDUNES] Error: Too many output arguments for action 'update'.\n                 Type 'help qpDUNES' for further information.");
 		}
 
 		switch ( nrhs-1 ) {
 			case 10:
-				updateAllIntervals( qpDataGlobal, nrhs-1, prhs+1 );	/* shift input pointers to begin of data */
+				updateAllIntervals( qpDataGlobal, nlhs, plhs, nrhs-1, prhs+1 );	/* shift input pointers to begin of data */
 				break;
 
 			default:
@@ -992,13 +1053,13 @@ void mexFunction( int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[] )
 		if( qpDataGlobal == 0 )
 			mexErrMsgTxt( "[qpDUNES] Error: QP data needs to initialized at least once before action 'updateInterval' can be performed.\n                 Type 'help qpDUNES' for further information." );
 
-		if (nlhs > 0) {
+		if (nlhs > 1) {
 			mexErrMsgTxt( "[qpDUNES] Error: Too many output arguments for action 'updateInterval'.\n                 Type 'help qpDUNES' for further information.");
 		}
 
 		switch ( nrhs-1 ) {
 			case 10:
-				updateSingleInterval( qpDataGlobal, nrhs-1, prhs+1 );	/* shift input pointers to begin of data */
+				updateSingleInterval( qpDataGlobal, nlhs, plhs, nrhs-1, prhs+1 );	/* shift input pointers to begin of data */
 				break;
 
 			default:
