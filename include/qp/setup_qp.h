@@ -46,6 +46,8 @@
 #include <qp/matrix_vector.h>
 #include <qp/qpdunes_utils.h>
 
+#include <qp/stage_qp_solver_qpoases.hpp>
+
 
 return_t qpDUNES_setup(	qpData_t* const qpData,
 						uint_t nI,

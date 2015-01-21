@@ -53,9 +53,9 @@ OMPFLAGS = [ '', ' ', ...   %-openmp
 
 if ( ispc == 0 )
 %  	CPPFLAGS  = [ IFLAGS, OMPFLAGS, '-largeArrayDims -D__cpluplus -D__MATLAB__ -cxx -O -D__NO_COPYRIGHT__ -DLINUX CFLAGS=''$CFLAGS -std=c99 -fPIC''', ' ' ]; %% -D__SUPPRESSANYOUTPUT__
-	CPPFLAGS  = [ IFLAGS, '-largeArrayDims -D__DEBUG__ -D__cpluplus -D__MATLAB__ -cxx -O -D__NO_COPYRIGHT__ -DLINUX CFLAGS=''$CFLAGS -fPIC''', ' ' ]; %% -D__DEBUG__ -D__SUPPRESSANYOUTPUT__
+	CPPFLAGS  = [ IFLAGS, '-largeArrayDims -D__DEBUG__ -D__cplusplus -D__MATLAB__ -cxx -O -D__NO_COPYRIGHT__ -DLINUX CFLAGS=''$CFLAGS -fPIC -std=c99''', ' ' ]; %% -D__DEBUG__ -D__SUPPRESSANYOUTPUT__
 else
-	CPPFLAGS  = [ IFLAGS, '-largeArrayDims -D__cpluplus -D__MATLAB__ -cxx -O -DWIN32', ' ' ]; %% -D__NO_COPYRIGHT__ -D__SUPPRESSANYOUTPUT__
+	CPPFLAGS  = [ IFLAGS, '-largeArrayDims -D__cplusplus -D__MATLAB__ -cxx -O -DWIN32', ' ' ]; %% -D__NO_COPYRIGHT__ -D__SUPPRESSANYOUTPUT__
 end
 
 QPDUNES_OBJECTS = [	QPDUNESPATH, 'src/stage_qp_solver_clipping.c ',...
@@ -92,7 +92,7 @@ MEXOBJS = { 'qpDUNES',
 ;
 for i = 1:length(MEXOBJS)
 % 	cmd = [ 'mex -v CC="gcc" CXX="gcc" LD="gcc" COPTIMFLAGS="$COPTIMFLAGS -O3 -fopenmp" -lgomp  -output ', MEXOBJS{i}, ' ', DEBUGFLAGS, CPPFLAGS, [MEXOBJS{i},'.cpp ',QPDUNES_OBJECTS] ]
-    cmd = [ 'mex -v CC="gcc" CXX="gcc" LD="gcc" COPTIMFLAGS="$COPTIMFLAGS -O3" -output ', MEXOBJS{i}, ' ', DEBUGFLAGS, CPPFLAGS, [MEXOBJS{i},'.cpp ',QPOASES_OBJECTS QPDUNES_OBJECTS] ]
+    cmd = [ 'mex -v COPTIMFLAGS="$COPTIMFLAGS -O3" -output ', MEXOBJS{i}, ' ', DEBUGFLAGS, CPPFLAGS, [MEXOBJS{i},'.cpp ',QPOASES_OBJECTS QPDUNES_OBJECTS] ]
 	
 	eval( cmd );
 	disp( [ MEXOBJS{i}, '.', eval('mexext'), ' successfully created!'] );

@@ -33,9 +33,8 @@
  */
 
 
-extern "C" {
 #include <qpDUNES.h>
-}
+
 #include <qpDUNES_matlab_utils.cpp>
 
 #include "mex.h"
