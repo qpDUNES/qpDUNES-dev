@@ -550,12 +550,13 @@ return_t qpDUNES_updateData(	qpData_t* const qpData,
 
 	int_t nDoffset = 0;
 	return_t statusFlag = QPDUNES_OK;
+	return_t nextFlag;
 
 	/** setup regular intervals */
 	for( kk=0; kk<_NI_; ++kk )
 	{
 		if (qpData->intervals[kk]->nD > 0) {
-			statusFlag += qpDUNES_updateIntervalData( qpData, qpData->intervals[kk],
+			nextFlag = qpDUNES_updateIntervalData( qpData, qpData->intervals[kk],
 									 offsetArray(H_, kk*_NZ_*_NZ_), offsetArray(g_, kk*_NZ_),
 									 offsetArray(C_, kk*_NX_*_NZ_), offsetArray(c_, kk*_NX_),
 									 offsetArray(zLow_, kk*_NZ_), offsetArray(zUpp_, kk*_NZ_),
@@ -564,17 +565,18 @@ return_t qpDUNES_updateData(	qpData_t* const qpData,
 			nDoffset += qpData->intervals[kk]->nD;
 		}
 		else {
-			statusFlag += qpDUNES_updateIntervalData( qpData, qpData->intervals[kk],
+			nextFlag = qpDUNES_updateIntervalData( qpData, qpData->intervals[kk],
 									 offsetArray(H_, kk*_NZ_*_NZ_), offsetArray(g_, kk*_NZ_),
 									 offsetArray(C_, kk*_NX_*_NZ_), offsetArray(c_, kk*_NX_),
 									 offsetArray(zLow_, kk*_NZ_), offsetArray(zUpp_, kk*_NZ_),
 									 0, 0, 0,
 									 0 );
 		}
+		if( nextFlag != QPDUNES_OK ) statusFlag = nextFlag;
 	}
 	/** set up final interval */
 	if (qpData->intervals[_NI_]->nD > 0) {
-		statusFlag += qpDUNES_updateIntervalData( qpData, qpData->intervals[_NI_],
+		nextFlag = qpDUNES_updateIntervalData( qpData, qpData->intervals[_NI_],
 							 offsetArray(H_, _NI_*_NZ_*_NZ_), offsetArray(g_, _NI_*_NZ_),
 							 0, 0,
 							 offsetArray(zLow_, _NI_*_NZ_), offsetArray(zUpp_, _NI_*_NZ_),
@@ -582,13 +584,14 @@ return_t qpDUNES_updateData(	qpData_t* const qpData,
 							 0 );
 	}
 	else {
-		statusFlag += qpDUNES_updateIntervalData( qpData, qpData->intervals[_NI_],
+		nextFlag = qpDUNES_updateIntervalData( qpData, qpData->intervals[_NI_],
 							 offsetArray(H_, _NI_*_NZ_*_NZ_), offsetArray(g_, _NI_*_NZ_),
 							 0, 0,
 							 offsetArray(zLow_, _NI_*_NZ_), offsetArray(zUpp_, _NI_*_NZ_),
 							 0, 0, 0,
 							 0 );
 	}
+	if( nextFlag != QPDUNES_OK ) statusFlag = nextFlag;
 
 
 	return ( statusFlag == QPDUNES_OK ) ? QPDUNES_OK : QPDUNES_ERR_INVALID_ARGUMENT;
