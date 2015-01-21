@@ -106,6 +106,9 @@ return_t qpDUNES_factorNewtonSystem(	qpData_t* const qpData,
 										);
 
 
+return_t qpDUNES_setupUnconstrainedNewtonSystem(	qpData_t* const qpData	);
+
+
 return_t qpDUNES_computeNewtonGradient(	qpData_t* const qpData,
 										xn_vector_t* gradient,
 										x_vector_t* gradPiece
