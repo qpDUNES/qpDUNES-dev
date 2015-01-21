@@ -51,7 +51,7 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
 #
 # Project name and programming languages used
 #
-PROJECT( qpDUNES C )
+PROJECT( qpDUNES C CXX )
 
 #
 # Folder path for generated executables
@@ -86,7 +86,7 @@ ENDIF( NOT CMAKE_BUILD_TYPE )
 
 OPTION( QPDUNES_SIMPLE_BOUNDS_ONLY
 	"Enable compilation of the library for simple bounds only"
-	ON
+	OFF
 )
 
 OPTION( QPDUNES_USE_ASSERTS
@@ -236,7 +236,7 @@ IF ( NOT QPDUNES_SIMPLE_BOUNDS_ONLY )
    	ENABLE_LANGUAGE( CXX )
 
    	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Wshadow -finline-functions -fPIC" )
-	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLINUX -D__NO_COPYRIGHT__" )
+	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLINUX -D__cplusplus -D__NO_COPYRIGHT__" )
 
    	INCLUDE_DIRECTORIES(	
         # qpOASES include paths
