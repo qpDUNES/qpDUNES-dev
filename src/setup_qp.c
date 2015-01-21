@@ -1120,7 +1120,7 @@ return_t qpDUNES_setupAllLocalQPs(	qpData_t* const qpData,
 	interval_t* interval;
 	return_t statusFlag;
 	
-	boolean_t refactorStageHessian = QPDUNES_OK;
+	boolean_t refactorStageHessian = QPDUNES_FALSE;
 
 
 	/* (1) set up initial lambda guess */
