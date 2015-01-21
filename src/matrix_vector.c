@@ -1670,17 +1670,17 @@ return_t multiplyInvMatrixVector(	qpData_t* const qpData,
 		case QPDUNES_DENSE		:
 			/* first backsolve: L*y = z */
 			statusFlag = backsolveDenseL( qpData, res->data, cholH->data, x->data, QPDUNES_FALSE, dim0 );
+			if( statusFlag != QPDUNES_OK ) return statusFlag;
 			/* second backsolve: L^T*res = y */
-			statusFlag += backsolveDenseL( qpData, res->data, cholH->data, res->data, QPDUNES_TRUE, dim0 );
-			return statusFlag;
+			return backsolveDenseL( qpData, res->data, cholH->data, res->data, QPDUNES_TRUE, dim0 );
 			
 		case QPDUNES_SPARSE	:
 			qpDUNES_printWarning( qpData, __FILE__, __LINE__, "Sparse inverse matrix-vector product not implemented. Using dense multiplication instead." );
 			/* first backsolve: L*y = z */
 			statusFlag = backsolveDenseL( qpData, res->data, cholH->data, x->data, QPDUNES_FALSE, dim0 );
+			if( statusFlag != QPDUNES_OK ) return statusFlag;
 			/* second backsolve: L^T*res = y */
-			statusFlag += backsolveDenseL( qpData, res->data, cholH->data, res->data, QPDUNES_TRUE, dim0 );
-			return statusFlag;
+			return backsolveDenseL( qpData, res->data, cholH->data, res->data, QPDUNES_TRUE, dim0 );\
 			
 		case QPDUNES_DIAGONAL	:
 			return backsolveDiagonal( qpData, res->data, cholH->data, x->data, dim0 );	/* cholH in this case contains full diagonal matrix (not a factor) */
@@ -1829,11 +1829,11 @@ return_t multiplyInvMatrixMatrixT(	qpData_t* const qpData,
 				case QPDUNES_IDENTITY	:
 					res->sparsityType = QPDUNES_DENSE;
 					/* first backsolve: L*Y = M2 */
-					statusFlag += backsolveMatrixDenseIdentityL( qpData, res->data, cholM1->data, vecTmp->data, dim0 );
+					statusFlag = backsolveMatrixDenseIdentityL( qpData, res->data, cholM1->data, vecTmp->data, dim0 );
+					if( statusFlag != QPDUNES_OK ) return statusFlag;
 					/* second backsolve: L^T*res = Y */
-					statusFlag += backsolveMatrixDenseDenseL( qpData, res->data, cholM1->data, res->data, vecTmp->data, QPDUNES_TRUE, dim0, dim1 );
+					return backsolveMatrixDenseDenseL( qpData, res->data, cholM1->data, res->data, vecTmp->data, QPDUNES_TRUE, dim0, dim1 );
 					/* TODO: transpose? */
-					return statusFlag;
 
 				default				:
 					qpDUNES_printError( qpData, __FILE__, __LINE__, "Unknown sparsity type of second matrix argument" );
