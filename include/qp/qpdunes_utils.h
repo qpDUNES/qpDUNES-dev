@@ -186,7 +186,7 @@ return_t qpDUNES_setMatrixNull(	matrix_t* matrix
  *	\version 1.0beta
  *	\date 2012
  */
-return_t qpDUNES_existsMatrix(	matrix_t* matrix
+boolean_t qpDUNES_existsMatrix(	matrix_t* matrix
 							);
 
 
@@ -199,7 +199,7 @@ return_t qpDUNES_existsMatrix(	matrix_t* matrix
  *	\version 1.0beta
  *	\date 2012
  */
-return_t qpDUNES_existsVector(	vector_t* vector
+boolean_t qpDUNES_existsVector(	vector_t* vector
 							);
 
 
