@@ -88,55 +88,42 @@ return_t qpDUNES_solve(qpData_t* const qpData) {
 
 
 		/** (1) get a step direction:
-		 *      switch between (preconditioned) gradient and Newton steps */
+		 *      switch between preconditioned gradient and Newton steps */
 		itLogPtr->isHessianRegularized = QPDUNES_FALSE;
 		if ((*itCntr > 1) && (*itCntr - 1 <= qpData->options.nbrInitialGradientSteps)) { /* always do one Newton step first */
 
-			if (qpData->options.preconditionInitialGradientSteps){
+			/** preconditioned gradient step with unconstrained hessian */
 
-				/** preconditioned gradient step with unconstrained hessian */
+			tNwtnSetupStart = getTime();
+			qpDUNES_computeNewtonGradient(qpData, &(qpData->gradient), &(qpData->xVecTmp));
+			tNwtnSetupEnd = getTime();
 
-				tNwtnSetupStart = getTime();
-				qpDUNES_computeNewtonGradient(qpData, &(qpData->gradient), &(qpData->xVecTmp));
-				tNwtnSetupEnd = getTime();
+			tNwtnSolveStart = getTime();
+			switch (qpData->options.nwtnHssnFacAlg) {
+			case QPDUNES_NH_FAC_BAND_FORWARD:
+				statusFlag = qpDUNES_solveNewtonEquation(qpData, &(qpData->deltaLambda), &(qpData->cholUnconstrainedHessian), &(qpData->gradient));
+				break;
 
-				tNwtnSolveStart = getTime();
-				switch (qpData->options.nwtnHssnFacAlg) {
-				case QPDUNES_NH_FAC_BAND_FORWARD:
-					statusFlag = qpDUNES_solveNewtonEquation(qpData, &(qpData->deltaLambda), &(qpData->cholUnconstrainedHessian), &(qpData->gradient));
-					break;
+			case QPDUNES_NH_FAC_BAND_REVERSE:
+				statusFlag = qpDUNES_solveNewtonEquationBottomUp(qpData, &(qpData->deltaLambda), &(qpData->cholUnconstrainedHessian), &(qpData->gradient));
+				break;
 
-				case QPDUNES_NH_FAC_BAND_REVERSE:
-					statusFlag = qpDUNES_solveNewtonEquationBottomUp(qpData, &(qpData->deltaLambda), &(qpData->cholUnconstrainedHessian), &(qpData->gradient));
-					break;
-
-				default:
-					qpDUNES_printError(qpData, __FILE__, __LINE__, "Unknown Newton Hessian factorization algorithm. Cannot do backsolve.");
-					return QPDUNES_ERR_INVALID_ARGUMENT;
-				}
-				tNwtnSolveEnd = getTime();
-				if (statusFlag != QPDUNES_OK) {
-					qpDUNES_printError(qpData, __FILE__, __LINE__,	"Could not compute Newton step direction.");
-					if (qpData->options.logLevel >= QPDUNES_LOG_ITERATIONS)	 qpDUNES_logIteration(qpData, itLogPtr, objValIncumbent, hessRefactorIdx);
-					return statusFlag;
-				}
-
+			default:
+				qpDUNES_printError(qpData, __FILE__, __LINE__, "Unknown Newton Hessian factorization algorithm. Cannot do backsolve.");
+				return QPDUNES_ERR_INVALID_ARGUMENT;
 			}
-			else{
-				/** do gradient step without preconditioning */
-				/** (1Aa) get a gradient step */
-				tNwtnSetupStart = getTime();
-				qpDUNES_computeNewtonGradient(qpData, &(qpData->gradient),
-						&(qpData->xVecTmp));
-				tNwtnSetupEnd = getTime();
-
-				/** (1Ab) do gradient step */
-				tNwtnSolveStart = getTime();
-				qpDUNES_copyVector(&(qpData->deltaLambda), &(qpData->gradient),
-						_NI_ * _NX_);
-				statusFlag = QPDUNES_OK;
-				tNwtnSolveEnd = getTime();
+			tNwtnSolveEnd = getTime();
+			if (statusFlag != QPDUNES_OK) {
+				qpDUNES_printError(qpData, __FILE__, __LINE__,	"Could not compute Newton step direction.");
+				if (qpData->options.logLevel >= QPDUNES_LOG_ITERATIONS)	 qpDUNES_logIteration(qpData, itLogPtr, objValIncumbent, hessRefactorIdx);
+				return statusFlag;
 			}
+
+			//if (*itCntr - 1 == qpData->options.nbrInitialGradientSteps){
+				// make sure that the next Newton Hessian is recomputed entirely
+				for (kk = 0; kk<_NI_; ++kk)
+					qpData->intervals[kk]->rebuildHessianBlock = QPDUNES_TRUE;
+			//}
 		}
 		else{
 
@@ -827,7 +814,7 @@ return_t qpDUNES_setupUnconstrainedNewtonSystem(	qpData_t* const qpData	)
 
 	interval_t** intervals = qpData->intervals;
 
-	xn2x_matrix_t* hessian = &(qpData->cholUnconstrainedHessian);
+	xn2x_matrix_t* hessian = &(qpData->unconstrainedHessian);
 
 	/* 1) diagonal blocks */
 	/*    E_{k+1} H_{k+1}^-1 E_{k+1}' + C_{k} P_{k} C_{k}'  for projected Hessian  P = Z (Z'HZ)^-1 Z'  */
@@ -873,7 +860,7 @@ return_t qpDUNES_setupUnconstrainedNewtonSystem(	qpData_t* const qpData	)
 //	qpDUNES_printMatrixData( qpData->cholDefaultHessian.data, _NI_*_NX_, 2*_NX_, "H = ");
 
 
-	return qpDUNES_factorNewtonSystem(qpData, &(qpData->cholUnconstrainedHessian), &(qpData->cholUnconstrainedHessian), &isHessianRegularized, -1);
+	return qpDUNES_factorNewtonSystem(qpData, &(qpData->cholUnconstrainedHessian), &(qpData->unconstrainedHessian), &isHessianRegularized, -1);
 }
 /*<<< END OF qpDUNES_setupNewtonSystem */
 
@@ -1008,6 +995,28 @@ return_t qpDUNES_factorNewtonSystem( qpData_t* const qpData,
 			case QPDUNES_REG_UNCONSTRAINED_HESSIAN :
 			qpDUNES_printError( qpData, __FILE__, __LINE__, "Regularization with unconstrained Hessian not yet implemented." );
 			return QPDUNES_ERR_UNKNOWN_ERROR;
+
+			case QPDUNES_REG_ADD_UNCONSTRAINED_HESSIAN :
+			for (kk = 0; kk < _NI_; ++kk)
+				for (ii = 0; ii < _NX_; ++ii)
+					for (jj = 0; jj < _NX_; ++jj)
+						accHessian( kk, 0, ii, jj) +=
+								qpData->options.regParam * accUnconstrainedHessian(kk, 0, ii, jj);
+			for (kk = 1; kk < _NI_-1; ++kk)
+				for (ii = 0; ii < _NX_; ++ii)
+					for (jj = 0; jj < _NX_; ++jj)
+						accHessian( kk, -1, ii, jj) +=
+								qpData->options.regParam * accUnconstrainedHessian(kk, 0, ii, jj);
+			break;
+
+			case QPDUNES_REG_ADD_UNCONSTRAINED_HESSIAN_DIAG :
+			for (kk = 0; kk < _NI_; ++kk) {
+				for (jj = 0; jj < _NX_; ++jj) {
+					accHessian( kk, 0, jj, jj ) +=
+							qpData->options.regParam * accUnconstrainedHessian( kk, 0, jj, jj);
+				}
+			}
+			break;
 
 			case QPDUNES_REG_GRADIENT_STEP :
 			*isHessianRegularized = QPDUNES_TRUE;

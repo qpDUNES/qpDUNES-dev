@@ -382,8 +382,6 @@ typedef struct
 	int_t nbrInitialGradientSteps;			/**< after the first Newton step a number of cheaper gradient
 											 	 steps with line search can be used to drive the method
 											 	 faster to the solution */
-	boolean_t preconditionInitialGradientSteps; /**< use unconstrained Hessian as a preconditioner
-													for the initial gradient steps */
 
 	boolean_t checkForInfeasibility;		/**< perform checks for infeasibility of the problem */
 	boolean_t allowSuboptimalTermination;	/**< permits regular termination after reaching iteration limit (when dual still suboptimal) */
@@ -530,6 +528,7 @@ typedef struct
 	xn2x_matrix_t cholHessian;
 	xn_vector_t gradient;
 
+	xn2x_matrix_t unconstrainedHessian;
 	xn2x_matrix_t cholUnconstrainedHessian;
 
 //	int_t* ieqStatus;

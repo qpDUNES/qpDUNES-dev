@@ -125,6 +125,11 @@
 /*                                                        block offset   row offset   column offset (0=diag,-1=supDiag)   column */
 #define accCholHessian( K, L, I, J )	cholHessian->data[ (K)*2*_NX_*_NX_  + (I)*2*_NX_   + (1+L)*_NX_                         + (J) ]
 
+#define accUnconstrainedHessian( K, L, I, J )	qpData->unconstrainedHessian.data[ (K)*2*_NX_*_NX_ + (I)*2*_NX_ + (1+L)*_NX_ + (J) ]
+
+#define accCholUnconstrainedHessian( K, L, I, J )	qpData->cholUnconstrainedHessian.data[ (K)*2*_NX_*_NX_ + (I)*2*_NX_ + (1+L)*_NX_ + (J) ]
+
+
 #define accH( I, J )	H->data[ (I)*nV + (J) ]
 
 #define accC( I, J )	C->data[ (I)*_NZ_ + (J) ]
@@ -191,8 +196,10 @@ typedef enum
 	QPDUNES_REG_LEVENBERG_MARQUARDT,				/**< 0 = ... */
 	QPDUNES_REG_NORMALIZED_LEVENBERG_MARQUARDT,		/**< 1 = ... */
 	QPDUNES_REG_SINGULAR_DIRECTIONS,				/**< 2 = regularize only in singular directions during Cholesky factorization */
-	QPDUNES_REG_UNCONSTRAINED_HESSIAN,				/**< 3 = ... */
-	QPDUNES_REG_GRADIENT_STEP						/**< 4 = ... */
+	QPDUNES_REG_UNCONSTRAINED_HESSIAN,				/**< 3 = use unconstrained Hessian instead */
+	QPDUNES_REG_ADD_UNCONSTRAINED_HESSIAN,			/**< 4 = add unconstrained Hessian multiplied by options.regParam */
+	QPDUNES_REG_ADD_UNCONSTRAINED_HESSIAN_DIAG,		/**< 5 = add diagonal entried of the unconstrained Hessian, multiplied by options.regParam */
+	QPDUNES_REG_GRADIENT_STEP						/**< 6 = ... */
 } nwtnHssnRegType_t;
 
 
