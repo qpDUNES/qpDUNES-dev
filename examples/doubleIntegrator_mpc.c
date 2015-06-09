@@ -215,8 +215,13 @@ int main( )
 		/* put new data in second but last interval: * LTI: from interval 0; * LTV: new */
 //		statusFlag = qp42_updateInterval( &(mpcProblem.qpData), mpcProblem.qpData.intervals[nI-1], H_, 0, C_, c_, 0, dLow_, dUpp_, cholH );
 		statusFlag = qpDUNES_updateIntervalData( &(mpcProblem.qpData), mpcProblem.qpData.intervals[nI-1], 0, 0, 0, 0, ziLow,ziUpp, 0, 0,0, 0 );	/* H, C, c do not need to be updated b/c LTI */
+		if (statusFlag != QPDUNES_OK) {
+			printf("data update failed.\n");
+			return (int)statusFlag;
+		}
+
 		/* put new data in last interval */
-		statusFlag += qpDUNES_updateIntervalData( &(mpcProblem.qpData), mpcProblem.qpData.intervals[nI], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 );		/* no new P matrix, bounds, etc. given */
+		statusFlag = qpDUNES_updateIntervalData( &(mpcProblem.qpData), mpcProblem.qpData.intervals[nI], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 );		/* no new P matrix, bounds, etc. given */
 		if (statusFlag != QPDUNES_OK) {
 			printf( "data update failed.\n" );
 			return (int)statusFlag;
