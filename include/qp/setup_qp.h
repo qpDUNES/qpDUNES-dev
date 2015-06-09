@@ -54,7 +54,7 @@ return_t qpDUNES_setup(	qpData_t* const qpData,
 						uint_t nX,
 						uint_t nU,
 						uint_t* nD,
-						qpOptions_t* options
+						const qpOptions_t* options
 						);
 
 
