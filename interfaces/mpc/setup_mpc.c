@@ -76,7 +76,7 @@ return_t mpcDUNES_setup(	mpcProblem_t* const mpcProblem,
 	mpcProblem->z0LowOrig = (real_t*)calloc( nZ,sizeof(real_t) );	/* workspace to save bounds before initial value embedding */
 	mpcProblem->z0UppOrig = (real_t*)calloc( nZ,sizeof(real_t) );
 
-	/* initalize solution variables */
+	/* initialize solution variables */
 	for ( ii=0; ii<(nI+1)*nX; ++ii ) {
 		mpcProblem->xOpt[ii] = -mpcProblem->qpData.options.QPDUNES_INFTY;
 	}

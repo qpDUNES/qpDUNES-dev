@@ -140,8 +140,9 @@ OPTION( QPDUNES_WITH_BLAS
 # Compiler settings
 #
 ################################################################################
-
-SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -Wall -Wextra -pedantic -Wshadow -g -finline-functions -std=c99" )
+IF(CMAKE_COMPILER_IS_GNUCC)
+	SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -Wall -Wextra -pedantic -Wshadow -g -finline-functions -std=c99" )
+ENDIF()
 
 SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D__DEBUG__")
 
@@ -235,8 +236,13 @@ IF ( NOT QPDUNES_SIMPLE_BOUNDS_ONLY )
 
    	ENABLE_LANGUAGE( CXX )
 
-   	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Wshadow -finline-functions -fPIC" )
-	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLINUX -D__cplusplus -D__NO_COPYRIGHT__" )
+	IF(CMAKE_COMPILER_IS_GNUCC)
+		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Wshadow -finline-functions -fPIC" )
+	ENDIF()
+	IF(CMAKE_SYSTEM_NAME EQUAL "Linux")
+		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLINUX -D__cplusplus" )
+	ENDIF()
+	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__NO_COPYRIGHT__" )
 
    	INCLUDE_DIRECTORIES(	
         # qpOASES include paths
@@ -321,7 +327,7 @@ ADD_LIBRARY(
 	${qpDUNES_SOURCES}
 )
 
-TARGET_LINK_LIBRARIES( qpdunes m )
+# TARGET_LINK_LIBRARIES( qpdunes m )
 
 IF ( QPDUNES_WITH_LAPACK AND LAPACK_FOUND )
 	TARGET_LINK_LIBRARIES(
@@ -346,6 +352,13 @@ ENDIF()
 FILE( GLOB qpDUNES_EXAMPLES ${CMAKE_CURRENT_SOURCE_DIR}/examples/*.c )
 FOREACH( EXAMPLE ${qpDUNES_EXAMPLES} )
 	GET_FILENAME_COMPONENT( EXEC_NAME ${EXAMPLE} NAME_WE )
+	
+	IF(MSVC)
+		# MSVC C compiler does not support const int expressions as array size specifiers.
+		# Therefore, the examples need to be compiled as C++.
+		SET_SOURCE_FILES_PROPERTIES(${EXAMPLE} PROPERTIES LANGUAGE CXX)
+	ENDIF()
+		
 	ADD_EXECUTABLE( example_${EXEC_NAME} ${EXAMPLE} )
 	TARGET_LINK_LIBRARIES(
 		example_${EXEC_NAME}

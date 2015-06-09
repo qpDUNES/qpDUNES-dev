@@ -29,6 +29,10 @@
  *	\date 2012
  */
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
 
 #include <qp/types.h>
 #include <qp/matrix_vector.h>
@@ -36,11 +40,6 @@
 #include <qp/stage_qp_solver_qpoases.hpp>
 #include <qp/dual_qp.h>
 #include <qp/qpdunes_utils.h>
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif /* __cplusplus */
 
 #include <qp/types.h>
 #if !defined(__STATIC_MEMORY__)

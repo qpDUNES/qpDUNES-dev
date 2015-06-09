@@ -36,7 +36,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <sys/time.h>
+#include <time.h>
 #include <qp/types.h>
 #if !defined(__STATIC_MEMORY__)
 	#include <qp/qpData.h>

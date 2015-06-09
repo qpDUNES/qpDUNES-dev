@@ -82,9 +82,9 @@ int main( )
 	const unsigned int nZ = nX+nU;		/* number of stage variables */
 	unsigned int nD[nI+1];  			/* number of constraints */
 	#ifndef __USE_AFFINE_CONSTRAINTS__
-		int nDkk = 0;
+		const int nDkk = 0;
 	#else
-		int nDkk = 1;
+		const int nDkk = 1;
 	#endif
 	for ( kk=0; kk<nI+1; ++kk ) {
 		nD[kk] = nDkk;

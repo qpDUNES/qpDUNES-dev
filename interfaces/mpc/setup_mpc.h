@@ -38,6 +38,10 @@
 
 #include <qpDUNES.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
 
 /** 
  *	\brief ...
@@ -228,7 +232,9 @@ return_t mpcDUNES_solve(	mpcProblem_t* const mpcProblem,
 							const real_t* const x0
 							);
 
-
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif	/* SETUP_MPC_H */
 

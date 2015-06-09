@@ -34,7 +34,7 @@
 
 
 #include <mpc/setup_mpc.h>
-#include <sys/time.h>
+#include <time.h>
 #include <stdio.h>
 
 
