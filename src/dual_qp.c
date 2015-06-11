@@ -1980,8 +1980,13 @@ return_t qpDUNES_bisectionIntervalSearch(	qpData_t* const qpData,
 			interval = qpData->intervals[kk];
 			z_vector_t* zTry = &(interval->zVecTmp);
 			/* get primal variables for trial step length */
-			addVectorScaledVector(zTry,	&(interval->qpSolverClipping.zUnconstrained), alphaMax,	&(interval->qpSolverClipping.dz), interval->nV);
-			directQpSolver_saturateVector(qpData, zTry, &(interval->y), &(interval->zLow), &(interval->zUpp), &(interval->H), interval->nV);
+			return_t result = addVectorScaledVector(zTry,	&(interval->qpSolverClipping.zUnconstrained), alphaMax,	&(interval->qpSolverClipping.dz), interval->nV);
+			if (result != QPDUNES_OK)
+				return result;
+
+			result = directQpSolver_saturateVector(qpData, zTry, &(interval->y), &(interval->zLow), &(interval->zUpp), &(interval->H), interval->nV);
+			if (result != QPDUNES_OK)
+				return result;
 		}
 
 		/* manual gradient computation; TODO: use function, but watch out with z, dz, zTry, etc. */
