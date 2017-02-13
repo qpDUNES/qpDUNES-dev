@@ -698,7 +698,7 @@ return_t qpDUNES_setupRegularInterval(	qpData_t* const qpData,
 			}
 			for ( ii=0; ii<_NU_; ++ii ) {
 				for( jj=0; jj<_NX_; ++jj ) {	/* S^T part */
-					accH( _NX_+ii,jj ) = S_[jj*_NX_+ii];
+					accH( _NX_+ii,jj ) = S_[jj*_NU_+ii];
 				}
 				if ( R_ != 0 ) {			/* R part */
 					for( jj=0; jj<_NU_; ++jj ) {
